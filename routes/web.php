@@ -19,7 +19,7 @@ Route::get('/user', function (Request $request) {
 
 
 // Typing Test Routes
-Route::get('/test/new', [TestController::class, 'getNewTest']);
+Route::get('api/test/new', [TestController::class, 'getNewTest']);
 Route::post('/test/complete', [TestController::class, 'store']);
 
 // Route::get('/', function () {

@@ -18,7 +18,8 @@ const typedCharacters = computed(() => userInput.value.split(''));
 
 const wpm = computed(() => {
     if (timer.value === 0) return 0;
-    const wordCount = userInput.value.length / 5; // Standard WPM calculation
+    // Standard WPM calculation: (all typed chars / 5) / (time in minutes)
+    const wordCount = userInput.value.length / 5;
     const minutes = timer.value / 60;
     return Math.round(wordCount / minutes);
 });
@@ -30,13 +31,49 @@ const accuracy = computed(() => {
             correctChars++;
         }
     });
-    return userInput.value.length === 0 ? 100 : Math.round((correctChars / userInput.value.length) * 100);
+    // Avoid division by zero
+    if (userInput.value.length === 0) return 100;
+    return Math.round((correctChars / userInput.value.length) * 100);
 });
+
+
+// --- New Computed Properties for Correct Rendering ---
+const firstErrorIndex = computed(() => {
+    // Find the index of the first character that doesn't match
+    for (let i = 0; i < typedCharacters.value.length; i++) {
+        if (typedCharacters.value[i] !== sourceCharacters.value[i]) {
+            return i;
+        }
+    }
+    return -1; // Return -1 if no errors are found
+});
+
+const correctPart = computed(() => {
+    // If there are errors, this is the part of the text before the first error.
+    // Otherwise, it's the entire typed portion.
+    const end = firstErrorIndex.value !== -1 ? firstErrorIndex.value : userInput.value.length;
+    return quranText.value.text.substring(0, end);
+});
+
+const incorrectPart = computed(() => {
+    // If there are no errors, this part is empty.
+    if (firstErrorIndex.value === -1) {
+        return '';
+    }
+    // Otherwise, it's the part of the text from the first error to the cursor.
+    return quranText.value.text.substring(firstErrorIndex.value, userInput.value.length);
+});
+
+const untypedPart = computed(() => {
+    // This is the rest of the text from the cursor to the end.
+    return quranText.value.text.substring(userInput.value.length);
+});
+
 
 // --- Core Logic ---
 const fetchNewTest = async () => {
     try {
-        const response = await axios.get('/test/new');
+        const response = await axios.get('/api/test/new');
         quranText.value = response.data;
         resetTest();
     } catch (error) {
@@ -117,11 +154,6 @@ const restartTest = () => {
     fetchNewTest();
 };
 
-// --- Styling Logic ---
-const getCharClass = (typedChar, sourceChar) => {
-    if (typedChar === undefined) return ''; // Should not happen with the overlay
-    return typedChar === sourceChar ? 'text-green-400' : 'text-red-500';
-};
 
 // --- Lifecycle Hooks ---
 onMounted(() => {
@@ -143,19 +175,17 @@ onMounted(() => {
             <div class="stat"><span class="font-bold text-yellow-500">{{ timer }}</span> ثانية</div>
         </div>
 
-        <!-- Typing Area - New Overlay Logic -->
+        <!-- Typing Area - New Rendering Logic -->
         <div v-if="quranText.text" class="text-container w-full max-w-4xl bg-gray-800 p-6 rounded-lg shadow-lg relative text-3xl leading-loose select-none" style="font-family: 'Noto Naskh Arabic', serif;">
             
-            <!-- Layer 1: Untyped Text (Gray) -->
-            <p class="text-gray-500">{{ quranText.text }}</p>
-
-            <!-- Layer 2: Typed Text (Colored Overlay) -->
-            <p class="absolute top-0 left-0 p-6">
-                <span v-for="(char, index) in typedCharacters" :key="index" :class="getCharClass(char, sourceCharacters[index])">
-                    {{ sourceCharacters[index] }}
+            <p>
+                <span class="text-green-400">{{ correctPart }}</span>
+                <span class="text-red-500 bg-red-900/50 rounded">{{ incorrectPart }}</span>
+                <!-- The Caret is positioned at the break between incorrect and untyped text -->
+                <span class="caret-container relative">
+                    <span class="caret absolute bg-yellow-400 animate-blink">&nbsp;</span>
                 </span>
-                <!-- The Caret -->
-                <span class="caret absolute bg-yellow-400 animate-blink">&nbsp;</span>
+                <span class="text-gray-500">{{ untypedPart }}</span>
             </p>
 
             <input
@@ -173,19 +203,13 @@ onMounted(() => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4 4l16 16"/></svg>
             إعادة / نص جديد
         </button>
-        <a href="https://buy.stripe.com/test_6oE14h8fVdld436144" class="mt-8 px-6 py-3 bg-green-500 text-gray-900 font-bold text-xl rounded-lg hover:bg-green-400 transition-colors duration-300">
-            Donate - تبرع
-            </a>
     </div>
 </template>
 
 <style scoped>
-/* We need to use a trick to position the caret correctly.
-   We can't just use left/right with RTL. We create a "ghost"
-   text element to measure the width of the typed text. */
 .text-container p {
-    white-space: pre-wrap; /* Preserve whitespace and wrap */
-    word-wrap: break-word; /* Break long words if necessary */
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .caret {
@@ -193,13 +217,8 @@ onMounted(() => {
     top: 10%;
     height: 80%;
     border-radius: 2px;
-    /* The caret position will be set by JS if needed, but CSS can handle it in many cases */
-    inset-inline-start: 0; /* Logical property for RTL */
 }
 
-/* This is a more complex part, for now, we'll keep it simple.
-   A more advanced caret would need JS to measure text width.
-   For now, we'll let it be at the end of the colored text. */
 .animate-blink {
     animation: blink 1s infinite;
 }
