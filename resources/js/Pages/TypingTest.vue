@@ -206,7 +206,7 @@ onMounted(() => {
 
             إعادة / نص جديد
         </button>
-        <a class="mt-8 px-6 py-3 bg-green-500 text-gray-900 font-bold text-xl rounded-lg hover:bg-green-400 transition-colors duration-300" href="https://buy.stripe.com/test_6oE14h8fVdld436144">Donate - تبرع</a>
+        <a class="mt-8 px-6 py-3 bg-green-500 text-gray-900 font-bold text-xl rounded-lg hover:bg-green-400 transition-colors duration-300" href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01">Donate - تبرع</a>
     </div>
 </template>
 
