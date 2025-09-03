@@ -15,13 +15,17 @@ return new class extends Migration
             $table->id();
             $table->unsignedSmallInteger('surah_number');
             $table->unsignedSmallInteger('ayah_number');
-            $table->text('text'); // Use text type for potentially long Ayahs
-            $table->unsignedTinyInteger('juz');
-            $table->unsignedSmallInteger('page');
-            $table->timestamps();
+            
+            // This will store the simple, clean Arabic text for typing
+            $table->text('text_arabic_simple');
 
-            // Add an index for faster lookups
-            $table->index(['surah_number', 'ayah_number']);
+            // Store Surah details for a richer UI
+            $table->string('surah_name_arabic');
+            $table->string('surah_name_english');
+            $table->string('surah_name_translation');
+            
+            $table->timestamps();
+            $table->unique(['surah_number', 'ayah_number']);
         });
     }
 

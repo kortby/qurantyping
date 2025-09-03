@@ -16,14 +16,20 @@ class TestController extends Controller
      */
     public function getNewTest(): JsonResponse
     {
-        // Fetch one random row from the quran_texts table
         $text = QuranText::inRandomOrder()->first();
 
         if (!$text) {
             return response()->json(['message' => 'No Quranic texts found.'], 404);
         }
 
-        return response()->json($text);
+        // We can simplify the response for the frontend
+        return response()->json([
+            'id' => $text->id,
+            'text' => $text->text_arabic_simple, // This is the key change
+            'surah_number' => $text->surah_number,
+            'ayah_number' => $text->ayah_number,
+            'surah_name_arabic' => $text->surah_name_arabic,
+        ]);
     }
 
     /**

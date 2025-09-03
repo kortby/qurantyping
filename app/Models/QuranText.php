@@ -13,10 +13,10 @@ class QuranText extends Model
     protected $fillable = [
         'surah_number',
         'ayah_number',
-        'text_uthmani',
-        'text_imlaei',
+        'text_arabic_simple',
         'surah_name_arabic',
         'surah_name_english',
+        'surah_name_translation',
     ];
 
     /**

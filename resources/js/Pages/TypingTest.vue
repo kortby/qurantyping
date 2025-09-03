@@ -6,6 +6,9 @@ import axios from 'axios';
 const quranText = ref({
     id: null,
     text: '...جار التحميل',
+    surah_name_arabic: '',
+    surah_number: null,
+    ayah_number: null,
 });
 const userInput = ref('');
 const timer = ref(0);
@@ -37,35 +40,27 @@ const accuracy = computed(() => {
 });
 
 
-// --- New Computed Properties for Correct Rendering ---
+// --- Computed Properties for Correct Rendering ---
 const firstErrorIndex = computed(() => {
-    // Find the index of the first character that doesn't match
     for (let i = 0; i < typedCharacters.value.length; i++) {
         if (typedCharacters.value[i] !== sourceCharacters.value[i]) {
             return i;
         }
     }
-    return -1; // Return -1 if no errors are found
+    return -1; // No errors
 });
 
 const correctPart = computed(() => {
-    // If there are errors, this is the part of the text before the first error.
-    // Otherwise, it's the entire typed portion.
     const end = firstErrorIndex.value !== -1 ? firstErrorIndex.value : userInput.value.length;
     return quranText.value.text.substring(0, end);
 });
 
 const incorrectPart = computed(() => {
-    // If there are no errors, this part is empty.
-    if (firstErrorIndex.value === -1) {
-        return '';
-    }
-    // Otherwise, it's the part of the text from the first error to the cursor.
+    if (firstErrorIndex.value === -1) return '';
     return quranText.value.text.substring(firstErrorIndex.value, userInput.value.length);
 });
 
 const untypedPart = computed(() => {
-    // This is the rest of the text from the cursor to the end.
     return quranText.value.text.substring(userInput.value.length);
 });
 
@@ -167,7 +162,12 @@ onMounted(() => {
 
 <template>
     <div class="min-h-screen flex flex-col items-center justify-center p-4" @click="() => document.getElementById('hidden-input')?.focus()">
-        <h1 class="text-4xl font-bold text-yellow-400 mb-8">إختبار سرعة الكتابة بالقرآن الكريم</h1>
+        <h1 class="text-4xl font-bold text-yellow-400 mb-4">إختبار سرعة الكتابة بالقرآن الكريم</h1>
+        
+        <!-- Display Surah and Ayah Info -->
+        <div v-if="quranText.surah_name_arabic" class="text-gray-400 text-xl mb-6">
+            {{ quranText.surah_name_arabic }} - الآية {{ quranText.ayah_number }}
+        </div>
 
         <div class="stats-container w-full max-w-4xl mb-8 flex justify-around text-2xl text-gray-300">
             <div class="stat"><span class="font-bold text-yellow-500">{{ wpm }}</span> كلمة/دقيقة</div>
@@ -175,13 +175,12 @@ onMounted(() => {
             <div class="stat"><span class="font-bold text-yellow-500">{{ timer }}</span> ثانية</div>
         </div>
 
-        <!-- Typing Area - New Rendering Logic -->
+        <!-- Typing Area -->
         <div v-if="quranText.text" class="text-container w-full max-w-4xl bg-gray-800 p-6 rounded-lg shadow-lg relative text-3xl leading-loose select-none" style="font-family: 'Noto Naskh Arabic', serif;">
             
             <p>
                 <span class="text-green-400">{{ correctPart }}</span>
                 <span class="text-red-500 bg-red-900/50 rounded">{{ incorrectPart }}</span>
-                <!-- The Caret is positioned at the break between incorrect and untyped text -->
                 <span class="caret-container relative">
                     <span class="caret absolute bg-yellow-400 animate-blink">&nbsp;</span>
                 </span>
@@ -199,11 +198,10 @@ onMounted(() => {
             />
         </div>
 
-        <button @click="restartTest" class="flex mt-8 px-6 py-3 bg-yellow-500 text-gray-900 font-bold text-xl rounded-lg hover:bg-yellow-400 transition-colors duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 ml-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        <button @click="restartTest" class="mt-8 px-6 py-3 bg-yellow-500 text-gray-900 font-bold text-xl rounded-lg hover:bg-yellow-400 transition-colors duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.664 0l3.181-3.183m-4.991-2.696a8.25 8.25 0 00-11.664 0l-3.181 3.183" />
             </svg>
-
             إعادة / نص جديد
         </button>
         <a class="mt-8 px-6 py-3 bg-green-500 text-gray-900 font-bold text-xl rounded-lg hover:bg-green-400 transition-colors duration-300" href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01">Donate - تبرع</a>
