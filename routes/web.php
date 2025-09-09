@@ -20,6 +20,9 @@ Route::get('/user', function (Request $request) {
 
 // Typing Test Routes
 Route::get('api/test/new', [TestController::class, 'getNewTest']);
+
+Route::get('api/surahs', [TestController::class, 'getSurahs']);
+Route::get('api/test/text', [TestController::class, 'getTextForTest']);
 Route::post('/test/complete', [TestController::class, 'store']);
 
 // Route::get('/', function () {

@@ -12,23 +12,50 @@ use Illuminate\Http\JsonResponse;
 class TestController extends Controller
 {
     /**
-     * Fetch a new random Quran text for a typing test.
+     * Get a list of all Surahs for the selection dropdown.
      */
-    public function getNewTest(): JsonResponse
+    public function getSurahs(): JsonResponse
     {
-        $text = QuranText::inRandomOrder()->first();
+        // Fetch a distinct list of Surahs, ordered correctly.
+        $surahs = QuranText::select('surah_number', 'surah_name_arabic', 'surah_name_english')
+            ->distinct()
+            ->orderBy('surah_number')
+            ->get();
 
-        if (!$text) {
-            return response()->json(['message' => 'No Quranic texts found.'], 404);
+        return response()->json($surahs);
+    }
+
+    /**
+     * Fetch and combine Quranic text for a specific range of Ayahs.
+     */
+    public function getTextForTest(Request $request): JsonResponse
+    {
+        // Validate the incoming request parameters
+        $validated = $request->validate([
+            'surah_number' => 'required|integer|min:1|max:114',
+            'start_ayah' => 'required|integer|min:1',
+            'end_ayah' => 'required|integer|min:1|gte:start_ayah',
+        ]);
+
+        // Query the database for the requested range of Ayahs
+        $ayahs = QuranText::where('surah_number', $validated['surah_number'])
+            ->whereBetween('ayah_number', [$validated['start_ayah'], $validated['end_ayah']])
+            ->orderBy('ayah_number', 'asc')
+            ->get();
+
+        if ($ayahs->isEmpty()) {
+            return response()->json(['message' => 'No Ayahs found for the selected range.'], 404);
         }
 
-        // We can simplify the response for the frontend
+        // Combine the text of all fetched Ayahs into a single string
+        $combinedText = $ayahs->pluck('text_arabic_simple')->implode(' ');
+
         return response()->json([
-            'id' => $text->id,
-            'text' => $text->text_arabic_simple, // This is the key change
-            'surah_number' => $text->surah_number,
-            'ayah_number' => $text->ayah_number,
-            'surah_name_arabic' => $text->surah_name_arabic,
+            'text' => $combinedText,
+            'surah_name_arabic' => $ayahs->first()->surah_name_arabic,
+            'surah_number' => $validated['surah_number'],
+            'start_ayah' => $validated['start_ayah'],
+            'end_ayah' => $validated['end_ayah'],
         ]);
     }
 
