@@ -16,4 +16,8 @@
 <body class="bg-gray-900 text-gray-200 antialiased">
     @inertia
 </body>
+    <script src="{{ mix('js/app.js') }}" defer></script>
+    {{-- Ensure the @routes directive is here --}}
+    @routes
+
 </html>

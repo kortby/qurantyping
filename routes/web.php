@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\TestController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TestPageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Request;
@@ -34,12 +35,10 @@ Route::post('/test/complete', [TestController::class, 'store']);
 //     ]);
 // });
 
-// Route::middleware([
-//     'auth:sanctum',
-//     config('jetstream.auth_session'),
-//     'verified',
-// ])->group(function () {
-//     Route::get('/dashboard', function () {
-//         return Inertia::render('Dashboard');
-//     })->name('dashboard');
-// });
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+});

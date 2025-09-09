@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
+import AppLayout from '@/Layouts/AppLayout.vue';
+
 // --- State for Filters and Test Data ---
 const surahs = ref([]); // To hold the list of all surahs
 const selectedSurah = ref(1); // Default to Al-Fatiha
@@ -119,6 +121,11 @@ const resetTest = () => {
     testFinished.value = false;
     document.getElementById('hidden-input')?.focus();
 };
+
+defineOptions({
+    layout: AppLayout
+});
+
 
 // --- Lifecycle Hooks ---
 onMounted(() => {
