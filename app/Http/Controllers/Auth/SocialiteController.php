@@ -17,6 +17,10 @@ class SocialiteController extends Controller
      */
     public function redirect(string $provider)
     {
+        if ($provider === 'github') {
+            return Socialite::driver($provider)->scopes(['user:email'])->redirect();
+        }
+
         return Socialite::driver($provider)->redirect();
     }
 
@@ -31,13 +35,19 @@ class SocialiteController extends Controller
             return redirect()->route('login')->with('error', 'Authentication failed.');
         }
 
+        $email = $socialUser->getEmail();
+
+        if (!$email) {
+            return redirect()->route('login')->with('error', 'We could not get your email from ' . ucfirst($provider) . '. Please ensure your email is public in your account settings.');
+        }
+
         $user = User::where('oauth_provider', $provider)
             ->where('oauth_id', $socialUser->getId())
             ->first();
 
         if (!$user) {
             // Check if user already exists with this email
-            $user = User::where('email', $socialUser->getEmail())->first();
+            $user = User::where('email', $email)->first();
 
             if ($user) {
                 // Link account
@@ -49,11 +59,11 @@ class SocialiteController extends Controller
                 // Create new user
                 $user = User::create([
                     'name' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
-                    'email' => $socialUser->getEmail(),
+                    'email' => $email,
                     'password' => Hash::make(Str::random(24)),
                     'oauth_id' => $socialUser->getId(),
                     'oauth_provider' => $provider,
-                    'email_verified_at' => now(), // Assume social email is verified
+                    'email_verified_at' => now(),
                 ]);
             }
         }

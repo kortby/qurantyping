@@ -38,6 +38,10 @@ const submit = () => {
                     <AuthenticationCardLogo />
                 </template>
 
+                <div v-if="$page.props.flash.error" class="mb-6 font-medium text-sm text-[var(--error-color)] bg-[var(--error-color)]/10 p-4 rounded-xl border border-[var(--error-color)]/20">
+                    {{ $page.props.flash.error }}
+                </div>
+
                 <form @submit.prevent="submit">
                     <div>
                         <InputLabel for="name" :value="t('auth.name')" />

@@ -44,6 +44,18 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                 ] : null,
             ],
+            'flash' => [
+                'message' => fn() => $request->session()->get('message'),
+                'error' => fn() => $request->session()->get('error'),
+            ],
+            'social' => [
+                'github' => !empty(config('services.github.client_id')),
+                'google' => !empty(config('services.google.client_id')),
+                'facebook' => !empty(config('services.facebook.client_id')),
+                'has_any' => !empty(config('services.github.client_id')) ||
+                    !empty(config('services.google.client_id')) ||
+                    !empty(config('services.facebook.client_id')),
+            ],
         ]);
     }
 }
