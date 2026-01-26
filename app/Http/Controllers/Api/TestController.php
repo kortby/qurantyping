@@ -66,6 +66,14 @@ class TestController extends Controller
         // Combine the text of all fetched Ayahs into a single string
         $combinedText = $ayahs->pluck('text_arabic_simple')->implode(' ');
 
+        // Enforce minimum word count for all selections
+        $wordCount = count(preg_split('/\s+/', trim($combinedText)));
+        if ($wordCount < 10) {
+            return response()->json([
+                'message' => 'Selected text must contain at least 10 words.',
+            ], 400);
+        }
+
         return response()->json([
             'id' => $ayahs->first()->id,
             'text' => $combinedText,

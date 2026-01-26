@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -95,27 +95,60 @@ const untypedPart = computed(() => {
 });
 
 // --- Core Logic ---
+const increaseStartAyah = () => {
+    const max = currentMaxAyahs.value;
+    if (startAyah.value < max) startAyah.value++;
+    if (startAyah.value > endAyah.value) endAyah.value = startAyah.value;
+};
+const decreaseStartAyah = () => {
+    if (startAyah.value > 1) startAyah.value--;
+};
+const increaseEndAyah = () => {
+    const max = currentMaxAyahs.value;
+    if (endAyah.value < max) endAyah.value++;
+    if (endAyah.value < startAyah.value) startAyah.value = endAyah.value;
+};
+const decreaseEndAyah = () => {
+    if (endAyah.value > 1) endAyah.value--;
+    if (endAyah.value < startAyah.value) startAyah.value = endAyah.value;
+};
+
+// Clear warnings when user changes selection
+watch([selectedSurah, startAyah, endAyah], () => {
+    warningMessage.value = '';
+    rangeError.value = '';
+});
+
 const fetchSurahs = async () => {
     try {
         const response = await axios.get('/api/surahs');
         surahs.value = response.data;
     } catch (error) {
-        console.error("Failed to fetch Surahs:", error);
+        console.error('Failed to fetch Surahs:', error);
     }
 };
+const warningMessage = ref('');
+const rangeError = ref('');
 
 const fetchTestText = async (withParams = true) => {
-    // Basic frontend validation to prevent 404s for invalid ayah ranges
+    // Validate range values before request
     if (withParams && selectedSurah.value) {
         const surah = surahs.value.find(s => s.surah_number === selectedSurah.value);
         if (surah) {
-            // Cap start/end within valid range for this surah
-            if (startAyah.value > surah.total_ayahs) startAyah.value = Math.max(1, surah.total_ayahs - 2);
-            if (endAyah.value > surah.total_ayahs) endAyah.value = surah.total_ayahs;
+            // Clamp to valid bounds
+            startAyah.value = Math.max(1, Math.min(startAyah.value, surah.total_ayahs));
+            endAyah.value = Math.max(1, Math.min(endAyah.value, surah.total_ayahs));
+            // Ensure start <= end
+            if (startAyah.value > endAyah.value) {
+                endAyah.value = startAyah.value;
+            }
         }
     }
 
-    isLoading.value = true;
+    // Reset warnings
+    warningMessage.value = '';
+    rangeError.value = '';
+
     try {
         let params = {};
         if (withParams) {
@@ -127,24 +160,33 @@ const fetchTestText = async (withParams = true) => {
         }
         const response = await axios.get('/api/test/text', { params });
         quranText.value = response.data;
-        
         // Sync UI filters with whatever the server returned (important for random selection)
         selectedSurah.value = quranText.value.surah_number;
         startAyah.value = quranText.value.start_ayah;
         endAyah.value = quranText.value.end_ayah;
-        
         // Update URL to reflect current test
         const url = new URL(window.location);
         url.searchParams.set('surah', selectedSurah.value);
         url.searchParams.set('start', startAyah.value);
         url.searchParams.set('end', endAyah.value);
         window.history.pushState({}, '', url);
-
         resetTest();
     } catch (error) {
         console.error("Failed to fetch test text:", error);
-        // If 404, the range was likely invalid, recover by fetching random
-        if (error.response?.status === 404) {
+        if (error.response?.status === 400 && error.response?.data?.message) {
+            // Determine if it's a range issue or word count issue
+            if (error.response.data.message.includes('range')) {
+                rangeError.value = t('range_error');
+            } else {
+                // If text is too short during random selection, try again
+                if (!withParams) {
+                    fetchTestText(false);
+                } else {
+                    warningMessage.value = t('text_too_short');
+                }
+            }
+        } else if (error.response?.status === 404) {
+            // If 404, the range was likely invalid, recover by fetching random
             fetchTestText(false);
         }
     } finally {
@@ -302,15 +344,35 @@ defineOptions({ layout: AppLayout });
                 :placeholder="t('select_surah') || 'Select Surah'"
             />
             <div class="flex items-center gap-3 bg-[var(--panel-color)] px-4 py-2 rounded-xl backdrop-blur-md border border-[var(--border-color)]">
-                <span class="text-[var(--caret-color)] opacity-60 font-cinzel text-xs uppercase tracking-widest">{{ t('range') }}</span>
+                <span class="text-[var(--caret-color)] opacity-60 font-cinzel text-xs uppercase tracking-widest">{{ t('ayats') }}</span>
                 <div class="flex items-center gap-2">
-                    <input type="number" v-model="startAyah" min="1" :max="currentMaxAyahs" class="w-14 bg-transparent border-none focus:ring-0 text-[var(--main-color)] p-0 text-center font-bold">
+                    <!-- Start Ayah Stepper -->
+                    <button @click="decreaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                        -
+                    </button>
+                    <span class="w-8 text-center font-bold text-[var(--main-color)]">{{ startAyah }}</span>
+                    <button @click="increaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                        +
+                    </button>
                     <span class="text-[var(--sub-color)] opacity-40">-</span>
-                    <input type="number" v-model="endAyah" min="1" :max="currentMaxAyahs" class="w-14 bg-transparent border-none focus:ring-0 text-[var(--main-color)] p-0 text-center font-bold">
+                    <!-- End Ayah Stepper -->
+                    <button @click="decreaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                        -
+                    </button>
+                    <span class="w-8 text-center font-bold text-[var(--main-color)]">{{ endAyah }}</span>
+                    <button @click="increaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                        +
+                    </button>
                     <span class="text-[10px] opacity-40 font-mono text-[var(--sub-color)] ml-2">/ {{ currentMaxAyahs }}</span>
                 </div>
             </div>
-            <button type="submit" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 rounded-xl font-cinzel font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-950/20">
+            <div v-if="warningMessage" class="text-[var(--error-color)] font-bold mb-2 text-center">
+                {{ warningMessage }}
+            </div>
+            <div v-else-if="rangeError" class="text-[var(--error-color)] font-bold mb-2 text-center">
+                {{ rangeError }}
+            </div>
+            <button type="submit" :disabled="!!warningMessage || !!rangeError" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 rounded-xl font-cinzel font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-950/20 disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ t('start_testing') }}
             </button>
             <button type="button" @click="fetchTestText(false)" class="bg-[var(--panel-color)] text-[var(--caret-color)] border border-[var(--border-color)] px-6 py-2 rounded-xl font-cinzel text-xs hover:bg-[var(--caret-color)]/[0.05] transition-all font-bold uppercase tracking-widest">

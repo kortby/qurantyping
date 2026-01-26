@@ -5,6 +5,7 @@ export const translations = {
         donate: "donate",
         surah: "surah",
         range: "range",
+        ayats: "Ayats",
         load_text: "load text",
         random: "random",
         wpm: "wpm",
@@ -39,6 +40,8 @@ export const translations = {
         challenge_masters: "Ready to challenge the masters?",
         start_testing: "Start Testing",
         select_surah: "Select Surah",
+        text_too_short: "Selected text must contain at least 10 words.",
+        range_error: "Please select a valid range.",
         navigation: {
             home: "Home",
             dashboard: "Dashboard",
@@ -52,6 +55,7 @@ export const translations = {
         donate: "faire un don",
         surah: "sourate",
         range: "intervalle",
+        ayats: "Ayats",
         load_text: "charger le texte",
         random: "au hasard",
         wpm: "mots/min",
@@ -86,6 +90,8 @@ export const translations = {
         challenge_masters: "Prêt à défier les maîtres ?",
         start_testing: "Commencer l'entraînement",
         select_surah: "Choisir une sourate",
+        text_too_short: "Le texte sélectionné doit contenir au moins 10 mots.",
+        range_error: "Veuillez sélectionner une plage valide.",
         navigation: {
             home: "Accueil",
             dashboard: "Tableau de bord"
@@ -97,6 +103,7 @@ export const translations = {
         donate: "تبرع",
         surah: "السورة",
         range: "المجال",
+        ayats: "آيات",
         load_text: "تحميل النص",
         random: "عشوائي",
         wpm: "كلمة/دقيقة",
@@ -131,6 +138,8 @@ export const translations = {
         challenge_masters: "هل أنت مستعد لتحدي المحترفين؟",
         start_testing: "ابدأ الاختبار",
         select_surah: "اختر سورة",
+        text_too_short: "النص المختار يجب أن يحتوي على 10 كلمات على الأقل.",
+        range_error: "يرجى اختيار نطاق صالح.",
         navigation: {
             home: "الرئيسية",
             dashboard: "لوحة التحكم"
