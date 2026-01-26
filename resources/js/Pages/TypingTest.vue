@@ -3,7 +3,10 @@ import { ref, onMounted, computed, onUnmounted } from 'vue';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import ArabicKeyboard from '@/Components/ArabicKeyboard.vue';
 import { useSettings } from '../useSettings';
+
+const activeKey = ref(null);
 
 const { t, currentLang } = useSettings();
 
@@ -128,6 +131,15 @@ const handleInput = (event) => {
     
     const newValue = event.target.value;
     
+    // Set active key for keyboard animation
+    if (newValue.length > userInput.value.length) {
+        const char = newValue[newValue.length - 1];
+        activeKey.value = (char === ' ') ? 'Space' : char;
+        setTimeout(() => {
+            if (activeKey.value === char || activeKey.value === 'Space') activeKey.value = null;
+        }, 150);
+    }
+
     // Count errors if the user typed something new and it's wrong
     if (newValue.length > userInput.value.length) {
         const lastTypedChar = newValue[newValue.length - 1];
@@ -334,6 +346,11 @@ defineOptions({ layout: AppLayout });
                        :maxlength="sourceCharacters.length" />
             </div>
         </div>
+
+        <!-- Animated Keyboard -->
+        <ArabicKeyboard v-if="quranText.text && !showResults" 
+                        :active-key="activeKey" 
+                        :next-key="untypedPart[0]" />
 
         <!-- Results View -->
         <div v-if="showResults" class="w-full max-w-5xl flex flex-col items-center justify-center py-20 animate-fade-in font-cinzel">
