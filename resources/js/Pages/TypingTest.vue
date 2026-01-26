@@ -279,7 +279,7 @@ defineOptions({ layout: AppLayout });
                 <input type="number" v-model="endAyah" class="w-16 bg-transparent border-none focus:ring-0 text-[var(--main-color)] p-0 text-center font-bold">
             </div>
             <button type="submit" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 rounded-xl font-cinzel font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-950/20">
-                {{ t('load_text') }}
+                {{ t('start_testing') }}
             </button>
             <button type="button" @click="fetchTestText(false)" class="bg-[var(--panel-color)] text-[var(--caret-color)] border border-[var(--border-color)] px-6 py-2 rounded-xl font-cinzel text-xs hover:bg-[var(--caret-color)]/[0.05] transition-all font-bold uppercase tracking-widest">
                 {{ t('random') }}

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\TestPageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Request;
@@ -10,6 +11,7 @@ use Inertia\Inertia;
 
 
 Route::get('/', TestPageController::class);
+Route::get('/leaderboard', LeaderboardController::class)->name('leaderboard');
 
 
 // This is the default route, you can leave it or remove it.

@@ -23,9 +23,13 @@ class DashboardController extends Controller
         // Get the best WPM for the crown icon
         $bestWpm = Test::where('user_id', $request->user()->id)->max('wpm');
 
+        // Calculate the average WPM
+        $averageWpm = Test::where('user_id', $request->user()->id)->avg('wpm');
+
         return Inertia::render('Dashboard', [
             'results' => $results,
             'bestWpm' => (int) $bestWpm,
+            'averageWpm' => round($averageWpm),
         ]);
     }
 }

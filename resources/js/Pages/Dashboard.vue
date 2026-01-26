@@ -8,6 +8,7 @@ const { t } = useSettings();
 defineProps({
     results: Object,
     bestWpm: Number,
+    averageWpm: Number,
 });
 
 const formatDate = (dateString) => {
@@ -33,11 +34,21 @@ const formatDate = (dateString) => {
                         <h1 class="text-5xl font-cinzel text-[var(--caret-color)] font-bold mb-3 tracking-wider">{{ t('dashboard') }}</h1>
                         <p class="text-[var(--sub-color)] font-mono text-sm uppercase tracking-[0.4em] opacity-80">{{ t('recent_performance') }}</p>
                     </div>
-                    <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-10 py-6 rounded-3xl border border-[var(--border-color)] backdrop-blur-md shadow-2xl relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 w-24 h-24 bg-[var(--caret-color)] opacity-[0.03] -mr-8 -mt-8 rounded-full transition-all group-hover:scale-150"></div>
-                        <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-2 relative z-10">{{ t('personal_best') }}</span>
-                        <div class="text-5xl text-[var(--caret-color)] font-cinzel font-bold flex items-center gap-4 relative z-10">
-                            <span class="text-4xl filter drop-shadow-md">🌙</span> {{ bestWpm }} <span class="text-lg opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-10 py-6 rounded-3xl border border-[var(--border-color)] backdrop-blur-md shadow-2xl relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-[var(--caret-color)] opacity-[0.03] -mr-8 -mt-8 rounded-full transition-all group-hover:scale-150"></div>
+                            <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-2 relative z-10">{{ t('personal_best') }}</span>
+                            <div class="text-5xl text-[var(--caret-color)] font-cinzel font-bold flex items-center gap-4 relative z-10">
+                                <span class="text-4xl filter drop-shadow-md">🌙</span> {{ bestWpm }} <span class="text-lg opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-10 py-6 rounded-3xl border border-[var(--border-color)] backdrop-blur-md shadow-2xl relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-[var(--main-color)] opacity-[0.03] -mr-8 -mt-8 rounded-full transition-all group-hover:scale-150"></div>
+                            <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-2 relative z-10">{{ t('average_speed') }}</span>
+                            <div class="text-5xl text-[var(--main-color)] font-cinzel font-bold flex items-center gap-4 relative z-10">
+                                <span class="text-4xl filter drop-shadow-md">📊</span> {{ averageWpm }} <span class="text-lg opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -109,8 +120,8 @@ const formatDate = (dateString) => {
                     <div v-else class="flex flex-col items-center justify-center py-32 text-[var(--sub-color)] font-mono">
                         <span class="text-6xl mb-6 filter drop-shadow-xl animate-bounce">⌨️</span>
                         <p class="text-xl opacity-60 mb-8">{{ t('no_tests') }}</p>
-                        <Link href="/" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-8 py-3 rounded-2xl font-bold hover:scale-110 active:scale-95 transition-all shadow-xl shadow-yellow-500/10">
-                            {{ t('start_first') }} →
+                        <Link href="/" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-8 py-3 rounded-2xl font-cinzel font-bold hover:scale-110 active:scale-95 transition-all shadow-xl shadow-emerald-950/20">
+                            {{ t('start_testing') }} →
                         </Link>
                     </div>
                 </div>

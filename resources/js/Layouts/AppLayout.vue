@@ -1,8 +1,10 @@
 <script setup>
+import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useSettings } from '../useSettings';
 
 const { currentLang, currentTheme, setLang, setTheme, t } = useSettings();
+const mobileMenuOpen = ref(false);
 
 const languages = [
     { code: 'en', label: 'EN' },
@@ -13,55 +15,53 @@ const languages = [
 
 <template>
     <div class="min-h-screen bg-[var(--bg-color)] text-[var(--main-color)] antialiased transition-colors duration-300">
-        <header class="container mx-auto px-6 py-10 flex justify-between items-center bg-transparent">
+        <header class="container mx-auto px-6 py-10 flex justify-between items-center bg-transparent relative z-50">
             <div class="flex items-center gap-12">
                 <Link href="/" class="flex items-center gap-4 group">
                     <div class="w-14 h-14 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl shadow-xl transition-all group-hover:rotate-12 group-hover:scale-110">
                         <span class="text-3xl filter drop-shadow-lg">📖</span>
                     </div>
-                    <span class="text-3xl font-cinzel font-bold tracking-widest text-[var(--caret-color)] group-hover:opacity-80 transition-opacity">
+                    <span class="text-2xl md:text-3xl font-cinzel font-bold tracking-widest text-[var(--caret-color)] group-hover:opacity-80 transition-opacity whitespace-nowrap">
                         {{ t('title') }}
                     </span>
                 </Link>
 
-                <!-- Nav Links -->
+                <!-- Nav Links Desktop -->
                 <nav class="hidden lg:flex items-center gap-10 font-cinzel text-xs uppercase tracking-[0.3em] opacity-70">
                     <Link href="/" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('navigation.home') }}</Link>
+                    <Link href="/leaderboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('leaderboard') }}</Link>
                     <Link v-if="$page.props.auth.user" href="/dashboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('navigation.dashboard') }}</Link>
                 </nav>
             </div>
 
-            <div class="flex items-center gap-10">
-                <!-- Donate Button (Header - Very Visible) -->
+            <div class="flex items-center gap-4 md:gap-10">
+                <!-- Donate Button Desktop -->
                 <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" 
-                   class="hidden md:flex items-center gap-3 bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-3 rounded-2xl font-cinzel font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-950/40">
+                   class="hidden xl:flex items-center gap-3 bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-3 rounded-2xl font-cinzel font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-950/40">
                     <span class="text-xl">❤️</span>
                     {{ t('donate') }}
                 </a>
 
-                <!-- Lang Switcher -->
-                <div class="flex items-center gap-1 bg-[var(--panel-color)] rounded-xl px-2 py-1 border border-[var(--border-color)] backdrop-blur-md">
-                    <button 
-                        v-for="lang in languages" 
-                        :key="lang.code"
-                        @click="setLang(lang.code)"
-                        class="px-5 py-2 rounded-lg text-xs font-cinzel font-bold transition-all"
-                        :class="currentLang === lang.code ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'hover:opacity-70 text-[var(--sub-color)] opacity-60'"
-                    >
-                        {{ lang.label }}
+                <!-- Desktop Actions -->
+                <div class="hidden md:flex items-center gap-6">
+                    <!-- Lang Switcher -->
+                    <div class="flex items-center gap-1 bg-[var(--panel-color)] rounded-xl px-2 py-1 border border-[var(--border-color)] backdrop-blur-md">
+                        <button v-for="lang in languages" :key="lang.code" @click="setLang(lang.code)"
+                            class="px-4 py-2 rounded-lg text-xs font-cinzel font-bold transition-all"
+                            :class="currentLang === lang.code ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'hover:opacity-70 text-[var(--sub-color)] opacity-60'">
+                            {{ lang.label }}
+                        </button>
+                    </div>
+
+                    <!-- Theme Switcher -->
+                    <button @click="setTheme(currentTheme === 'dark' ? 'light' : 'dark')"
+                        class="p-3 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] backdrop-blur-md hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-all text-xl shadow-lg">
+                        {{ currentTheme === 'dark' ? '🌙' : '☀️' }}
                     </button>
                 </div>
 
-                <!-- Theme Switcher -->
-                <button 
-                    @click="setTheme(currentTheme === 'dark' ? 'light' : 'dark')"
-                    class="p-3 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] backdrop-blur-md hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-all text-xl shadow-lg"
-                >
-                    {{ currentTheme === 'dark' ? '🌙' : '☀️' }}
-                </button>
-
-                <!-- Login/Logout -->
-                <div class="flex items-center gap-8 font-cinzel text-xs uppercase tracking-widest">
+                <!-- Desktop Auth -->
+                <div class="hidden lg:flex items-center gap-8 font-cinzel text-xs uppercase tracking-widest">
                     <div v-if="$page.props.auth.user" class="flex items-center gap-4">
                         <Link href="/logout" method="post" as="button" class="opacity-60 hover:text-[var(--error-color)] hover:opacity-100 transition-all font-bold">
                             {{ t('logout') }}
@@ -74,8 +74,65 @@ const languages = [
                         </Link>
                     </div>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" 
+                    class="lg:hidden p-4 rounded-2xl bg-[var(--panel-color)] border border-[var(--border-color)] text-[var(--caret-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-all shadow-lg active:scale-90">
+                    <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </header>
+
+        <!-- Mobile Menu Overlay -->
+        <transition name="fade">
+            <div v-if="mobileMenuOpen" class="fixed inset-0 z-40 lg:hidden">
+                <div class="absolute inset-0 bg-[var(--bg-color)]/95 backdrop-blur-xl"></div>
+                <div class="relative h-full flex flex-col p-8 pt-32">
+                    <nav class="flex flex-col gap-8 font-cinzel text-2xl font-bold tracking-widest text-center">
+                        <Link href="/" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.home') }}</Link>
+                        <Link href="/leaderboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('leaderboard') }}</Link>
+                        <Link v-if="$page.props.auth.user" href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
+                    </nav>
+
+                    <div class="mt-auto flex flex-col gap-6">
+                        <div class="flex justify-center gap-4">
+                            <button v-for="lang in languages" :key="lang.code" @click="setLang(lang.code)"
+                                class="px-6 py-3 rounded-xl text-sm font-cinzel font-bold border border-[var(--border-color)]"
+                                :class="currentLang === lang.code ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'bg-[var(--panel-color)] text-[var(--sub-color)]'">
+                                {{ lang.label }}
+                            </button>
+                        </div>
+                        <button @click="setTheme(currentTheme === 'dark' ? 'light' : 'dark')"
+                            class="w-full py-4 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] text-xl font-cinzel">
+                            {{ currentTheme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode' }}
+                        </button>
+                        <hr class="border-[var(--border-color)] opacity-20 my-4" />
+                        <div v-if="$page.props.auth.user" class="flex flex-col gap-4">
+                            <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="w-full py-4 rounded-xl border border-[var(--error-color)] text-[var(--error-color)] font-bold uppercase tracking-widest text-sm">
+                                {{ t('logout') }}
+                            </Link>
+                        </div>
+                        <div v-else class="flex flex-col gap-4">
+                            <Link href="/login" @click="mobileMenuOpen = false" class="w-full py-4 rounded-xl border border-[var(--border-color)] text-[var(--main-color)] text-center font-bold uppercase tracking-widest text-sm">
+                                {{ t('login') }}
+                            </Link>
+                            <Link href="/register" @click="mobileMenuOpen = false" class="w-full py-4 rounded-xl bg-[var(--caret-color)] text-[var(--bg-color)] text-center font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-950/20">
+                                {{ t('register') }}
+                            </Link>
+                        </div>
+                        <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" 
+                           class="w-full py-4 rounded-xl bg-red-600 text-white text-center font-bold uppercase tracking-widest text-sm shadow-xl shadow-red-950/20 flex items-center justify-center gap-3 mt-4">
+                            <span>❤️</span> {{ t('donate') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </transition>
 
         <main class="container mx-auto px-6 pb-24">
             <slot />

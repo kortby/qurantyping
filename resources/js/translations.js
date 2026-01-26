@@ -26,9 +26,23 @@ export const translations = {
         login: "Log in",
         register: "Register",
         logout: "Logout",
+        leaderboard: "Leaderboard",
+        average_speed: "Average Speed",
+        leaderboard_subtitle: "Honoring the swiftest in the word of Allah",
+        rank: "Rank",
+        seeker: "Seeker",
+        tests_count: "Tests",
+        devoted_reader: "Devoted Reader",
+        words_min: "words / min",
+        no_scores: "No scores found",
+        claim_throne: "Be the first to claim the throne",
+        challenge_masters: "Ready to challenge the masters?",
+        start_testing: "Start Testing",
         navigation: {
             home: "Home",
-            dashboard: "Dashboard"
+            dashboard: "Dashboard",
+            title: "Navigation",
+            leaderboard: "Leaderboard"
         }
     },
     fr: {
@@ -58,6 +72,18 @@ export const translations = {
         login: "Connexion",
         register: "S'inscrire",
         logout: "Déconnexion",
+        leaderboard: "Classement",
+        average_speed: "Vitesse Moyenne",
+        leaderboard_subtitle: "Honorer les plus rapides dans la parole d'Allah",
+        rank: "Rang",
+        seeker: "Chercheur",
+        tests_count: "Tests",
+        devoted_reader: "Lecteur dévoué",
+        words_min: "mots / min",
+        no_scores: "Aucun score trouvé",
+        claim_throne: "Soyez le premier à réclamer le trône",
+        challenge_masters: "Prêt à défier les maîtres ?",
+        start_testing: "Commencer l'entraînement",
         navigation: {
             home: "Accueil",
             dashboard: "Tableau de bord"
@@ -90,6 +116,18 @@ export const translations = {
         login: "تسجيل الدخول",
         register: "إنشاء حساب",
         logout: "تسجيل الخروج",
+        leaderboard: "لوحة المتصدرين",
+        average_speed: "متوسط السرعة",
+        leaderboard_subtitle: "تكريم الأسرع في كلام الله",
+        rank: "الترتيب",
+        seeker: "القارئ",
+        tests_count: "الاختبارات",
+        devoted_reader: "قارئ مخلص",
+        words_min: "كلمة / دقيقة",
+        no_scores: "لا توجد نتائج بعد",
+        claim_throne: "كن أول من يعتلي العرش",
+        challenge_masters: "هل أنت مستعد لتحدي المحترفين؟",
+        start_testing: "ابدأ الاختبار",
         navigation: {
             home: "الرئيسية",
             dashboard: "لوحة التحكم"
