@@ -45,11 +45,18 @@ export const translations = {
         resources: "Resources",
         surah_list: "Surah List",
         statistics: "Statistics",
+        help_center: "Help Center",
         support_project: "Support the Project",
         support_now: "Support Now",
         footer_tagline: "Reading and typing the word of Allah is a form of dhikr that strengthens both memory and faith.",
         support_message: "Your support helps us maintain the servers and add more features to help the community.",
         copyright: "© 2026 Quran Typing. All rights reserved.",
+        work_in_progress: {
+            title: "Under Construction",
+            subtitle: "Working for Excellence",
+            message: "We are currently perfecting this section of the site to provide you with the best experience. It will be available very soon, Insha'Allah.",
+            back_home: "Back to Home"
+        },
         navigation: {
             home: "Home",
             dashboard: "Dashboard",
@@ -127,11 +134,18 @@ export const translations = {
         resources: "Ressources",
         surah_list: "Liste des sourates",
         statistics: "Statistiques",
+        help_center: "Centre d'Aide",
         support_project: "Soutenir le Projet",
         support_now: "Soutenir Maintenant",
         footer_tagline: "Lire et taper la parole d'Allah est une forme de dhikr qui fortifie à la fois la mémoire et la foi.",
         support_message: "Votre soutien nous aide à maintenir les serveurs et à ajouter plus de fonctionnalités pour aider la communauté.",
         copyright: "© 2026 Quran Typing. Tous droits réservés.",
+        work_in_progress: {
+            title: "En Construction",
+            subtitle: "Travail pour l'Excellence",
+            message: "Nous perfectionnons actuellement cette section du site pour vous offrir la meilleure expérience. Elle sera disponible très bientôt, Insha'Allah.",
+            back_home: "Retour à l'Accueil"
+        },
         navigation: {
             home: "Accueil",
             dashboard: "Tableau de bord",
@@ -209,11 +223,18 @@ export const translations = {
         resources: "المصادر",
         surah_list: "قائمة السور",
         statistics: "الإحصائيات",
+        help_center: "مركز المساعدة",
         support_project: "دعم المشروع",
         support_now: "ادعمنا الآن",
         footer_tagline: "قراءة وطباعة كلام الله هي شكل من أشكال الذكر التي تقوي الذاكرة والإيمان.",
         support_message: "دعمكم يساعدنا في الحفاظ على الخوادم وإضافة المزيد من الميزات لمساعدة المجتمع.",
         copyright: "© 2026 مرتل. جميع الحقوق محفوظة.",
+        work_in_progress: {
+            title: "قيد التطوير",
+            subtitle: "نعمل بجد للتميز",
+            message: "نحن نعمل حالياً على تحسين هذا القسم من الموقع لنقدم لكم أفضل تجربة. سيكون متاحاً قريباً جداً، إن شاء الله.",
+            back_home: "العودة للرئيسية"
+        },
         navigation: {
             home: "الرئيسية",
             dashboard: "لوحة التحكم",

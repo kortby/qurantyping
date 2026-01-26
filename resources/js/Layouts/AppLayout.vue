@@ -169,6 +169,7 @@ const languages = [
                         <nav class="flex flex-col gap-4 font-cinzel text-xs uppercase tracking-widest opacity-60">
                             <Link href="/" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('surah_list') }}</Link>
                             <Link href="/leaderboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('statistics') }}</Link>
+                            <Link href="/work-in-progress" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('help_center') }}</Link>
                         </nav>
                     </div>
 
@@ -186,8 +187,8 @@ const languages = [
                 <div class="pt-10 border-t border-[var(--border-color)] flex flex-col md:flex-row justify-between items-center gap-6 opacity-40">
                     <p class="font-mono text-[10px] tracking-tighter uppercase">{{ t('copyright') }}</p>
                     <div class="flex gap-8 font-cinzel text-[10px] uppercase tracking-widest font-bold">
-                        <Link href="/privacy-policy" class="hover:underline">{{ t('auth.privacy_policy') }}</Link>
-                        <Link href="/terms-of-service" class="hover:underline">{{ t('auth.terms_of_service') }}</Link>
+                        <Link href="/work-in-progress" class="hover:underline">{{ t('auth.privacy_policy') }}</Link>
+                        <Link href="/work-in-progress" class="hover:underline">{{ t('auth.terms_of_service') }}</Link>
                     </div>
                 </div>
             </div>
