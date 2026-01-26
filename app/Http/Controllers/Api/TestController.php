@@ -51,6 +51,7 @@ class TestController extends Controller
         $combinedText = $ayahs->pluck('text_arabic_simple')->implode(' ');
 
         return response()->json([
+            'id' => $ayahs->first()->id,
             'text' => $combinedText,
             'surah_name_arabic' => $ayahs->first()->surah_name_arabic,
             'surah_number' => $validated['surah_number'],

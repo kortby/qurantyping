@@ -12,12 +12,20 @@ class DashboardController extends Controller
     {
         // Fetch the logged-in user's test results, newest first, with pagination
         $results = Test::where('user_id', $request->user()->id)
-            ->with('quranText:id,surah_number,ayah_number,surah_name_arabic') // Eager load relations
+            ->with([
+                'quranText' => function ($query) {
+                    $query->select('id', 'surah_number', 'ayah_number', 'surah_name_arabic');
+                }
+            ])
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
+
+        // Get the best WPM for the crown icon
+        $bestWpm = Test::where('user_id', $request->user()->id)->max('wpm');
 
         return Inertia::render('Dashboard', [
             'results' => $results,
+            'bestWpm' => (int) $bestWpm,
         ]);
     }
 }

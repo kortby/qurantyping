@@ -22,7 +22,8 @@ class Test extends Model
         'accuracy',
         'char_count',
         'correct_chars',
-        'incorrect_chars',
+        'start_ayah',
+        'end_ayah',
     ];
 
     /**
