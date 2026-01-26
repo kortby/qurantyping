@@ -21,7 +21,8 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\Gate::define('viewPulse', function ($user) {
             return in_array($user->email, [
-                'mysek@mailinator.com',
+                'hasbellaoui.faycal@gmail.com',
+                'kortby@gmail.com'
             ]);
         });
     }
