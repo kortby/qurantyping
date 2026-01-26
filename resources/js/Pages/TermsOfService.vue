@@ -1,6 +1,10 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
+import { useSettings } from '@/useSettings';
+
+const { t } = useSettings();
 
 defineProps({
     terms: String,
@@ -8,17 +12,28 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Terms of Service" />
+    <Head :title="t('auth.terms_of_service')" />
 
-    <div class="font-sans text-gray-900 dark:text-gray-100 antialiased">
-        <div class="pt-4 bg-gray-100 dark:bg-gray-900">
-            <div class="min-h-screen flex flex-col items-center pt-6 sm:pt-0">
-                <div>
-                    <AuthenticationCardLogo />
-                </div>
-
-                <div class="w-full sm:max-w-2xl mt-6 p-6 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg prose dark:prose-invert" v-html="terms" />
+    <AppLayout>
+        <div class="py-6 flex flex-col items-center">
+            <div class="mb-8">
+                <AuthenticationCardLogo />
             </div>
+
+            <div class="w-full sm:max-w-4xl p-10 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-3xl shadow-2xl backdrop-blur-md prose prose-invert max-w-none" 
+                 style="color: var(--main-color);"
+                 v-html="terms" />
         </div>
-    </div>
+    </AppLayout>
 </template>
+
+<style scoped>
+:deep(h1), :deep(h2), :deep(h3) {
+    color: var(--caret-color);
+    font-family: 'Cinzel', serif;
+}
+:deep(p), :deep(li) {
+    color: var(--main-color);
+    opacity: 0.8;
+}
+</style>

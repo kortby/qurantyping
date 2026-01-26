@@ -15,7 +15,7 @@ const languages = [
 
 <template>
     <div class="min-h-screen bg-[var(--bg-color)] text-[var(--main-color)] antialiased transition-colors duration-300">
-        <header class="container mx-auto px-6 py-10 flex justify-between items-center bg-transparent relative z-50">
+        <header class="container mx-auto px-6 py-6 flex justify-between items-center bg-transparent relative z-50">
             <div class="flex items-center gap-12">
                 <Link href="/" class="flex items-center gap-4 group">
                     <div class="w-14 h-14 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl shadow-xl transition-all group-hover:rotate-12 group-hover:scale-110">
@@ -134,12 +134,12 @@ const languages = [
             </div>
         </transition>
 
-        <main class="container mx-auto px-6 pb-24">
+        <main class="container mx-auto px-6 pb-12">
             <slot />
         </main>
 
         <!-- Islamic Footer -->
-        <footer class="bg-[var(--panel-color)] border-t border-[var(--border-color)] pt-20 pb-10 mt-20 backdrop-blur-xl relative overflow-hidden">
+        <footer class="bg-[var(--panel-color)] border-t border-[var(--border-color)] pt-12 pb-10 mt-12 backdrop-blur-xl relative overflow-hidden">
             <!-- Decorative Background Element -->
             <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-[var(--border-color)] opacity-[0.03] rounded-full"></div>
             
@@ -151,44 +151,43 @@ const languages = [
                             <span class="text-2xl font-cinzel font-bold tracking-widest text-[var(--caret-color)]">{{ t('title') }}</span>
                         </Link>
                         <p class="text-sm border-l-2 border-[var(--caret-color)]/20 pl-4 py-1 italic opacity-60 leading-relaxed font-serif">
-                            Reading and typing the word of Allah is a form of dhikr that strengthens both memory and faith.
+                            {{ t('footer_tagline') }}
                         </p>
                     </div>
 
                     <div class="flex flex-col gap-6">
                         <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">{{ t('navigation.title') || 'Navigation' }}</h4>
                         <nav class="flex flex-col gap-4 font-cinzel text-xs uppercase tracking-widest opacity-60">
-                            <Link href="/" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Home</Link>
-                            <Link href="/dashboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Dashboard</Link>
-                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Settings</Link>
+                            <Link href="/" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('navigation.home') }}</Link>
+                            <Link href="/dashboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('navigation.dashboard') }}</Link>
+                            <Link href="/leaderboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('leaderboard') }}</Link>
                         </nav>
                     </div>
 
                     <div class="flex flex-col gap-6">
-                        <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">Resources</h4>
+                        <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">{{ t('resources') }}</h4>
                         <nav class="flex flex-col gap-4 font-cinzel text-xs uppercase tracking-widest opacity-60">
-                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Surah List</Link>
-                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Statistics</Link>
-                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Help Center</Link>
+                            <Link href="/" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('surah_list') }}</Link>
+                            <Link href="/leaderboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">{{ t('statistics') }}</Link>
                         </nav>
                     </div>
 
                     <div class="flex flex-col gap-8">
-                        <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">Support the Project</h4>
-                        <p class="text-xs opacity-60 leading-relaxed">Your support helps us maintain the servers and add more features to help the community.</p>
+                        <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">{{ t('support_project') }}</h4>
+                        <p class="text-xs opacity-60 leading-relaxed">{{ t('support_message') }}</p>
                         <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" 
                            class="flex items-center justify-center gap-4 bg-[var(--caret-color)] text-[var(--bg-color)] px-8 py-4 rounded-2xl font-cinzel font-bold text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-emerald-950/40">
                             <span class="text-2xl">❤️</span>
-                            Support Now
+                            {{ t('support_now') }}
                         </a>
                     </div>
                 </div>
 
                 <div class="pt-10 border-t border-[var(--border-color)] flex flex-col md:flex-row justify-between items-center gap-6 opacity-40">
-                    <p class="font-mono text-[10px] tracking-tighter uppercase">© 2026 Quran Typing. All rights reserved.</p>
+                    <p class="font-mono text-[10px] tracking-tighter uppercase">{{ t('copyright') }}</p>
                     <div class="flex gap-8 font-cinzel text-[10px] uppercase tracking-widest font-bold">
-                        <Link href="/privacy-policy" class="hover:underline">Privacy Policy</Link>
-                        <Link href="/terms-of-service" class="hover:underline">Terms of Service</Link>
+                        <Link href="/privacy-policy" class="hover:underline">{{ t('auth.privacy_policy') }}</Link>
+                        <Link href="/terms-of-service" class="hover:underline">{{ t('auth.terms_of_service') }}</Link>
                     </div>
                 </div>
             </div>

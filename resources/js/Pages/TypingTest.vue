@@ -79,7 +79,8 @@ const firstErrorIndex = computed(() => {
 });
 
 const currentMaxAyahs = computed(() => {
-    const surah = surahs.value.find(s => s.surah_number === selectedSurah.value);
+    if (!surahs.value.length) return 0;
+    const surah = surahs.value.find(s => s.surah_number == selectedSurah.value);
     return surah ? surah.total_ayahs : 0;
 });
 const correctPart = computed(() => {
@@ -96,21 +97,52 @@ const untypedPart = computed(() => {
 
 // --- Core Logic ---
 const increaseStartAyah = () => {
-    const max = currentMaxAyahs.value;
-    if (startAyah.value < max) startAyah.value++;
-    if (startAyah.value > endAyah.value) endAyah.value = startAyah.value;
+    const max = currentMaxAyahs.value || 286; // Default to max surah size if not loaded
+    const current = parseInt(startAyah.value) || 1;
+    if (current < max) {
+        startAyah.value = current + 1;
+        if (startAyah.value > endAyah.value) endAyah.value = startAyah.value;
+    }
 };
 const decreaseStartAyah = () => {
-    if (startAyah.value > 1) startAyah.value--;
+    const current = parseInt(startAyah.value) || 1;
+    if (current > 1) startAyah.value = current - 1;
 };
 const increaseEndAyah = () => {
-    const max = currentMaxAyahs.value;
-    if (endAyah.value < max) endAyah.value++;
-    if (endAyah.value < startAyah.value) startAyah.value = endAyah.value;
+    const max = currentMaxAyahs.value || 286;
+    const current = parseInt(endAyah.value) || 1;
+    if (current < max) {
+        endAyah.value = current + 1;
+    }
 };
 const decreaseEndAyah = () => {
-    if (endAyah.value > 1) endAyah.value--;
-    if (endAyah.value < startAyah.value) startAyah.value = endAyah.value;
+    const current = parseInt(endAyah.value) || 1;
+    if (current > 1) {
+        endAyah.value = current - 1;
+        if (endAyah.value < startAyah.value) startAyah.value = endAyah.value;
+    }
+};
+
+const validateAyahs = () => {
+    const max = currentMaxAyahs.value;
+    // Don't validate against 0 if surahs haven't loaded yet
+    if (max <= 0) return;
+    
+    let start = parseInt(startAyah.value) || 1;
+    let end = parseInt(endAyah.value) || 1;
+
+    if (start < 1) start = 1;
+    if (start > max) start = max;
+    if (end < 1) end = 1;
+    if (end > max) end = max;
+    
+    // Ensure end >= start
+    if (end < start) {
+        end = start;
+    }
+
+    startAyah.value = start;
+    endAyah.value = end;
 };
 
 // Clear warnings when user changes selection
@@ -133,15 +165,20 @@ const rangeError = ref('');
 const fetchTestText = async (withParams = true) => {
     // Validate range values before request
     if (withParams && selectedSurah.value) {
-        const surah = surahs.value.find(s => s.surah_number === selectedSurah.value);
+        const surah = surahs.value.find(s => s.surah_number == selectedSurah.value);
         if (surah) {
             // Clamp to valid bounds
-            startAyah.value = Math.max(1, Math.min(startAyah.value, surah.total_ayahs));
-            endAyah.value = Math.max(1, Math.min(endAyah.value, surah.total_ayahs));
-            // Ensure start <= end
-            if (startAyah.value > endAyah.value) {
-                endAyah.value = startAyah.value;
-            }
+            const max = surah.total_ayahs;
+            let start = parseInt(startAyah.value) || 1;
+            let end = parseInt(endAyah.value) || 1;
+
+            start = Math.max(1, Math.min(start, max));
+            end = Math.max(1, Math.min(end, max));
+
+            if (start > end) end = start;
+
+            startAyah.value = start;
+            endAyah.value = end;
         }
     }
 
@@ -347,20 +384,34 @@ defineOptions({ layout: AppLayout });
                 <span class="text-[var(--caret-color)] opacity-60 font-cinzel text-xs uppercase tracking-widest">{{ t('ayats') }}</span>
                 <div class="flex items-center gap-2">
                     <!-- Start Ayah Stepper -->
-                    <button @click="decreaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                    <button type="button" @click="decreaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
                         -
                     </button>
-                    <span class="w-8 text-center font-bold text-[var(--main-color)]">{{ startAyah }}</span>
-                    <button @click="increaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                    <input 
+                        v-model.number="startAyah" 
+                        type="number" 
+                        min="1" 
+                        :max="currentMaxAyahs"
+                        @change="validateAyahs"
+                        class="w-10 text-center font-bold text-[var(--main-color)] bg-transparent border-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button type="button" @click="increaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
                         +
                     </button>
                     <span class="text-[var(--sub-color)] opacity-40">-</span>
                     <!-- End Ayah Stepper -->
-                    <button @click="decreaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                    <button type="button" @click="decreaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
                         -
                     </button>
-                    <span class="w-8 text-center font-bold text-[var(--main-color)]">{{ endAyah }}</span>
-                    <button @click="increaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                    <input 
+                        v-model.number="endAyah" 
+                        type="number" 
+                        min="1" 
+                        :max="currentMaxAyahs"
+                        @change="validateAyahs"
+                        class="w-10 text-center font-bold text-[var(--main-color)] bg-transparent border-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button type="button" @click="increaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
                         +
                     </button>
                     <span class="text-[10px] opacity-40 font-mono text-[var(--sub-color)] ml-2">/ {{ currentMaxAyahs }}</span>

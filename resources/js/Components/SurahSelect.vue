@@ -93,7 +93,7 @@ onUnmounted(() => {
                         <input v-model="searchQuery" 
                                type="text" 
                                :placeholder="placeholder" 
-                               class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2 text-sm text-[var(--main-color)] focus:ring-1 focus:ring-[var(--caret-color)] focus:border-[var(--caret-color)] outline-none placeholder:opacity-30"
+                               class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2 text-sm text-[var(--main-color)] focus:ring-1 focus:ring-[var(--caret-color)] focus:border-[var(--caret-color)] outline-none placeholder-[var(--sub-color)]/30 transition-all duration-200"
                                @click.stop
                                autofocus />
                         <span class="absolute right-3 top-1/2 -translate-y-1/2 opacity-40">🔍</span>

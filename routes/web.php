@@ -13,6 +13,10 @@ use Inertia\Inertia;
 Route::get('/', TestPageController::class);
 Route::get('/leaderboard', LeaderboardController::class)->name('leaderboard');
 
+// Social Authentication
+Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\Auth\SocialiteController::class, 'redirect'])->name('social.redirect');
+Route::get('/auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialiteController::class, 'callback'])->name('social.callback');
+
 
 // This is the default route, you can leave it or remove it.
 Route::get('/user', function (Request $request) {
