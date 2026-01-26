@@ -30,23 +30,24 @@ const formatDate = (dateString) => {
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-16 gap-8">
                     <div class="text-center md:text-left">
-                        <h1 class="text-5xl font-mono text-[var(--main-color)] font-bold mb-3 tracking-tighter">{{ t('dashboard') }}</h1>
-                        <p class="text-[var(--sub-color)] font-mono text-sm uppercase tracking-widest">{{ t('recent_performance') }}</p>
+                        <h1 class="text-5xl font-cinzel text-[var(--caret-color)] font-bold mb-3 tracking-wider">{{ t('dashboard') }}</h1>
+                        <p class="text-[var(--sub-color)] font-mono text-sm uppercase tracking-[0.4em] opacity-80">{{ t('recent_performance') }}</p>
                     </div>
-                    <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-10 py-6 rounded-3xl border border-white/5 backdrop-blur-md shadow-2xl">
-                        <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-2">{{ t('personal_best') }}</span>
-                        <div class="text-5xl text-[var(--caret-color)] font-mono font-bold flex items-center gap-4">
-                            <span class="text-4xl">👑</span> {{ bestWpm }} <span class="text-lg opacity-60">{{ t('wpm') }}</span>
+                    <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-10 py-6 rounded-3xl border border-[var(--border-color)] backdrop-blur-md shadow-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-[var(--caret-color)] opacity-[0.03] -mr-8 -mt-8 rounded-full transition-all group-hover:scale-150"></div>
+                        <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-2 relative z-10">{{ t('personal_best') }}</span>
+                        <div class="text-5xl text-[var(--caret-color)] font-cinzel font-bold flex items-center gap-4 relative z-10">
+                            <span class="text-4xl filter drop-shadow-md">🌙</span> {{ bestWpm }} <span class="text-lg opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Stats Table -->
-                <div class="bg-[var(--panel-color)] rounded-[2.5rem] overflow-hidden border border-white/5 backdrop-blur-xl shadow-2xl">
+                <div class="bg-[var(--panel-color)] rounded-[2.5rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-2xl transition-all duration-500 hover:shadow-emerald-900/10">
                     <div v-if="results.data.length > 0">
                         <table class="w-full text-left font-mono text-sm border-collapse">
                             <thead>
-                                <tr class="bg-white/5 text-[var(--sub-color)] uppercase tracking-widest text-[10px]">
+                                <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-[0.2em] text-[10px]">
                                     <th class="px-10 py-6 font-bold">{{ t('wpm') }}</th>
                                     <th class="px-10 py-6 font-bold text-center">errors</th>
                                     <th class="px-10 py-6 font-bold text-center">{{ t('accuracy') }}</th>
@@ -55,9 +56,9 @@ const formatDate = (dateString) => {
                                     <th class="px-10 py-6 font-bold text-right">{{ t('date') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-white/5">
+                            <tbody class="divide-y divide-[var(--border-color)]">
                                 <tr v-for="result in results.data" :key="result.id" 
-                                    class="hover:bg-white/5 transition-all duration-300 group">
+                                    class="hover:bg-[var(--caret-color)]/[0.02] transition-all duration-300 group">
                                     <td class="px-10 py-8">
                                         <div class="flex items-center gap-4">
                                             <span class="text-3xl font-bold" :class="result.wpm === bestWpm ? 'text-[var(--caret-color)]' : 'text-[var(--main-color)]'">

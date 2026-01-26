@@ -13,31 +13,40 @@ const languages = [
 
 <template>
     <div class="min-h-screen bg-[var(--bg-color)] text-[var(--main-color)] antialiased transition-colors duration-300">
-        <header class="container mx-auto px-6 py-6 flex justify-between items-center bg-transparent">
-            <div class="flex items-center gap-8">
-                <Link href="/" class="flex items-center gap-3 group">
-                    <span class="text-3xl filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">📖</span>
-                    <span class="text-2xl font-mono font-bold tracking-tighter text-[var(--caret-color)] group-hover:opacity-80 transition-opacity">
+        <header class="container mx-auto px-6 py-10 flex justify-between items-center bg-transparent">
+            <div class="flex items-center gap-12">
+                <Link href="/" class="flex items-center gap-4 group">
+                    <div class="w-14 h-14 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl shadow-xl transition-all group-hover:rotate-12 group-hover:scale-110">
+                        <span class="text-3xl filter drop-shadow-lg">📖</span>
+                    </div>
+                    <span class="text-3xl font-cinzel font-bold tracking-widest text-[var(--caret-color)] group-hover:opacity-80 transition-opacity">
                         {{ t('title') }}
                     </span>
                 </Link>
 
                 <!-- Nav Links -->
-                <nav class="hidden md:flex items-center gap-6 font-mono text-sm opacity-60">
-                    <Link href="/" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.home') }}</Link>
-                    <Link v-if="$page.props.auth.user" href="/dashboard" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
+                <nav class="hidden lg:flex items-center gap-10 font-cinzel text-xs uppercase tracking-[0.3em] opacity-70">
+                    <Link href="/" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('navigation.home') }}</Link>
+                    <Link v-if="$page.props.auth.user" href="/dashboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('navigation.dashboard') }}</Link>
                 </nav>
             </div>
 
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-10">
+                <!-- Donate Button (Header - Very Visible) -->
+                <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" 
+                   class="hidden md:flex items-center gap-3 bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-3 rounded-2xl font-cinzel font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-950/40">
+                    <span class="text-xl">❤️</span>
+                    {{ t('donate') }}
+                </a>
+
                 <!-- Lang Switcher -->
-                <div class="flex items-center gap-1 bg-[var(--panel-color)] rounded-full px-2 py-1 border border-white/5 backdrop-blur-md">
+                <div class="flex items-center gap-1 bg-[var(--panel-color)] rounded-xl px-2 py-1 border border-[var(--border-color)] backdrop-blur-md">
                     <button 
                         v-for="lang in languages" 
                         :key="lang.code"
                         @click="setLang(lang.code)"
-                        class="px-3 py-1 rounded-full text-xs font-mono transition-all"
-                        :class="currentLang === lang.code ? 'bg-[var(--caret-color)] text-[var(--bg-color)] font-bold' : 'hover:opacity-70 text-[var(--sub-color)]'"
+                        class="px-5 py-2 rounded-lg text-xs font-cinzel font-bold transition-all"
+                        :class="currentLang === lang.code ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'hover:opacity-70 text-[var(--sub-color)] opacity-60'"
                     >
                         {{ lang.label }}
                     </button>
@@ -46,21 +55,21 @@ const languages = [
                 <!-- Theme Switcher -->
                 <button 
                     @click="setTheme(currentTheme === 'dark' ? 'light' : 'dark')"
-                    class="p-2 rounded-full bg-[var(--panel-color)] border border-white/5 backdrop-blur-md hover:bg-white/10 transition-all text-xl"
+                    class="p-3 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] backdrop-blur-md hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-all text-xl shadow-lg"
                 >
-                    {{ currentTheme === 'dark' ? '☀️' : '🌙' }}
+                    {{ currentTheme === 'dark' ? '🌙' : '☀️' }}
                 </button>
 
                 <!-- Login/Logout -->
-                <div class="flex items-center gap-4 font-mono text-sm">
+                <div class="flex items-center gap-8 font-cinzel text-xs uppercase tracking-widest">
                     <div v-if="$page.props.auth.user" class="flex items-center gap-4">
-                        <Link href="/logout" method="post" as="button" class="opacity-60 hover:text-[var(--error-color)] transition-colors">
+                        <Link href="/logout" method="post" as="button" class="opacity-60 hover:text-[var(--error-color)] hover:opacity-100 transition-all font-bold">
                             {{ t('logout') }}
                         </Link>
                     </div>
-                    <div v-else class="flex items-center gap-4">
-                        <Link href="/login" class="opacity-60 hover:text-[var(--caret-color)] transition-colors">{{ t('login') }}</Link>
-                        <Link href="/register" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-4 py-1.5 rounded-full font-bold hover:scale-105 active:scale-95 transition-all">
+                    <div v-else class="flex items-center gap-8">
+                        <Link href="/login" class="opacity-60 hover:text-[var(--caret-color)] hover:opacity-100 transition-all font-bold">{{ t('login') }}</Link>
+                        <Link href="/register" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-8 py-3 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-950/20">
                             {{ t('register') }}
                         </Link>
                     </div>
@@ -68,9 +77,65 @@ const languages = [
             </div>
         </header>
 
-        <main class="container mx-auto px-6">
+        <main class="container mx-auto px-6 pb-24">
             <slot />
         </main>
+
+        <!-- Islamic Footer -->
+        <footer class="bg-[var(--panel-color)] border-t border-[var(--border-color)] pt-20 pb-10 mt-20 backdrop-blur-xl relative overflow-hidden">
+            <!-- Decorative Background Element -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-[var(--border-color)] opacity-[0.03] rounded-full"></div>
+            
+            <div class="container mx-auto px-6 relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
+                    <div class="col-span-1 md:col-span-1">
+                        <Link href="/" class="flex items-center gap-4 mb-6 group">
+                            <span class="text-3xl filter drop-shadow-lg group-hover:scale-110 transition-transform">📖</span>
+                            <span class="text-2xl font-cinzel font-bold tracking-widest text-[var(--caret-color)]">{{ t('title') }}</span>
+                        </Link>
+                        <p class="text-sm border-l-2 border-[var(--caret-color)]/20 pl-4 py-1 italic opacity-60 leading-relaxed font-serif">
+                            Reading and typing the word of Allah is a form of dhikr that strengthens both memory and faith.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">{{ t('navigation.title') || 'Navigation' }}</h4>
+                        <nav class="flex flex-col gap-4 font-cinzel text-xs uppercase tracking-widest opacity-60">
+                            <Link href="/" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Home</Link>
+                            <Link href="/dashboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Dashboard</Link>
+                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Settings</Link>
+                        </nav>
+                    </div>
+
+                    <div class="flex flex-col gap-6">
+                        <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">Resources</h4>
+                        <nav class="flex flex-col gap-4 font-cinzel text-xs uppercase tracking-widest opacity-60">
+                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Surah List</Link>
+                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Statistics</Link>
+                            <Link href="#" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-colors">Help Center</Link>
+                        </nav>
+                    </div>
+
+                    <div class="flex flex-col gap-8">
+                        <h4 class="font-cinzel text-[10px] uppercase tracking-[0.4em] text-[var(--caret-color)]">Support the Project</h4>
+                        <p class="text-xs opacity-60 leading-relaxed">Your support helps us maintain the servers and add more features to help the community.</p>
+                        <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" 
+                           class="flex items-center justify-center gap-4 bg-[var(--caret-color)] text-[var(--bg-color)] px-8 py-4 rounded-2xl font-cinzel font-bold text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-emerald-950/40">
+                            <span class="text-2xl">❤️</span>
+                            Support Now
+                        </a>
+                    </div>
+                </div>
+
+                <div class="pt-10 border-t border-[var(--border-color)] flex flex-col md:flex-row justify-between items-center gap-6 opacity-40">
+                    <p class="font-mono text-[10px] tracking-tighter uppercase">© 2026 Quran Typing. All rights reserved.</p>
+                    <div class="flex gap-8 font-cinzel text-[10px] uppercase tracking-widest font-bold">
+                        <Link href="/privacy-policy" class="hover:underline">Privacy Policy</Link>
+                        <Link href="/terms-of-service" class="hover:underline">Terms of Service</Link>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 </template>
 
