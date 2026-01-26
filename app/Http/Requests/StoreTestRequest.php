@@ -35,6 +35,7 @@ class StoreTestRequest extends FormRequest
             'duration' => 'required|integer|min:1',
             'start_ayah' => 'required|integer|min:1',
             'end_ayah' => 'required|integer|min:1|gte:start_ayah',
+            'total_errors' => 'required|integer|min:0',
         ];
     }
 }

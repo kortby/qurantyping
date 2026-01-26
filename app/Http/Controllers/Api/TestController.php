@@ -30,16 +30,31 @@ class TestController extends Controller
      */
     public function getTextForTest(Request $request): JsonResponse
     {
-        // Validate the incoming request parameters
-        $validated = $request->validate([
-            'surah_number' => 'required|integer|min:1|max:114',
-            'start_ayah' => 'required|integer|min:1',
-            'end_ayah' => 'required|integer|min:1|gte:start_ayah',
-        ]);
+        // If no parameters are provided, pick a random surah and 3 consecutive ayahs
+        if (!$request->has('surah_number')) {
+            $randomAyah = QuranText::inRandomOrder()->first();
+            $surahNumber = $randomAyah->surah_number;
+
+            // Try to get 3 consecutive ayahs starting from a random point 
+            // but ensuring we don't go past the end of the surah
+            $maxAyahInSurah = QuranText::where('surah_number', $surahNumber)->max('ayah_number');
+            $startAyah = rand(1, max(1, $maxAyahInSurah - 2));
+            $endAyah = min($maxAyahInSurah, $startAyah + 2);
+        } else {
+            // Validate the incoming request parameters
+            $validated = $request->validate([
+                'surah_number' => 'required|integer|min:1|max:114',
+                'start_ayah' => 'required|integer|min:1',
+                'end_ayah' => 'required|integer|min:1|gte:start_ayah',
+            ]);
+            $surahNumber = $validated['surah_number'];
+            $startAyah = $validated['start_ayah'];
+            $endAyah = $validated['end_ayah'];
+        }
 
         // Query the database for the requested range of Ayahs
-        $ayahs = QuranText::where('surah_number', $validated['surah_number'])
-            ->whereBetween('ayah_number', [$validated['start_ayah'], $validated['end_ayah']])
+        $ayahs = QuranText::where('surah_number', $surahNumber)
+            ->whereBetween('ayah_number', [$startAyah, $endAyah])
             ->orderBy('ayah_number', 'asc')
             ->get();
 
@@ -54,9 +69,9 @@ class TestController extends Controller
             'id' => $ayahs->first()->id,
             'text' => $combinedText,
             'surah_name_arabic' => $ayahs->first()->surah_name_arabic,
-            'surah_number' => $validated['surah_number'],
-            'start_ayah' => $validated['start_ayah'],
-            'end_ayah' => $validated['end_ayah'],
+            'surah_number' => $surahNumber,
+            'start_ayah' => $startAyah,
+            'end_ayah' => $endAyah,
         ]);
     }
 

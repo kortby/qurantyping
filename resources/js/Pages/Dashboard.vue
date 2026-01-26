@@ -48,6 +48,7 @@ const formatDate = (dateString) => {
                             <thead>
                                 <tr class="bg-white/5 text-[var(--sub-color)] uppercase tracking-widest text-[10px]">
                                     <th class="px-10 py-6 font-bold">{{ t('wpm') }}</th>
+                                    <th class="px-10 py-6 font-bold text-center">errors</th>
                                     <th class="px-10 py-6 font-bold text-center">{{ t('accuracy') }}</th>
                                     <th class="px-10 py-6 font-bold text-center">{{ t('surah') }}</th>
                                     <th class="px-10 py-6 font-bold text-center">action</th>
@@ -65,14 +66,24 @@ const formatDate = (dateString) => {
                                             <span v-if="result.wpm === bestWpm" class="text-xl animate-bounce" title="Personal Best">👑</span>
                                         </div>
                                     </td>
+                                    <td class="px-10 py-8 text-center text-xl text-[var(--error-color)] font-bold">
+                                        {{ result.total_errors ?? 0 }}
+                                    </td>
                                     <td class="px-10 py-8 text-center">
                                         <div class="inline-flex items-center justify-center px-4 py-1.5 rounded-full border" 
                                              :class="result.accuracy > 95 ? 'border-green-500/30 bg-green-500/10 text-green-500' : 'border-white/10 text-[var(--sub-color)]'">
                                             {{ Math.round(result.accuracy) }}%
                                         </div>
                                     </td>
-                                    <td class="px-10 py-8 text-center text-2xl" dir="rtl" style="font-family: 'Noto Naskh Arabic', serif;">
-                                        {{ result.quran_text.surah_name_arabic }}
+                                    <td class="px-10 py-8 text-center" dir="rtl">
+                                        <div class="text-2xl mb-1" style="font-family: 'Noto Naskh Arabic', serif;">
+                                            {{ result.quran_text.surah_name_arabic }}
+                                        </div>
+                                        <div class="text-[10px] font-mono text-[var(--sub-color)] opacity-60 flex items-center justify-center gap-1" dir="ltr">
+                                            <span>{{ result.start_ayah }}</span>
+                                            <span class="opacity-40">→</span>
+                                            <span>{{ result.end_ayah }}</span>
+                                        </div>
                                     </td>
                                     <td class="px-10 py-8 text-center">
                                         <Link :href="`/?surah=${result.quran_text.surah_number}&start=${result.start_ayah || 1}&end=${result.end_ayah || 1}`" 

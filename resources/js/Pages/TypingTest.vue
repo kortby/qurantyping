@@ -7,6 +7,12 @@ import { useSettings } from '../useSettings';
 
 const { t, currentLang } = useSettings();
 
+const props = defineProps({
+    personalBestWpm: Number,
+});
+
+const currentPB = ref(props.personalBestWpm || 0);
+
 // --- State for Filters and Test Data ---
 const surahs = ref([]);
 const selectedSurah = ref(1);
@@ -29,6 +35,7 @@ const intervalId = ref(null);
 const testFinished = ref(false);
 const isFocused = ref(false);
 const showResults = ref(false);
+const totalErrors = ref(0);
 
 const normalizeForComparison = (text) => {
     if (!text) return '';
@@ -49,14 +56,16 @@ const wpm = computed(() => {
     return Math.round(wordCount / minutes);
 });
 const accuracy = computed(() => {
+    if (userInput.value.length === 0) return 100;
     let correctChars = 0;
     typedCharacters.value.forEach((char, index) => {
         if (normalizeForComparison(char) === normalizeForComparison(sourceCharacters.value[index])) {
             correctChars++;
         }
     });
-    if (userInput.value.length === 0) return 100;
-    return Math.round((correctChars / userInput.value.length) * 100);
+    // Calculate accuracy based on total keystrokes (current length + mistakes made)
+    const totalKeystrokes = userInput.value.length + totalErrors.value;
+    return Math.round((correctChars / totalKeystrokes) * 100);
 });
 const firstErrorIndex = computed(() => {
     for (let i = 0; i < typedCharacters.value.length; i++) {
@@ -86,16 +95,25 @@ const fetchSurahs = async () => {
     }
 };
 
-const fetchTestText = async () => {
+const fetchTestText = async (withParams = true) => {
     isLoading.value = true;
     try {
-        const params = {
-            surah_number: selectedSurah.value,
-            start_ayah: startAyah.value,
-            end_ayah: endAyah.value,
-        };
+        let params = {};
+        if (withParams) {
+            params = {
+                surah_number: selectedSurah.value,
+                start_ayah: startAyah.value,
+                end_ayah: endAyah.value,
+            };
+        }
         const response = await axios.get('/api/test/text', { params });
         quranText.value = response.data;
+        
+        // Sync UI filters with whatever the server returned (important for random selection)
+        selectedSurah.value = quranText.value.surah_number;
+        startAyah.value = quranText.value.start_ayah;
+        endAyah.value = quranText.value.end_ayah;
+        
         resetTest();
     } catch (error) {
         console.error("Failed to fetch test text:", error);
@@ -107,9 +125,21 @@ const fetchTestText = async () => {
 const handleInput = (event) => {
     if (testFinished.value || isLoading.value) return;
     if (!intervalId.value) startTimer();
-    userInput.value = event.target.value;
-    if (userInput.value.length >= sourceCharacters.value.length) {
-        userInput.value = userInput.value.substring(0, sourceCharacters.value.length);
+    
+    const newValue = event.target.value;
+    
+    // Count errors if the user typed something new and it's wrong
+    if (newValue.length > userInput.value.length) {
+        const lastTypedChar = newValue[newValue.length - 1];
+        const expectedChar = sourceCharacters.value[newValue.length - 1];
+        if (normalizeForComparison(lastTypedChar) !== normalizeForComparison(expectedChar)) {
+            totalErrors.value++;
+        }
+    }
+
+    userInput.value = newValue;
+    // Only finish if the length matches and there are no active errors (100% correct text)
+    if (userInput.value.length === sourceCharacters.value.length && firstErrorIndex.value === -1) {
         finishTest();
     }
 };
@@ -129,10 +159,12 @@ const finishTest = async () => {
     testFinished.value = true;
     showResults.value = true;
 
-    if (accuracy.value >= 90) {
+    // Trigger celebration ONLY if it's a new personal record
+    if (wpm.value > currentPB.value) {
+        currentPB.value = wpm.value;
         confetti({
-            particleCount: 150,
-            spread: 70,
+            particleCount: 200,
+            spread: 90,
             origin: { y: 0.6 },
             colors: ['#eab308', '#d1d0c5', '#646669']
         });
@@ -160,6 +192,7 @@ const finishTest = async () => {
             duration: timer.value || 1,
             start_ayah: quranText.value.start_ayah,
             end_ayah: quranText.value.end_ayah,
+            total_errors: totalErrors.value,
         });
     } catch (error) {
         console.error("Failed to save test result:", error);
@@ -170,6 +203,7 @@ const resetTest = () => {
     stopTimer();
     userInput.value = '';
     timer.value = 0;
+    totalErrors.value = 0;
     testFinished.value = false;
     showResults.value = false;
     setTimeout(() => {
@@ -197,9 +231,10 @@ onMounted(async () => {
         selectedSurah.value = parseInt(urlParams.get('surah'));
         startAyah.value = parseInt(urlParams.get('start')) || 1;
         endAyah.value = parseInt(urlParams.get('end')) || 1;
-        await fetchTestText();
-    } else if (surahs.value.length > 0) {
-        await fetchTestText();
+        await fetchTestText(true);
+    } else {
+        // No params? Start with a fresh random selection of 3 ayas
+        await fetchTestText(false);
     }
     
     isLoading.value = false;
@@ -234,6 +269,9 @@ defineOptions({ layout: AppLayout });
             <button type="submit" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-yellow-500/10">
                 {{ t('load_text') }}
             </button>
+            <button type="button" @click="fetchTestText(false)" class="bg-[var(--panel-color)] text-[var(--caret-color)] border border-[var(--caret-color)]/20 px-6 py-2 rounded-xl font-mono text-xs hover:bg-[var(--caret-color)]/10 transition-all font-bold uppercase tracking-widest">
+                {{ t('random') }}
+            </button>
         </form>
 
         <!-- Live Stats (during test) -->
@@ -249,6 +287,10 @@ defineOptions({ layout: AppLayout });
             <div class="flex flex-col">
                 <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">{{ t('time') }}</span>
                 <span class="font-bold">{{ timer }}s</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">Errors</span>
+                <span class="font-bold text-[var(--error-color)]">{{ totalErrors }}</span>
             </div>
         </div>
 
@@ -302,6 +344,10 @@ defineOptions({ layout: AppLayout });
                 <div class="flex flex-col items-center group">
                     <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('accuracy') }}</span>
                     <span class="text-8xl text-[var(--caret-color)] font-mono font-bold">{{ accuracy }}%</span>
+                </div>
+                <div class="flex flex-col items-center group">
+                    <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--error-color)] transition-colors">Errors</span>
+                    <span class="text-8xl text-[var(--error-color)] font-mono font-bold">{{ totalErrors }}</span>
                 </div>
             </div>
             

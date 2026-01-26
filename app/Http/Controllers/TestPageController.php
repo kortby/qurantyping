@@ -14,8 +14,13 @@ class TestPageController extends Controller
      */
     public function __invoke(): Response
     {
-        // This will render the Vue component located at:
-        // resources/js/Pages/TypingTest.vue
-        return Inertia::render('TypingTest');
+        $bestWpm = 0;
+        if (auth()->check()) {
+            $bestWpm = \App\Models\Test::where('user_id', auth()->id())->max('wpm') ?? 0;
+        }
+
+        return Inertia::render('TypingTest', [
+            'personalBestWpm' => (int) $bestWpm,
+        ]);
     }
 }
