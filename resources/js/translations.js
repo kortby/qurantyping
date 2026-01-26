@@ -38,6 +38,7 @@ export const translations = {
         claim_throne: "Be the first to claim the throne",
         challenge_masters: "Ready to challenge the masters?",
         start_testing: "Start Testing",
+        select_surah: "Select Surah",
         navigation: {
             home: "Home",
             dashboard: "Dashboard",
@@ -84,6 +85,7 @@ export const translations = {
         claim_throne: "Soyez le premier à réclamer le trône",
         challenge_masters: "Prêt à défier les maîtres ?",
         start_testing: "Commencer l'entraînement",
+        select_surah: "Choisir une sourate",
         navigation: {
             home: "Accueil",
             dashboard: "Tableau de bord"
@@ -128,6 +130,7 @@ export const translations = {
         claim_throne: "كن أول من يعتلي العرش",
         challenge_masters: "هل أنت مستعد لتحدي المحترفين؟",
         start_testing: "ابدأ الاختبار",
+        select_surah: "اختر سورة",
         navigation: {
             home: "الرئيسية",
             dashboard: "لوحة التحكم"

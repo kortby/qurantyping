@@ -4,6 +4,7 @@ import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ArabicKeyboard from '@/Components/ArabicKeyboard.vue';
+import SurahSelect from '@/Components/SurahSelect.vue';
 import { useSettings } from '../useSettings';
 
 const activeKey = ref(null);
@@ -76,6 +77,11 @@ const firstErrorIndex = computed(() => {
     }
     return -1;
 });
+
+const currentMaxAyahs = computed(() => {
+    const surah = surahs.value.find(s => s.surah_number === selectedSurah.value);
+    return surah ? surah.total_ayahs : 0;
+});
 const correctPart = computed(() => {
     const end = firstErrorIndex.value !== -1 ? firstErrorIndex.value : userInput.value.length;
     return quranText.value.text.substring(0, end);
@@ -99,6 +105,16 @@ const fetchSurahs = async () => {
 };
 
 const fetchTestText = async (withParams = true) => {
+    // Basic frontend validation to prevent 404s for invalid ayah ranges
+    if (withParams && selectedSurah.value) {
+        const surah = surahs.value.find(s => s.surah_number === selectedSurah.value);
+        if (surah) {
+            // Cap start/end within valid range for this surah
+            if (startAyah.value > surah.total_ayahs) startAyah.value = Math.max(1, surah.total_ayahs - 2);
+            if (endAyah.value > surah.total_ayahs) endAyah.value = surah.total_ayahs;
+        }
+    }
+
     isLoading.value = true;
     try {
         let params = {};
@@ -117,9 +133,20 @@ const fetchTestText = async (withParams = true) => {
         startAyah.value = quranText.value.start_ayah;
         endAyah.value = quranText.value.end_ayah;
         
+        // Update URL to reflect current test
+        const url = new URL(window.location);
+        url.searchParams.set('surah', selectedSurah.value);
+        url.searchParams.set('start', startAyah.value);
+        url.searchParams.set('end', endAyah.value);
+        window.history.pushState({}, '', url);
+
         resetTest();
     } catch (error) {
         console.error("Failed to fetch test text:", error);
+        // If 404, the range was likely invalid, recover by fetching random
+        if (error.response?.status === 404) {
+            fetchTestText(false);
+        }
     } finally {
         isLoading.value = false;
     }
@@ -219,8 +246,12 @@ const resetTest = () => {
     testFinished.value = false;
     showResults.value = false;
     setTimeout(() => {
-        document.getElementById('hidden-input')?.focus();
+        focusInput();
     }, 100);
+};
+
+const focusInput = () => {
+    document.getElementById('hidden-input')?.focus();
 };
 
 const handleFocus = () => isFocused.value = true;
@@ -264,19 +295,20 @@ defineOptions({ layout: AppLayout });
     <div class="flex flex-col items-center justify-start py-8 min-h-[80vh]">
         <!-- Minimalist Filters -->
         <form @submit.prevent="fetchTestText" class="w-full max-w-5xl mb-12 flex flex-wrap items-center gap-6 font-mono text-sm">
-            <div class="flex items-center gap-3 bg-[var(--panel-color)] px-4 py-2 rounded-xl backdrop-blur-md border border-[var(--border-color)]">
-                <span class="text-[var(--caret-color)] opacity-60 font-cinzel text-xs uppercase tracking-widest">{{ t('surah') }}</span>
-                <select v-model="selectedSurah" class="bg-transparent border-none focus:ring-0 text-[var(--main-color)] cursor-pointer outline-none min-w-[120px] font-bold">
-                    <option v-for="surah in surahs" :key="surah.surah_number" :value="surah.surah_number" class="bg-[#0f2a27] text-white">
-                        {{ surah.surah_number }}. {{ surah.surah_name_arabic }}
-                    </option>
-                </select>
-            </div>
+            <SurahSelect 
+                v-model="selectedSurah" 
+                :options="surahs" 
+                :label="t('surah')"
+                :placeholder="t('select_surah') || 'Select Surah'"
+            />
             <div class="flex items-center gap-3 bg-[var(--panel-color)] px-4 py-2 rounded-xl backdrop-blur-md border border-[var(--border-color)]">
                 <span class="text-[var(--caret-color)] opacity-60 font-cinzel text-xs uppercase tracking-widest">{{ t('range') }}</span>
-                <input type="number" v-model="startAyah" class="w-16 bg-transparent border-none focus:ring-0 text-[var(--main-color)] p-0 text-center font-bold">
-                <span class="text-[var(--sub-color)]">-</span>
-                <input type="number" v-model="endAyah" class="w-16 bg-transparent border-none focus:ring-0 text-[var(--main-color)] p-0 text-center font-bold">
+                <div class="flex items-center gap-2">
+                    <input type="number" v-model="startAyah" min="1" :max="currentMaxAyahs" class="w-14 bg-transparent border-none focus:ring-0 text-[var(--main-color)] p-0 text-center font-bold">
+                    <span class="text-[var(--sub-color)] opacity-40">-</span>
+                    <input type="number" v-model="endAyah" min="1" :max="currentMaxAyahs" class="w-14 bg-transparent border-none focus:ring-0 text-[var(--main-color)] p-0 text-center font-bold">
+                    <span class="text-[10px] opacity-40 font-mono text-[var(--sub-color)] ml-2">/ {{ currentMaxAyahs }}</span>
+                </div>
             </div>
             <button type="submit" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 rounded-xl font-cinzel font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-950/20">
                 {{ t('start_testing') }}
@@ -308,7 +340,7 @@ defineOptions({ layout: AppLayout });
 
         <!-- Typing Area -->
         <div v-if="quranText.text && !showResults" 
-             @click="() => document.getElementById('hidden-input')?.focus()" 
+             @click="focusInput" 
              class="relative w-full max-w-5xl py-12 transition-all duration-500 min-h-[300px] flex items-center"
              :class="{ 'opacity-100': isFocused, 'opacity-40 blur-[4px] scale-[0.98]': !isFocused }">
             

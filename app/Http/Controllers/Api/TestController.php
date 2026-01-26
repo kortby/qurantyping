@@ -18,7 +18,8 @@ class TestController extends Controller
     {
         // Fetch a distinct list of Surahs, ordered correctly.
         $surahs = QuranText::select('surah_number', 'surah_name_arabic', 'surah_name_english')
-            ->distinct()
+            ->selectRaw('MAX(ayah_number) as total_ayahs')
+            ->groupBy('surah_number', 'surah_name_arabic', 'surah_name_english')
             ->orderBy('surah_number')
             ->get();
 
