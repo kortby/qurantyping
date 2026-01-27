@@ -17,6 +17,7 @@ class QuranText extends Model
         'surah_name_arabic',
         'surah_name_english',
         'surah_name_translation',
+        'surah_arabic_ponctuation',
     ];
 
     /**

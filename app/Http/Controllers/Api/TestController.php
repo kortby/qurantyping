@@ -64,10 +64,11 @@ class TestController extends Controller
         }
 
         // Combine the text of all fetched Ayahs into a single string
-        $combinedText = $ayahs->pluck('text_arabic_simple')->implode(' ');
+        $combinedTextSimple = $ayahs->pluck('text_arabic_simple')->implode(' ');
+        $combinedTextPunctuated = $ayahs->pluck('surah_arabic_ponctuation')->implode(' ');
 
-        // Enforce minimum word count for all selections
-        $wordCount = count(preg_split('/\s+/', trim($combinedText)));
+        // Enforce minimum word count for all selections (use simple text for word count)
+        $wordCount = count(preg_split('/\s+/', trim($combinedTextSimple)));
         if ($wordCount < 10) {
             return response()->json([
                 'message' => 'Selected text must contain at least 10 words.',
@@ -76,7 +77,9 @@ class TestController extends Controller
 
         return response()->json([
             'id' => $ayahs->first()->id,
-            'text' => $combinedText,
+            'text' => $combinedTextSimple, // Keep for backward compatibility
+            'text_simple' => $combinedTextSimple,
+            'text_punctuated' => $combinedTextPunctuated,
             'surah_name_arabic' => $ayahs->first()->surah_name_arabic,
             'surah_number' => $surahNumber,
             'start_ayah' => $startAyah,

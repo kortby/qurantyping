@@ -4,8 +4,14 @@ import { translations } from './translations';
 const currentLang = ref(localStorage.getItem('lang') || 'en');
 const currentTheme = ref(localStorage.getItem('theme') || 'dark');
 const currentKeyboardLayout = ref(localStorage.getItem('keyboardLayout') || 'qwerty');
+const usePunctuation = ref(localStorage.getItem('usePunctuation') === 'true');
 
 export function useSettings() {
+    const setPunctuation = (value) => {
+        usePunctuation.value = value;
+        localStorage.setItem('usePunctuation', value);
+    };
+
     const setKeyboardLayout = (layout) => {
         currentKeyboardLayout.value = layout;
         localStorage.setItem('keyboardLayout', layout);
@@ -45,9 +51,11 @@ export function useSettings() {
         currentLang,
         currentTheme,
         currentKeyboardLayout,
+        usePunctuation,
         setLang,
         setTheme,
         setKeyboardLayout,
+        setPunctuation,
         t
     };
 }

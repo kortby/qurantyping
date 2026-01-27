@@ -10,7 +10,7 @@ import { useSettings } from '../useSettings';
 const activeKey = ref(null);
 const activeCode = ref(null);
 
-const { t, currentLang } = useSettings();
+const { t, currentLang, usePunctuation, setPunctuation } = useSettings();
 
 const props = defineProps({
     personalBestWpm: Number,
@@ -27,6 +27,8 @@ const isLoading = ref(true);
 
 const quranText = ref({
     text: '',
+    text_simple: '',
+    text_punctuated: '',
     surah_name_arabic: '',
     surah_number: null,
     start_ayah: null,
@@ -41,28 +43,54 @@ const testFinished = ref(false);
 const isFocused = ref(false);
 const showResults = ref(false);
 const totalErrors = ref(0);
+const isShiftPressed = ref(false);
 
 const normalizeForComparison = (text) => {
     if (!text) return '';
     return text
-        .replace(/[أإآ]/g, 'ا')
+        .replace(/[أإآٱ]/g, 'ا')
         .replace(/[ۀة]/g, 'ه')
         .replace(/[ىي]/g, 'ي')
-        // Strip all Arabic diacritics, small letters, and Quranic signs
-        // Range covers: Tashkeel, Hamzas, Small letters, Waqf signs, etc.
-        .replace(/[\u0610-\u061A\u064B-\u065F\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '')
+        // Strip all diacritics, tatweel, and Quranic signs for comparison
+        .replace(/[\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '')
         .trim();
 };
 
 // --- Computed Properties for Stats & Rendering ---
-const sourceCharacters = computed(() => quranText.value?.text?.split('') || []);
+const currentDisplayText = computed(() => {
+    const raw = usePunctuation.value ? (quranText.value.text_punctuated || quranText.value.text) : quranText.value.text_simple;
+    // Strip Tatweel (aesthetic stretch) as it's not typed and causes index displacement
+    return raw?.replace(/\u0640/g, '') || '';
+});
+
+const sourceClusters = computed(() => {
+    const text = currentDisplayText.value || '';
+    const clusters = [];
+    for (let i = 0; i < text.length; i++) {
+        let cluster = text[i];
+        // Group base letter with all following diacritics/Quranic signs
+        // Ranges cover: Tashkeel, Hamzas, Small letters, Waqf signs, etc.
+        while (i + 1 < text.length && /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/.test(text[i + 1])) {
+            i++;
+            cluster += text[i];
+        }
+        clusters.push(cluster);
+    }
+    return clusters;
+});
+
+const sourceCharacters = computed(() => sourceClusters.value);
 const typedCharacters = computed(() => userInput.value.split(''));
+
 const wpm = computed(() => {
     if (timer.value === 0) return 0;
-    const wordCount = userInput.value.length / 5;
+    // For WPM calculation, we use the simple text length as a stable baseline
+    const baseLength = quranText.value.text_simple?.length || userInput.value.length;
+    const wordCount = baseLength / 5;
     const minutes = timer.value / 60;
     return Math.round(wordCount / minutes);
 });
+
 const accuracy = computed(() => {
     if (userInput.value.length === 0) return 100;
     let correctChars = 0;
@@ -71,13 +99,15 @@ const accuracy = computed(() => {
             correctChars++;
         }
     });
-    // Calculate accuracy based on total keystrokes (current length + mistakes made)
     const totalKeystrokes = userInput.value.length + totalErrors.value;
     return Math.round((correctChars / totalKeystrokes) * 100);
 });
+
 const firstErrorIndex = computed(() => {
     for (let i = 0; i < typedCharacters.value.length; i++) {
-        if (normalizeForComparison(typedCharacters.value[i]) !== normalizeForComparison(sourceCharacters.value[i])) return i;
+        const typed = normalizeForComparison(typedCharacters.value[i]);
+        const source = normalizeForComparison(sourceCharacters.value[i]);
+        if (typed !== source) return i;
     }
     return -1;
 });
@@ -87,16 +117,17 @@ const currentMaxAyahs = computed(() => {
     const surah = surahs.value.find(s => s.surah_number == selectedSurah.value);
     return surah ? surah.total_ayahs : 0;
 });
+
 const correctPart = computed(() => {
     const end = firstErrorIndex.value !== -1 ? firstErrorIndex.value : userInput.value.length;
-    return quranText.value.text.substring(0, end);
+    return sourceClusters.value.slice(0, end);
 });
 const incorrectPart = computed(() => {
-    if (firstErrorIndex.value === -1) return '';
-    return quranText.value.text.substring(firstErrorIndex.value, userInput.value.length);
+    if (firstErrorIndex.value === -1) return [];
+    return sourceClusters.value.slice(firstErrorIndex.value, userInput.value.length);
 });
 const untypedPart = computed(() => {
-    return quranText.value.text.substring(userInput.value.length);
+    return sourceClusters.value.slice(userInput.value.length);
 });
 
 // --- Core Logic ---
@@ -352,6 +383,7 @@ const handleBlur = () => isFocused.value = false;
 // Global Tab handler for restart
 const handleGlobalKeydown = (e) => {
     activeCode.value = e.code;
+    if (e.shiftKey) isShiftPressed.value = true;
     
     if (e.key === 'Tab') {
         e.preventDefault();
@@ -360,6 +392,7 @@ const handleGlobalKeydown = (e) => {
 };
 
 const handleGlobalKeyup = (e) => {
+    if (e.key === 'Shift') isShiftPressed.value = false;
     if (activeCode.value === e.code) {
         activeCode.value = null;
         activeKey.value = null;
@@ -397,7 +430,7 @@ defineOptions({ layout: AppLayout });
 <template>
     <div class="flex flex-col items-center justify-start py-8 min-h-[80vh]">
         <!-- Minimalist Filters -->
-        <form @submit.prevent="fetchTestText" class="w-full max-w-5xl mb-12 flex flex-wrap items-center gap-6 font-mono text-sm">
+        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-12 flex flex-wrap items-center gap-6 font-mono text-sm">
             <SurahSelect 
                 v-model="selectedSurah" 
                 :options="surahs" 
@@ -453,10 +486,19 @@ defineOptions({ layout: AppLayout });
             <button type="button" @click="fetchTestText(false)" class="bg-[var(--panel-color)] text-[var(--caret-color)] border border-[var(--border-color)] px-6 py-2 rounded-xl font-cinzel text-xs hover:bg-[var(--caret-color)]/[0.05] transition-all font-bold uppercase tracking-widest">
                 {{ t('random') }}
             </button>
+
+            <!-- Punctuation Toggle -->
+            <button type="button" 
+                    @click="setPunctuation(!usePunctuation); resetTest()"
+                    class="flex items-center gap-2 bg-[var(--panel-color)] border border-[var(--border-color)] px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-widest transition-all"
+                    :class="usePunctuation ? 'text-[var(--caret-color)] border-[var(--caret-color)]/40 shadow-lg shadow-emerald-950/10' : 'text-[var(--sub-color)] opacity-60 hover:opacity-100'">
+                <span class="text-lg">{{ usePunctuation ? '✨' : '📝' }}</span>
+                {{ t(usePunctuation ? 'tashkeel_on' : 'tashkeel_off') }}
+            </button>
         </form>
 
         <!-- Live Stats (during test) -->
-        <div v-if="!showResults" class="w-full max-w-5xl mb-8 flex gap-12 font-cinzel text-xl text-[var(--caret-color)] select-none">
+        <div v-if="!showResults" class="w-full max-w-6xl mb-8 flex gap-12 font-cinzel text-xl text-[var(--caret-color)] select-none">
             <div class="flex flex-col">
                 <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1 font-mono">{{ t('wpm') }}</span>
                 <span class="font-bold border-b border-[var(--border-color)] pb-1">{{ wpm }}</span>
@@ -476,9 +518,9 @@ defineOptions({ layout: AppLayout });
         </div>
 
         <!-- Typing Area -->
-        <div v-if="quranText.text && !showResults" 
+        <div v-if="currentDisplayText && !showResults" 
              @click="focusInput" 
-             class="relative w-full max-w-5xl py-12 transition-all duration-500 min-h-[300px] flex items-center"
+             class="relative w-full max-w-6xl py-12 transition-all duration-500 min-h-[300px] flex items-center"
              :class="{ 'opacity-100': isFocused, 'opacity-40 blur-[4px] scale-[0.98]': !isFocused }">
             
             <!-- Focus Message -->
@@ -491,16 +533,18 @@ defineOptions({ layout: AppLayout });
                 </div>
             </div>
 
-            <div v-if="isLoading" class="absolute inset-0 bg-[var(--bg-color)]/80 backdrop-blur-sm flex items-center justify-center z-10 transition-all">
+            <div v-if="isLoading" class="absolute inset-0 bg-[var(--bg-color)]/80 backdrop-blur-sm flex items-center justify-center z-30 transition-all rounded-2xl">
                 <div class="flex flex-col items-center gap-3">
                     <div class="w-12 h-12 border-4 border-[var(--caret-color)] border-t-transparent rounded-full animate-spin"></div>
                     <p class="text-xs font-cinzel text-[var(--caret-color)] uppercase tracking-widest">{{ t('loading') }}</p>
                 </div>
             </div>
 
-            <div class="text-4xl lg:text-5xl leading-[2.2] select-none text-right w-full" style="font-family: 'Noto Naskh Arabic', serif;" dir="rtl">
+            <div class="text-4xl lg:text-5xl select-none text-right w-full transition-all duration-300" 
+                 :class="usePunctuation ? 'leading-[4.5] py-8' : 'leading-[2.2]'"
+                 style="font-family: 'Noto Naskh Arabic', serif;" dir="rtl">
                 <p class="relative z-0 whitespace-pre-wrap break-words transition-all duration-300">
-                    <span class="text-[var(--main-color)]">{{ correctPart }}</span><span class="text-[var(--error-color)] border-b-2 border-[var(--error-color)] bg-[var(--error-color)]/5">{{ incorrectPart }}</span><template v-if="untypedPart.length > 0"><span class="text-[var(--sub-color)] border-b-2 border-[var(--caret-color)] animate-caret-blink inline-block" style="margin-bottom: -2px;">{{ untypedPart[0] }}</span><span class="text-[var(--sub-color)]">{{ untypedPart.slice(1) }}</span></template>
+                    <span v-for="(cluster, idx) in correctPart" :key="'c'+idx" class="text-[var(--main-color)]">{{ cluster }}</span><span v-for="(cluster, idx) in incorrectPart" :key="'i'+idx" class="text-[var(--error-color)] border-b-2 border-[var(--error-color)] bg-[var(--error-color)]/5">{{ cluster }}</span><template v-if="untypedPart.length > 0"><span class="text-[var(--sub-color)] border-b-2 border-[var(--caret-color)] animate-caret-blink inline-block" style="margin-bottom: -2px;">{{ untypedPart[0] }}</span><span v-for="(cluster, idx) in untypedPart.slice(1)" :key="'u'+idx" class="text-[var(--sub-color)]">{{ cluster }}</span></template>
                 </p>
                 <input id="hidden-input" 
                        type="text" 
@@ -510,20 +554,21 @@ defineOptions({ layout: AppLayout });
                        @focus="handleFocus"
                        @blur="handleBlur"
                        autofocus 
-                       autocomplete="off"
-                       spellcheck="false"
+                       autocomplete="off" 
+                       spellcheck="false" 
                        :maxlength="sourceCharacters.length" />
             </div>
         </div>
 
         <!-- Animated Keyboard -->
-        <ArabicKeyboard v-if="quranText.text && !showResults" 
+        <ArabicKeyboard v-if="currentDisplayText && !showResults" 
                         :active-key="activeKey" 
                         :active-code="activeCode"
+                        :is-shift-on="isShiftPressed"
                         :next-key="untypedPart[0]" />
 
         <!-- Results View -->
-        <div v-if="showResults" class="w-full max-w-5xl flex flex-col items-center justify-center py-20 animate-fade-in font-cinzel">
+        <div v-if="showResults" class="w-full max-w-6xl flex flex-col items-center justify-center py-20 animate-fade-in font-cinzel">
             <div class="flex flex-col md:flex-row gap-20 mb-16 items-center">
                 <div class="flex flex-col items-center group">
                     <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('wpm') }}</span>
