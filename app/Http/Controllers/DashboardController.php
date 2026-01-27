@@ -26,10 +26,19 @@ class DashboardController extends Controller
         // Calculate the average WPM
         $averageWpm = Test::where('user_id', $request->user()->id)->avg('wpm');
 
+        // Fetch chart data (last 30 tests, sorted chronologically)
+        $chartData = Test::where('user_id', $request->user()->id)
+            ->latest()
+            ->take(30)
+            ->get()
+            ->reverse()
+            ->values();
+
         return Inertia::render('Dashboard', [
             'results' => $results,
             'bestWpm' => (int) $bestWpm,
             'averageWpm' => round($averageWpm),
+            'chartData' => $chartData,
         ]);
     }
 }

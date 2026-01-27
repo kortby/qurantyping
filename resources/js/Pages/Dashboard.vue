@@ -1,15 +1,128 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import { ref, computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
 import { useSettings } from '../useSettings';
+import { Line } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const { t } = useSettings();
 
-defineProps({
+const props = defineProps({
     results: Object,
     bestWpm: Number,
     averageWpm: Number,
+    chartData: Array,
 });
+
+const chartDataValues = computed(() => {
+    return {
+        labels: props.chartData.map((_, index) => index + 1),
+        datasets: [
+            {
+                label: t('wpm'),
+                data: props.chartData.map(d => d.wpm),
+                borderColor: '#fbbf24',
+                backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 3,
+            },
+            {
+                label: t('accuracy'),
+                data: props.chartData.map(d => d.accuracy),
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                borderWidth: 2,
+                borderDash: [5, 5],
+                yAxisID: 'y1',
+            }
+        ]
+    };
+});
+
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            display: true,
+            position: 'top',
+            align: 'end',
+            labels: {
+                color: '#94a3b8',
+                font: {
+                    family: 'Inter, sans-serif',
+                    size: 10,
+                },
+                usePointStyle: true,
+                padding: 20
+            }
+        },
+        tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            titleColor: '#94a3b8',
+            bodyColor: '#fff',
+            borderColor: 'rgba(251, 191, 36, 0.2)',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: true,
+        },
+    },
+    scales: {
+        x: {
+            display: false,
+        },
+        y: {
+            beginAtZero: true,
+            grid: {
+                color: 'rgba(255, 255, 255, 0.03)',
+            },
+            ticks: {
+                color: '#64748b',
+                font: { size: 10 }
+            }
+        },
+        y1: {
+            position: 'right',
+            beginAtZero: true,
+            max: 100,
+            display: false,
+        }
+    },
+    interaction: {
+        intersect: false,
+        mode: 'nearest',
+    }
+};
 
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(undefined, { 
@@ -19,6 +132,12 @@ const formatDate = (dateString) => {
         hour: '2-digit',
         minute: '2-digit'
     });
+};
+
+const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 };
 </script>
 
@@ -53,6 +172,20 @@ const formatDate = (dateString) => {
                     </div>
                 </div>
 
+                <!-- Evolution Chart -->
+                <div v-if="chartData.length > 1" class="mb-16">
+                    <div class="bg-[var(--panel-color)] p-8 rounded-[2.5rem] border border-[var(--border-color)] shadow-2xl backdrop-blur-md">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] font-mono opacity-80">
+                                {{ t('speed_evolution') }}
+                            </h3>
+                        </div>
+                        <div class="h-[250px] w-full">
+                            <Line :data="chartDataValues" :options="chartOptions" />
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Stats Table -->
                 <div class="bg-[var(--panel-color)] rounded-[2.5rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-2xl transition-all duration-500 hover:shadow-emerald-900/10">
                     <div v-if="results.data.length > 0">
@@ -60,6 +193,7 @@ const formatDate = (dateString) => {
                             <thead>
                                 <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-[0.2em] text-[10px]">
                                     <th class="px-10 py-6 font-bold">{{ t('wpm') }}</th>
+                                    <th class="px-10 py-6 font-bold text-center">{{ t('time') }}</th>
                                     <th class="px-10 py-6 font-bold text-center">errors</th>
                                     <th class="px-10 py-6 font-bold text-center">{{ t('accuracy') }}</th>
                                     <th class="px-10 py-6 font-bold text-center">{{ t('surah') }}</th>
@@ -77,6 +211,9 @@ const formatDate = (dateString) => {
                                             </span>
                                             <span v-if="result.wpm === bestWpm" class="text-xl animate-bounce" title="Personal Best">👑</span>
                                         </div>
+                                    </td>
+                                    <td class="px-10 py-8 text-center text-xl text-[var(--main-color)] font-mono opacity-80">
+                                        {{ formatDuration(result.duration) }}
                                     </td>
                                     <td class="px-10 py-8 text-center text-xl text-[var(--error-color)] font-bold">
                                         {{ result.total_errors ?? 0 }}

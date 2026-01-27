@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -11,6 +12,9 @@ const activeKey = ref(null);
 const activeCode = ref(null);
 
 const { t, currentLang, usePunctuation, setPunctuation } = useSettings();
+const page = usePage();
+
+const showTashkilFeature = computed(() => page.props.features?.tashkil ?? false);
 
 const props = defineProps({
     personalBestWpm: Number,
@@ -543,6 +547,11 @@ const handleGlobalKeydown = (e) => {
         e.preventDefault();
         resetTest();
     }
+
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        resetTest();
+    }
 };
 
 const handleGlobalKeyup = (e) => {
@@ -645,7 +654,8 @@ defineOptions({ layout: AppLayout });
             </button>
 
             <!-- Punctuation Toggle -->
-            <button type="button" 
+            <button v-if="showTashkilFeature"
+                    type="button" 
                     @click="setPunctuation(!usePunctuation); resetTest()"
                     class="flex items-center gap-2 bg-[var(--panel-color)] border border-[var(--border-color)] px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-widest transition-all"
                     :class="usePunctuation ? 'text-[var(--caret-color)] border-[var(--caret-color)]/40 shadow-lg shadow-emerald-950/10' : 'text-[var(--sub-color)] opacity-60 hover:opacity-100'">

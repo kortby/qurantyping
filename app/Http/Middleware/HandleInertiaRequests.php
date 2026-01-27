@@ -56,6 +56,9 @@ class HandleInertiaRequests extends Middleware
                     !empty(config('services.google.client_id')) ||
                     !empty(config('services.facebook.client_id')),
             ],
+            'features' => [
+                'tashkil' => config('app.tashkil_feature', false),
+            ],
         ]);
     }
 }
