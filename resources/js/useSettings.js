@@ -3,8 +3,14 @@ import { translations } from './translations';
 
 const currentLang = ref(localStorage.getItem('lang') || 'en');
 const currentTheme = ref(localStorage.getItem('theme') || 'dark');
+const currentKeyboardLayout = ref(localStorage.getItem('keyboardLayout') || 'qwerty');
 
 export function useSettings() {
+    const setKeyboardLayout = (layout) => {
+        currentKeyboardLayout.value = layout;
+        localStorage.setItem('keyboardLayout', layout);
+    };
+
     const setLang = (lang) => {
         currentLang.value = lang;
         localStorage.setItem('lang', lang);
@@ -38,8 +44,10 @@ export function useSettings() {
     return {
         currentLang,
         currentTheme,
+        currentKeyboardLayout,
         setLang,
         setTheme,
+        setKeyboardLayout,
         t
     };
 }

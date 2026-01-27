@@ -8,6 +8,7 @@ import SurahSelect from '@/Components/SurahSelect.vue';
 import { useSettings } from '../useSettings';
 
 const activeKey = ref(null);
+const activeCode = ref(null);
 
 const { t, currentLang } = useSettings();
 
@@ -47,7 +48,10 @@ const normalizeForComparison = (text) => {
         .replace(/[أإآ]/g, 'ا')
         .replace(/[ۀة]/g, 'ه')
         .replace(/[ىي]/g, 'ي')
-        .replace(/[\u064B-\u0652]/g, ''); // Remove tashkeel
+        // Strip all Arabic diacritics, small letters, and Quranic signs
+        // Range covers: Tashkeel, Hamzas, Small letters, Waqf signs, etc.
+        .replace(/[\u0610-\u061A\u064B-\u065F\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '')
+        .trim();
 };
 
 // --- Computed Properties for Stats & Rendering ---
@@ -236,28 +240,37 @@ const handleInput = (event) => {
     if (!intervalId.value) startTimer();
     
     const newValue = event.target.value;
+    const addedCount = newValue.length - userInput.value.length;
     
     // Set active key for keyboard animation
-    if (newValue.length > userInput.value.length) {
+    if (addedCount > 0) {
         const char = newValue[newValue.length - 1];
         activeKey.value = (char === ' ') ? 'Space' : char;
+        
+        // activeCode is set in handleGlobalKeydown
         setTimeout(() => {
-            if (activeKey.value === char || activeKey.value === 'Space') activeKey.value = null;
+            if (activeKey.value === char || activeKey.value === 'Space') {
+                activeKey.value = null;
+                activeCode.value = null;
+            }
         }, 150);
-    }
 
-    // Count errors if the user typed something new and it's wrong
-    if (newValue.length > userInput.value.length) {
-        const lastTypedChar = newValue[newValue.length - 1];
-        const expectedChar = sourceCharacters.value[newValue.length - 1];
-        if (normalizeForComparison(lastTypedChar) !== normalizeForComparison(expectedChar)) {
-            totalErrors.value++;
+        // Count errors for all newly added characters
+        for (let i = 0; i < addedCount; i++) {
+            const index = userInput.value.length + i;
+            if (index < sourceCharacters.value.length) {
+                const typedChar = newValue[index];
+                const expectedChar = sourceCharacters.value[index];
+                if (normalizeForComparison(typedChar) !== normalizeForComparison(expectedChar)) {
+                    totalErrors.value++;
+                }
+            }
         }
     }
 
     userInput.value = newValue;
     // Only finish if the length matches and there are no active errors (100% correct text)
-    if (userInput.value.length === sourceCharacters.value.length && firstErrorIndex.value === -1) {
+    if (userInput.value.length >= sourceCharacters.value.length && firstErrorIndex.value === -1) {
         finishTest();
     }
 };
@@ -338,9 +351,18 @@ const handleBlur = () => isFocused.value = false;
 
 // Global Tab handler for restart
 const handleGlobalKeydown = (e) => {
+    activeCode.value = e.code;
+    
     if (e.key === 'Tab') {
         e.preventDefault();
         resetTest();
+    }
+};
+
+const handleGlobalKeyup = (e) => {
+    if (activeCode.value === e.code) {
+        activeCode.value = null;
+        activeKey.value = null;
     }
 };
 
@@ -361,10 +383,12 @@ onMounted(async () => {
     
     isLoading.value = false;
     window.addEventListener('keydown', handleGlobalKeydown);
+    window.addEventListener('keyup', handleGlobalKeyup);
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleGlobalKeydown);
+    window.removeEventListener('keyup', handleGlobalKeyup);
 });
 
 defineOptions({ layout: AppLayout });
@@ -495,6 +519,7 @@ defineOptions({ layout: AppLayout });
         <!-- Animated Keyboard -->
         <ArabicKeyboard v-if="quranText.text && !showResults" 
                         :active-key="activeKey" 
+                        :active-code="activeCode"
                         :next-key="untypedPart[0]" />
 
         <!-- Results View -->
