@@ -6,6 +6,7 @@ const props = defineProps({
     activeKey: String, // The character that was just typed
     activeCode: String, // The physical key code that was just pressed
     nextKey: String,   // The character that should be typed next
+    isShiftOn: Boolean, // Whether shift is currently being held
 });
 
 const { currentKeyboardLayout, setKeyboardLayout } = useSettings();
@@ -17,6 +18,13 @@ const defaultArabic101 = {
     'KeyA': 'ش', 'KeyS': 'س', 'KeyD': 'ي', 'KeyF': 'ب', 'KeyG': 'ل', 'KeyH': 'ا', 'KeyJ': 'ت', 'KeyK': 'ن', 'KeyL': 'م', 'Semicolon': 'ك', 'Quote': 'ط',
     'KeyZ': 'ئ', 'KeyX': 'ء', 'KeyC': 'ؤ', 'KeyV': 'ر', 'KeyB': 'لا', 'KeyN': 'ى', 'KeyM': 'ة', 'Comma': 'و', 'Period': 'ز', 'Slash': 'ظ',
     'Space': ' ', 'Backslash': 'ذ'
+};
+
+const shiftArabic101 = {
+    'Backquote': 'ّ', 'Digit1': '!', 'Digit2': '@', 'Digit3': '#', 'Digit4': '$', 'Digit5': '%', 'Digit6': '^', 'Digit7': '&', 'Digit8': '*', 'Digit9': '(', 'Digit0': ')', 'Minus': '_', 'Equal': '+',
+    'KeyQ': 'َ', 'KeyW': 'ً', 'KeyE': 'ُ', 'KeyR': 'ٌ', 'KeyT': 'ﻹ', 'KeyY': 'إ', 'KeyU': '‘', 'KeyI': 'ٱ', 'KeyO': '×', 'KeyP': '؛',
+    'KeyA': 'ِ', 'KeyS': 'ٍ', 'KeyD': 'ْ', 'KeyF': ']', 'KeyG': '[', 'KeyH': 'ٰ', 'KeyJ': 'ـ', 'KeyK': '،', 'KeyL': '/', 'Semicolon': ':', 'Quote': '"',
+    'KeyZ': '~', 'KeyX': 'ْ', 'KeyC': '{', 'KeyV': 'أ', 'KeyB': 'لآ', 'KeyN': 'آ', 'KeyM': '’', 'Comma': ',', 'Period': '.', 'Slash': '؟'
 };
 
 const layoutMap = ref(new Map());
@@ -120,21 +128,51 @@ const rows = computed(() => {
     return layoutRows.map(row => row.map(code => ({
         code: code,
         label: getLabel(code),
-        latinLabel: getLatinLabel(code)
+        latinLabel: getLatinLabel(code),
+        shiftLabel: shiftArabic101[code] || ''
     })));
 });
+
+const normalize = (char) => {
+    if (!char) return '';
+    return char
+        .replace(/[أإآٱ]/g, 'ا')
+        .replace(/[ۀة]/g, 'ه')
+        .replace(/[ىي]/g, 'ي')
+        .replace(/[\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '')
+        .trim();
+};
 
 const isKeyActive = (keyObj) => {
     if (props.activeCode === keyObj.code) return true;
     if (!props.activeKey) return false;
     if (props.activeKey === 'Space' && keyObj.code === 'Space') return true;
-    return props.activeKey === keyObj.label;
+    
+    const activeNorm = normalize(props.activeKey);
+    const labelNorm = normalize(keyObj.label);
+    const shiftLabel = shiftArabic101[keyObj.code];
+    
+    if (activeNorm === labelNorm && activeNorm !== '') return true;
+    if (props.activeKey === shiftLabel) return true;
+    
+    return false;
 };
 
 const isKeyNext = (keyObj) => {
     if (!props.nextKey) return false;
     if (props.nextKey === ' ' && keyObj.code === 'Space') return true;
-    return props.nextKey === keyObj.label;
+    
+    const nextNorm = normalize(props.nextKey);
+    const labelNorm = normalize(keyObj.label);
+    const shiftLabel = shiftArabic101[keyObj.code];
+
+    // Priority 1: Exact match with next key (for diacritics)
+    if (props.nextKey === shiftLabel) return true;
+    
+    // Priority 2: Normalized match (for letters)
+    if (nextNorm === labelNorm && nextNorm !== '') return true;
+    
+    return false;
 };
 </script>
 
@@ -151,25 +189,35 @@ const isKeyNext = (keyObj) => {
             </span>
         </div>
 
-        <div class="keyboard flex flex-col gap-2 mx-auto max-w-4xl" dir="ltr">
+        <div class="keyboard flex flex-col gap-2 mx-auto max-w-6xl" dir="ltr">
             <div v-for="(row, rowIndex) in rows" :key="rowIndex" class="flex gap-2 justify-center">
                 <div v-for="key in row" :key="key.code" 
-                    class="key-cap flex flex-col items-center justify-center transition-all duration-150 rounded-xl font-cinzel border border-transparent shadow-md relative group"
+                    class="key-cap flex flex-col items-center justify-center transition-all duration-150 rounded-2xl font-cinzel border border-transparent shadow-md relative group"
                     :class="[
-                        key.code === 'Space' ? 'w-[450px] h-14' : (['Backspace', 'Tab', 'CapsLock', 'Enter', 'ShiftLeft', 'ShiftRight'].includes(key.code) ? 'px-6 py-2 min-w-[90px] h-14 opacity-40 uppercase text-[10px]' : 'w-14 h-14'),
+                        key.code === 'Space' ? 'w-[640px] h-20' : (['Backspace', 'Tab', 'CapsLock', 'Enter', 'ShiftLeft', 'ShiftRight'].includes(key.code) ? 'px-8 py-2 min-w-[120px] h-20 opacity-40 uppercase text-[10px]' : 'w-20 h-20'),
                         isKeyActive(key) ? 'key-active' : '',
                         isKeyNext(key) ? 'key-next' : '',
-                        !isKeyActive(key) && !isKeyNext(key) ? 'bg-[var(--bg-color)]/40 text-[var(--main-color)]' : ''
+                        // Highlight Shift keys if the next char is a shift-character
+                        (['ShiftLeft', 'ShiftRight'].includes(key.code) && Object.values(shiftArabic101).includes(props.nextKey)) ? 'key-shift-hint' : '',
+                        !isKeyActive(key) && !isKeyNext(key) && !(['ShiftLeft', 'ShiftRight'].includes(key.code) && Object.values(shiftArabic101).includes(props.nextKey)) ? 'bg-[var(--bg-color)]/40 text-[var(--main-color)]' : ''
                     ]">
-                    <!-- Latin Alphabet Label (Small, Top) -->
+                    <!-- Shift Character Label (Tiny, Top Left) - Shows base char when shift is on -->
+                    <span v-if="key.shiftLabel || key.label"
+                          class="absolute top-2 left-3 text-xs transition-opacity text-[var(--caret-color)] font-bold"
+                          :class="isShiftOn ? 'opacity-40' : 'opacity-30 group-hover:opacity-100'">
+                        {{ isShiftOn ? key.label : key.shiftLabel }}
+                    </span>
+
+                    <!-- Latin Alphabet Label (Small, Top Right) -->
                     <span v-if="key.latinLabel" 
-                          class="absolute top-1 right-2 text-[9px] font-mono uppercase tracking-tighter opacity-40 transition-opacity group-hover:opacity-100">
+                          class="absolute top-2 right-3 text-[10px] font-mono uppercase tracking-tighter opacity-40 transition-opacity group-hover:opacity-100">
                         {{ key.latinLabel }}
                     </span>
 
                     <!-- Arabic Character (Large, Center) -->
-                    <span class="text-2xl mt-1 leading-none">
-                        {{ key.code === 'Space' ? '' : key.label }}
+                    <span class="text-4xl mt-1 leading-none transition-all duration-100"
+                          :class="{ 'scale-110 text-[var(--caret-color)]': isShiftOn && key.shiftLabel }">
+                        {{ key.code === 'Space' ? '' : (isShiftOn && key.shiftLabel ? key.shiftLabel : key.label) }}
                     </span>
                     
                     <!-- Home row tactile markers (bumps) -->
@@ -211,6 +259,19 @@ const isKeyNext = (keyObj) => {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.4); }
     70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(197, 160, 89, 0); }
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); }
+}
+
+.key-shift-hint {
+    border: 2px solid var(--caret-color) !important;
+    color: var(--caret-color) !important;
+    opacity: 1 !important;
+    animation: pulse-shift 1.5s infinite;
+}
+
+@keyframes pulse-shift {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); opacity: 0.8; }
+    100% { transform: scale(1); }
 }
 
 .keyboard-container {
