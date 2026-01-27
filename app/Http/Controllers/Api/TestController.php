@@ -63,9 +63,18 @@ class TestController extends Controller
             return response()->json(['message' => 'No Ayahs found for the selected range.'], 404);
         }
 
-        // Combine the text of all fetched Ayahs into a single string
-        $combinedTextSimple = $ayahs->pluck('text_arabic_simple')->implode(' ');
-        $combinedTextPunctuated = $ayahs->pluck('surah_arabic_ponctuation')->implode(' ');
+        // Combine the text of all fetched Ayahs into a single string with a decorative separator
+        $combinedTextSimple = $ayahs->map(function ($ayah) {
+            return trim($ayah->text_arabic_simple) . ' ۝' . $this->convertToArabicNumbers($ayah->ayah_number) . ' ';
+        })->implode('');
+
+        $combinedTextPunctuated = $ayahs->map(function ($ayah) {
+            return trim($ayah->surah_arabic_ponctuation) . ' ۝' . $this->convertToArabicNumbers($ayah->ayah_number) . ' ';
+        })->implode('');
+
+        // Remove trailing space if any
+        $combinedTextSimple = trim($combinedTextSimple);
+        $combinedTextPunctuated = trim($combinedTextPunctuated);
 
         // Enforce minimum word count for all selections (use simple text for word count)
         $wordCount = count(preg_split('/\s+/', trim($combinedTextSimple)));
@@ -101,5 +110,19 @@ class TestController extends Controller
         $test = Test::create($validatedData);
 
         return response()->json($test, 201); // 201 Created status
+    }
+
+    /**
+     * Convert numbers to Arabic-Indic digits.
+     */
+    private function convertToArabicNumbers($number): string
+    {
+        $arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $numStr = (string) $number;
+        $result = '';
+        for ($i = 0; $i < strlen($numStr); $i++) {
+            $result .= $arabicDigits[$numStr[$i]];
+        }
+        return $result;
     }
 }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <title>Typing Test - إختبار سرعة الكتابة</title>
+    <title> {{ env('APP_NAME') }} - إختبار سرعة الكتابة</title>
 
     {{-- Import a beautiful Arabic font --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
