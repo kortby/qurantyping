@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
-import { usePage, Head } from '@inertiajs/vue3';
+import { usePage, Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -52,6 +52,47 @@ const isShiftPressed = ref(false);
 const isTyping = ref(false);
 const showLanguageWarning = ref(false);
 let typingTimeout = null;
+
+// Error Sound Logic
+const errorSoundEnabled = ref(page.props.auth?.user?.error_sound ?? true);
+
+const playErrorSound = () => {
+    if (!errorSoundEnabled.value) return;
+    
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    // Soft "thud" sound
+    osc.type = 'triangle'; // Softer than sine for this low freq
+    osc.frequency.setValueAtTime(100, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.1);
+    
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.1);
+};
+
+const toggleErrorSound = () => {
+    errorSoundEnabled.value = !errorSoundEnabled.value;
+    
+    if (page.props.auth?.user) {
+        router.post(route('user.settings.error-sound'), {
+            enabled: errorSoundEnabled.value
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+        });
+    }
+};
 
 // --- Caret Position State ---
 const caretPosition = ref({ top: 0, left: 0, width: 0, height: 0, opacity: 0 });
@@ -465,6 +506,7 @@ const handleInput = (event) => {
                 const expectedChar = sourceCharacters.value[index];
                 if (normalizeForComparison(typedChar) !== normalizeForComparison(expectedChar)) {
                     totalErrors.value++;
+                    playErrorSound();
                 }
             }
         }
@@ -614,7 +656,7 @@ defineOptions({ layout: AppLayout });
 
     <div class="flex flex-col items-center justify-start py-8 min-h-[80vh]">
         <!-- Minimalist Filters -->
-        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-12 flex flex-wrap items-center gap-6 font-mono text-sm">
+        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-2 flex flex-wrap items-center gap-6 font-mono text-sm">
             <SurahSelect 
                 v-model="selectedSurah" 
                 :options="surahs" 
@@ -682,10 +724,11 @@ defineOptions({ layout: AppLayout });
                 <span class="text-lg">{{ usePunctuation ? '✨' : '📝' }}</span>
                 {{ t(usePunctuation ? 'tashkeel_on' : 'tashkeel_off') }}
             </button>
+
         </form>
 
         <!-- Live Stats (during test) -->
-        <div v-if="!showResults" class="w-full max-w-6xl mb-8 flex gap-12 font-cinzel text-xl text-[var(--caret-color)] select-none">
+        <div v-if="!showResults" class="w-full max-w-6xl mb-2 flex gap-12 font-cinzel text-xl text-[var(--caret-color)] select-none">
             <div class="flex flex-col">
                 <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1 font-mono">{{ t('wpm') }}</span>
                 <span class="font-bold border-b border-[var(--border-color)] pb-1">{{ wpm }}</span>
@@ -703,6 +746,21 @@ defineOptions({ layout: AppLayout });
                 <span class="font-bold text-[var(--error-color)] border-b border-[var(--error-color)]/20 pb-1">{{ totalErrors }}</span>
             </div>
 
+             <!-- Error Sound Toggle (Right Float) -->
+             <button type="button" 
+                    @click="toggleErrorSound"
+                    class="ml-auto relative group flex items-center gap-2 bg-[var(--panel-color)] border border-[var(--border-color)] px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-widest transition-all self-center"
+                    :class="errorSoundEnabled ? 'text-[var(--caret-color)] border-[var(--caret-color)]/40 shadow-lg shadow-emerald-950/10' : 'text-[var(--sub-color)] opacity-60 hover:opacity-100'">
+                <span class="text-lg">{{ errorSoundEnabled ? '🔊' : '🔇' }}</span>
+                {{ t('sound_label') }}
+                
+                <!-- Tooltip -->
+                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 bg-[var(--bg-color)] border border-[var(--border-color)] text-[var(--main-color)] text-[10px] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 font-sans normal-case tracking-normal backdrop-blur-md">
+                    {{ t('error_sound_tooltip') }}
+                    <span class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[var(--border-color)]"></span>
+                </span>
+            </button>
+
             <!-- Audio Player
             <QuranAudioPlayer 
                 v-if="!showResults"
@@ -718,7 +776,7 @@ defineOptions({ layout: AppLayout });
         <div v-if="currentDisplayText && !showResults" 
              @click="focusInput" 
              ref="containerRef"
-             class="relative w-full max-w-6xl py-12 transition-all duration-500 min-h-[300px] flex items-center"
+             class="relative w-full max-w-6xl py-2 transition-all duration-500 min-h-[200px] flex items-center"
              :class="{ 'opacity-100': isFocused, 'opacity-40 blur-[4px] scale-[0.98]': !isFocused }">
             
             <!-- Language Switching Warning -->
@@ -775,7 +833,7 @@ defineOptions({ layout: AppLayout });
                      fontFamily: 'Noto Naskh Arabic, serif', 
                      lineHeight: usePunctuation ? '6.5rem' : '4.5rem' 
                  }" 
-                 :class="usePunctuation ? 'py-12' : 'py-8'"
+                 :class="usePunctuation ? 'py-4' : 'py-2'"
                  dir="rtl">
                 <p class="relative z-0 whitespace-pre-wrap break-words transition-all duration-300">
                     <span v-for="(cluster, idx) in sourceClusters" :key="idx" 
