@@ -166,154 +166,151 @@ const formatDuration = (seconds) => {
     <Head :title="t('dashboard')" />
 
     <AppLayout>
-        <div class="py-12 animate-fade-in">
+        <div class="py-6 animate-fade-in">
             <div class="max-w-5xl mx-auto">
                 <!-- Header -->
-                <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-16 gap-8">
+                <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-4 gap-2">
                     <div class="text-center md:text-left">
-                        <h1 class="text-5xl font-cinzel text-[var(--caret-color)] font-bold mb-3 tracking-wider">{{ t('dashboard') }}</h1>
-                        <p class="text-[var(--sub-color)] font-mono text-sm uppercase tracking-[0.4em] opacity-80">{{ t('recent_performance') }}</p>
+                        <h1 class="text-2xl font-cinzel text-[var(--caret-color)] font-bold mb-0.5 tracking-tight">{{ t('dashboard') }}</h1>
+                        <p class="text-[var(--sub-color)] font-mono text-[9px] uppercase tracking-[0.3em] opacity-80">{{ t('recent_performance') }}</p>
                     </div>
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-10 py-6 rounded-3xl border border-[var(--border-color)] backdrop-blur-md shadow-2xl relative overflow-hidden group">
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-[var(--caret-color)] opacity-[0.03] -mr-8 -mt-8 rounded-full transition-all group-hover:scale-150"></div>
-                            <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-2 relative z-10">{{ t('personal_best') }}</span>
-                            <div class="text-5xl text-[var(--caret-color)] font-cinzel font-bold flex items-center gap-4 relative z-10">
-                                <span class="text-4xl filter drop-shadow-md">🌙</span> {{ bestWpm }} <span class="text-lg opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
+                    <div class="flex flex-col md:flex-row gap-2">
+                        <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-4 py-2 rounded-xl border border-[var(--border-color)] backdrop-blur-md shadow-lg relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-12 h-12 bg-[var(--caret-color)] opacity-[0.03] -mr-3 -mt-3 rounded-full transition-all group-hover:scale-150"></div>
+                            <span class="text-[7px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-0.5 relative z-10">{{ t('personal_best') }}</span>
+                            <div class="text-2xl text-[var(--caret-color)] font-cinzel font-bold flex items-center gap-2 relative z-10 leading-none">
+                                <span class="text-lg filter drop-shadow-md">🌙</span> {{ bestWpm }} <span class="text-[9px] opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
                             </div>
                         </div>
 
-                        <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-10 py-6 rounded-3xl border border-[var(--border-color)] backdrop-blur-md shadow-2xl relative overflow-hidden group">
-                            <div class="absolute top-0 right-0 w-24 h-24 bg-[var(--main-color)] opacity-[0.03] -mr-8 -mt-8 rounded-full transition-all group-hover:scale-150"></div>
-                            <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-2 relative z-10">{{ t('average_speed') }}</span>
-                            <div class="text-5xl text-[var(--main-color)] font-cinzel font-bold flex items-center gap-4 relative z-10">
-                                <span class="text-4xl filter drop-shadow-md">📊</span> {{ averageWpm }} <span class="text-lg opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
+                        <div class="flex flex-col items-center md:items-end bg-[var(--panel-color)] px-4 py-2 rounded-xl border border-[var(--border-color)] backdrop-blur-md shadow-lg relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-12 h-12 bg-[var(--main-color)] opacity-[0.03] -mr-3 -mt-3 rounded-full transition-all group-hover:scale-150"></div>
+                            <span class="text-[7px] text-[var(--sub-color)] uppercase tracking-widest font-mono mb-0.5 relative z-10">{{ t('average_speed') }}</span>
+                            <div class="text-2xl text-[var(--main-color)] font-cinzel font-bold flex items-center gap-2 relative z-10 leading-none">
+                                <span class="text-lg filter drop-shadow-md">📊</span> {{ averageWpm }} <span class="text-[9px] opacity-60 font-mono tracking-tighter">{{ t('wpm') }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Evolution Chart -->
-                <div v-if="chartData.length > 1" class="mb-16">
-                    <div class="bg-[var(--panel-color)] p-8 rounded-[2.5rem] border border-[var(--border-color)] shadow-2xl backdrop-blur-md">
-                        <div class="flex justify-between items-center mb-8">
-                            <h3 class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] font-mono opacity-80">
+                <div v-if="chartData.length > 1" class="mb-4">
+                    <div class="bg-[var(--panel-color)] p-3 rounded-[1rem] border border-[var(--border-color)] shadow-xl backdrop-blur-md">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-[7px] text-[var(--sub-color)] uppercase tracking-[0.2em] font-mono opacity-80">
                                 {{ t('speed_evolution') }}
                             </h3>
                         </div>
-                        <div class="h-[250px] w-full">
+                        <div class="h-[140px] w-full">
                             <Line :data="chartDataValues" :options="chartOptions" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Best Test Showcase -->
-                <div v-if="bestTest" class="mb-16">
-                    <div class="relative group bg-gradient-to-br from-amber-500/10 via-[var(--panel-color)] to-[var(--panel-color)] rounded-[2.5rem] border border-amber-500/20 shadow-2xl overflow-hidden backdrop-blur-md">
-                        <div class="absolute top-0 right-0 p-8">
-                             <span class="text-6xl opacity-20 filter grayscale group-hover:grayscale-0 transition-all duration-700 -rotate-12 group-hover:rotate-0 inline-block">🏆</span>
+                <div v-if="bestTest" class="mb-4">
+                    <div class="relative group bg-gradient-to-br from-amber-500/10 via-[var(--panel-color)] to-[var(--panel-color)] rounded-[1rem] border border-amber-500/20 shadow-xl overflow-hidden backdrop-blur-md">
+                        <div class="absolute top-0 right-0 p-3">
+                             <span class="text-3xl opacity-20 filter grayscale group-hover:grayscale-0 transition-all duration-700 -rotate-12 group-hover:rotate-0 inline-block">🏆</span>
                         </div>
                         
-                        <div class="p-10 flex flex-col md:flex-row items-center gap-12 relative z-10">
+                        <div class="p-4 flex flex-col md:flex-row items-center gap-6 relative z-10">
                             <div class="flex flex-col items-center md:items-start text-center md:text-left">
-                                <span class="text-[10px] text-amber-500 uppercase tracking-[0.4em] font-mono mb-4">{{ t('personal_best') }}</span>
-                                <div class="flex items-end gap-3 mb-2">
-                                    <span class="text-7xl font-cinzel font-bold text-amber-500 leading-none">{{ bestTest.wpm }}</span>
-                                    <span class="text-xl text-amber-500/60 font-mono mb-2">{{ t('wpm') }}</span>
+                                <span class="text-[7px] text-amber-500 uppercase tracking-[0.4em] font-mono mb-1 leading-tight">{{ t('personal_best') }}</span>
+                                <div class="flex items-end gap-1.5 mb-0.5">
+                                    <span class="text-4xl font-cinzel font-bold text-amber-500 leading-none">{{ bestTest.wpm }}</span>
+                                    <span class="text-xs text-amber-500/60 font-mono mb-1">{{ t('wpm') }}</span>
                                 </div>
-                                <div class="flex gap-6 mt-4">
+                                <div class="flex gap-3 mt-1">
                                     <div class="flex flex-col">
-                                        <span class="text-[8px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">{{ t('accuracy') }}</span>
-                                        <span class="text-lg text-[var(--main-color)] font-bold">{{ Math.round(bestTest.accuracy) }}%</span>
+                                        <span class="text-[6px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">{{ t('accuracy') }}</span>
+                                        <span class="text-xs text-[var(--main-color)] font-bold">{{ Math.round(bestTest.accuracy) }}%</span>
                                     </div>
-                                    <div class="flex flex-col border-l border-[var(--border-color)] pl-6">
-                                        <span class="text-[8px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">errors</span>
-                                        <span class="text-lg text-[var(--error-color)] font-bold">{{ bestTest.total_errors ?? 0 }}</span>
+                                    <div class="flex flex-col border-l border-[var(--border-color)] pl-3">
+                                        <span class="text-[6px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">errors</span>
+                                        <span class="text-xs text-[var(--error-color)] font-bold">{{ bestTest.total_errors ?? 0 }}</span>
                                     </div>
-                                    <div class="flex flex-col border-l border-[var(--border-color)] pl-6">
-                                        <span class="text-[8px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">{{ t('time') }}</span>
-                                        <span class="text-lg text-[var(--main-color)] font-bold">{{ formatDuration(bestTest.duration) }}</span>
+                                    <div class="flex flex-col border-l border-[var(--border-color)] pl-3">
+                                        <span class="text-[6px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">{{ t('time') }}</span>
+                                        <span class="text-xs text-[var(--main-color)] font-bold">{{ formatDuration(bestTest.duration) }}</span>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="flex-1 flex flex-col items-center md:items-end text-right" dir="rtl">
-                                <div class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.4em] font-mono mb-4 text-left w-full" dir="ltr" style="text-align: right;">{{ t('surah') }}</div>
-                                <div class="text-4xl lg:text-5xl font-bold bg-gradient-to-l from-[var(--main-color)] to-amber-200 bg-clip-text text-transparent mb-3" style="font-family: 'Noto Naskh Arabic', serif;">
+                                <div class="text-[7px] text-[var(--sub-color)] uppercase tracking-[0.4em] font-mono mb-1 text-left w-full" dir="ltr" style="text-align: right;">{{ t('surah') }}</div>
+                                <div class="text-xl lg:text-2xl font-bold bg-gradient-to-l from-[var(--main-color)] to-amber-200 bg-clip-text text-transparent mb-0.5 leading-tight" style="font-family: 'Noto Naskh Arabic', serif;">
                                     {{ bestTest.quran_text.surah_name_arabic }}
                                 </div>
-                                <div class="flex items-center gap-4 text-[var(--sub-color)] opacity-60 font-mono text-xs w-full justify-center md:justify-end" dir="ltr">
-                                    <span class="bg-white/5 px-3 py-1 rounded-full border border-white/5 whitespace-nowrap">{{ t('ayats') }} {{ bestTest.start_ayah }} - {{ bestTest.end_ayah }}</span>
-                                    <span class="bg-white/5 px-3 py-1 rounded-full border border-white/5 whitespace-nowrap">{{ formatDate(bestTest.created_at) }}</span>
+                                <div class="flex items-center gap-2 text-[var(--sub-color)] opacity-60 font-mono text-[9px] w-full justify-center md:justify-end" dir="ltr">
+                                    <span class="bg-white/5 px-1.5 py-0.5 rounded-full border border-white/5 whitespace-nowrap">{{ t('ayats') }} {{ bestTest.start_ayah }} - {{ bestTest.end_ayah }}</span>
+                                    <span class="bg-white/5 px-1.5 py-0.5 rounded-full border border-white/5 whitespace-nowrap">{{ formatDate(bestTest.created_at) }}</span>
                                 </div>
                                 
                                 <Link :href="`/?surah=${bestTest.quran_text.surah_number}&start=${bestTest.start_ayah || 1}&end=${bestTest.end_ayah || 1}`" 
-                                      class="mt-8 bg-amber-500 text-[var(--bg-color)] px-8 py-3 rounded-2xl font-cinzel font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-amber-950/20 group-hover:shadow-amber-500/20" dir="ltr">
+                                      class="mt-3 bg-amber-500 text-[var(--bg-color)] px-4 py-1.5 rounded-lg font-cinzel font-bold text-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-amber-950/20 group-hover:shadow-amber-500/20" dir="ltr">
                                     {{ t('retake') }} →
                                 </Link>
                             </div>
                         </div>
-                        
-                        <!-- Decorative background element -->
-                        <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all duration-700"></div>
                     </div>
                 </div>
 
                 <!-- Stats Table -->
-                <div class="bg-[var(--panel-color)] rounded-[2.5rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-2xl transition-all duration-500 hover:shadow-emerald-900/10">
+                <div class="bg-[var(--panel-color)] rounded-[1rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-emerald-900/10">
                     <div v-if="results.data.length > 0">
-                        <table class="w-full text-left font-mono text-sm border-collapse">
+                        <table class="w-full text-left font-mono text-[9px] border-collapse">
                             <thead>
-                                <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-[0.2em] text-[10px]">
-                                    <th class="px-10 py-6 font-bold">{{ t('wpm') }}</th>
-                                    <th class="px-10 py-6 font-bold text-center">{{ t('time') }}</th>
-                                    <th class="px-10 py-6 font-bold text-center">errors</th>
-                                    <th class="px-10 py-6 font-bold text-center">{{ t('accuracy') }}</th>
-                                    <th class="px-10 py-6 font-bold text-center">{{ t('surah') }}</th>
-                                    <th class="px-10 py-6 font-bold text-center">action</th>
-                                    <th class="px-10 py-6 font-bold text-right">{{ t('date') }}</th>
+                                <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-widest text-[7px]">
+                                    <th class="px-4 py-2 font-bold">{{ t('wpm') }}</th>
+                                    <th class="px-4 py-2 font-bold text-center">{{ t('time') }}</th>
+                                    <th class="px-4 py-2 font-bold text-center">errors</th>
+                                    <th class="px-4 py-2 font-bold text-center">{{ t('accuracy') }}</th>
+                                    <th class="px-4 py-2 font-bold text-center">{{ t('surah') }}</th>
+                                    <th class="px-4 py-2 font-bold text-center">action</th>
+                                    <th class="px-4 py-2 font-bold text-right">{{ t('date') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[var(--border-color)]">
                                 <tr v-for="result in results.data" :key="result.id" 
                                     class="hover:bg-[var(--caret-color)]/[0.02] transition-all duration-300 group">
-                                    <td class="px-10 py-8">
-                                        <div class="flex items-center gap-4">
-                                            <span class="text-3xl font-bold" :class="result.wpm === bestWpm ? 'text-[var(--caret-color)]' : 'text-[var(--main-color)]'">
+                                    <td class="px-4 py-1.5">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base font-bold" :class="result.wpm === bestWpm ? 'text-[var(--caret-color)]' : 'text-[var(--main-color)]'">
                                                 {{ result.wpm }}
                                             </span>
-                                            <span v-if="result.wpm === bestWpm" class="text-xl animate-bounce" title="Personal Best">👑</span>
+                                            <span v-if="result.wpm === bestWpm" class="text-xs animate-bounce" title="Personal Best">👑</span>
                                         </div>
                                     </td>
-                                    <td class="px-10 py-8 text-center text-xl text-[var(--main-color)] font-mono opacity-80">
+                                    <td class="px-4 py-1.5 text-center text-[10px] text-[var(--main-color)] font-mono opacity-80">
                                         {{ formatDuration(result.duration) }}
                                     </td>
-                                    <td class="px-10 py-8 text-center text-xl text-[var(--error-color)] font-bold">
+                                    <td class="px-4 py-1.5 text-center text-[10px] text-[var(--error-color)] font-bold">
                                         {{ result.total_errors ?? 0 }}
                                     </td>
-                                    <td class="px-10 py-8 text-center">
-                                        <div class="inline-flex items-center justify-center px-4 py-1.5 rounded-full border" 
+                                    <td class="px-4 py-1.5 text-center">
+                                        <div class="inline-flex items-center justify-center px-2 py-0.5 rounded-full border text-[8px]" 
                                              :class="result.accuracy > 95 ? 'border-green-500/30 bg-green-500/10 text-green-500' : 'border-white/10 text-[var(--sub-color)]'">
                                             {{ Math.round(result.accuracy) }}%
                                         </div>
                                     </td>
-                                    <td class="px-10 py-8 text-center" dir="rtl">
-                                        <div class="text-2xl mb-1" style="font-family: 'Noto Naskh Arabic', serif;">
+                                    <td class="px-4 py-1.5 text-center" dir="rtl">
+                                        <div class="text-sm mb-0" style="font-family: 'Noto Naskh Arabic', serif;">
                                             {{ result.quran_text.surah_name_arabic }}
                                         </div>
-                                        <div class="text-[10px] font-mono text-[var(--sub-color)] opacity-60 flex items-center justify-center gap-1" dir="ltr">
+                                        <div class="text-[7px] font-mono text-[var(--sub-color)] opacity-60 flex items-center justify-center gap-1" dir="ltr">
                                             <span>{{ result.start_ayah }}</span>
-                                            <span class="opacity-40">→</span>
+                                            <span class="opacity-30">-</span>
                                             <span>{{ result.end_ayah }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-10 py-8 text-center">
+                                    <td class="px-4 py-1.5 text-center">
                                         <Link :href="`/?surah=${result.quran_text.surah_number}&start=${result.start_ayah || 1}&end=${result.end_ayah || 1}`" 
-                                              class="text-xs bg-[var(--caret-color)] text-[var(--bg-color)] px-4 py-1.5 rounded-full font-bold hover:scale-105 transition-all inline-block">
+                                              class="text-[8px] bg-[var(--caret-color)] text-[var(--bg-color)] px-2 py-0.5 rounded-md font-bold hover:scale-105 transition-all inline-block">
                                             {{ t('retake') }}
                                         </Link>
                                     </td>
-                                    <td class="px-10 py-8 text-right text-[var(--sub-color)] opacity-60 text-xs">
+                                    <td class="px-4 py-1.5 text-right text-[var(--sub-color)] opacity-60 text-[8px]">
                                         {{ formatDate(result.created_at) }}
                                     </td>
                                 </tr>
@@ -321,9 +318,9 @@ const formatDuration = (seconds) => {
                         </table>
                         
                         <!-- Pagination -->
-                        <div class="p-8 bg-white/5 flex justify-center gap-8 font-mono">
-                             <Link v-if="results.prev_page_url" :href="results.prev_page_url" :only="['results']" preserve-scroll class="px-6 py-2 rounded-xl bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">← previous</Link>
-                             <Link v-if="results.next_page_url" :href="results.next_page_url" :only="['results']" preserve-scroll class="px-6 py-2 rounded-xl bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">next →</Link>
+                        <div class="p-2 bg-white/5 flex justify-center gap-2 font-mono text-[10px]">
+                             <Link v-if="results.prev_page_url" :href="results.prev_page_url" :only="['results']" preserve-scroll class="px-3 py-1 rounded-md bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">← prev</Link>
+                             <Link v-if="results.next_page_url" :href="results.next_page_url" :only="['results']" preserve-scroll class="px-3 py-1 rounded-md bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">next →</Link>
                         </div>
                     </div>
 
