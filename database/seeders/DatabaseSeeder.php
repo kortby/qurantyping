@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $this->call([
-            QuranTextSeeder::class,
+            // QuranTextSeeder::class,
             // You can add other seeders here in the future
         ]);
     }

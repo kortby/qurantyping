@@ -34,6 +34,7 @@ const props = defineProps({
     bestWpm: Number,
     averageWpm: Number,
     chartData: Array,
+    bestTest: Object,
 });
 
 const chartDataValues = computed(() => {
@@ -62,6 +63,18 @@ const chartDataValues = computed(() => {
                 borderWidth: 2,
                 borderDash: [5, 5],
                 yAxisID: 'y1',
+            },
+            {
+                label: 'errors',
+                data: props.chartData.map(d => d.total_errors),
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                borderWidth: 2,
+                yAxisID: 'y2',
             }
         ]
     };
@@ -115,6 +128,14 @@ const chartOptions = {
             position: 'right',
             beginAtZero: true,
             max: 100,
+            display: false,
+        },
+        y2: {
+            position: 'right',
+            beginAtZero: true,
+            grid: {
+                drawOnChartArea: false,
+            },
             display: false,
         }
     },
@@ -186,6 +207,58 @@ const formatDuration = (seconds) => {
                     </div>
                 </div>
 
+                <!-- Best Test Showcase -->
+                <div v-if="bestTest" class="mb-16">
+                    <div class="relative group bg-gradient-to-br from-amber-500/10 via-[var(--panel-color)] to-[var(--panel-color)] rounded-[2.5rem] border border-amber-500/20 shadow-2xl overflow-hidden backdrop-blur-md">
+                        <div class="absolute top-0 right-0 p-8">
+                             <span class="text-6xl opacity-20 filter grayscale group-hover:grayscale-0 transition-all duration-700 -rotate-12 group-hover:rotate-0 inline-block">🏆</span>
+                        </div>
+                        
+                        <div class="p-10 flex flex-col md:flex-row items-center gap-12 relative z-10">
+                            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                                <span class="text-[10px] text-amber-500 uppercase tracking-[0.4em] font-mono mb-4">{{ t('personal_best') }}</span>
+                                <div class="flex items-end gap-3 mb-2">
+                                    <span class="text-7xl font-cinzel font-bold text-amber-500 leading-none">{{ bestTest.wpm }}</span>
+                                    <span class="text-xl text-amber-500/60 font-mono mb-2">{{ t('wpm') }}</span>
+                                </div>
+                                <div class="flex gap-6 mt-4">
+                                    <div class="flex flex-col">
+                                        <span class="text-[8px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">{{ t('accuracy') }}</span>
+                                        <span class="text-lg text-[var(--main-color)] font-bold">{{ Math.round(bestTest.accuracy) }}%</span>
+                                    </div>
+                                    <div class="flex flex-col border-l border-[var(--border-color)] pl-6">
+                                        <span class="text-[8px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">errors</span>
+                                        <span class="text-lg text-[var(--error-color)] font-bold">{{ bestTest.total_errors ?? 0 }}</span>
+                                    </div>
+                                    <div class="flex flex-col border-l border-[var(--border-color)] pl-6">
+                                        <span class="text-[8px] text-[var(--sub-color)] uppercase tracking-widest font-mono text-left">{{ t('time') }}</span>
+                                        <span class="text-lg text-[var(--main-color)] font-bold">{{ formatDuration(bestTest.duration) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col items-center md:items-end text-right" dir="rtl">
+                                <div class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.4em] font-mono mb-4 text-left w-full" dir="ltr" style="text-align: right;">{{ t('surah') }}</div>
+                                <div class="text-4xl lg:text-5xl font-bold bg-gradient-to-l from-[var(--main-color)] to-amber-200 bg-clip-text text-transparent mb-3" style="font-family: 'Noto Naskh Arabic', serif;">
+                                    {{ bestTest.quran_text.surah_name_arabic }}
+                                </div>
+                                <div class="flex items-center gap-4 text-[var(--sub-color)] opacity-60 font-mono text-xs w-full justify-center md:justify-end" dir="ltr">
+                                    <span class="bg-white/5 px-3 py-1 rounded-full border border-white/5 whitespace-nowrap">{{ t('ayats') }} {{ bestTest.start_ayah }} - {{ bestTest.end_ayah }}</span>
+                                    <span class="bg-white/5 px-3 py-1 rounded-full border border-white/5 whitespace-nowrap">{{ formatDate(bestTest.created_at) }}</span>
+                                </div>
+                                
+                                <Link :href="`/?surah=${bestTest.quran_text.surah_number}&start=${bestTest.start_ayah || 1}&end=${bestTest.end_ayah || 1}`" 
+                                      class="mt-8 bg-amber-500 text-[var(--bg-color)] px-8 py-3 rounded-2xl font-cinzel font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-amber-950/20 group-hover:shadow-amber-500/20" dir="ltr">
+                                    {{ t('retake') }} →
+                                </Link>
+                            </div>
+                        </div>
+                        
+                        <!-- Decorative background element -->
+                        <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all duration-700"></div>
+                    </div>
+                </div>
+
                 <!-- Stats Table -->
                 <div class="bg-[var(--panel-color)] rounded-[2.5rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-2xl transition-all duration-500 hover:shadow-emerald-900/10">
                     <div v-if="results.data.length > 0">
@@ -249,8 +322,8 @@ const formatDuration = (seconds) => {
                         
                         <!-- Pagination -->
                         <div class="p-8 bg-white/5 flex justify-center gap-8 font-mono">
-                             <Link v-if="results.prev_page_url" :href="results.prev_page_url" class="px-6 py-2 rounded-xl bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">← previous</Link>
-                             <Link v-if="results.next_page_url" :href="results.next_page_url" class="px-6 py-2 rounded-xl bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">next →</Link>
+                             <Link v-if="results.prev_page_url" :href="results.prev_page_url" :only="['results']" preserve-scroll class="px-6 py-2 rounded-xl bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">← previous</Link>
+                             <Link v-if="results.next_page_url" :href="results.next_page_url" :only="['results']" preserve-scroll class="px-6 py-2 rounded-xl bg-[var(--bg-color)] border border-white/5 text-[var(--caret-color)] hover:scale-105 transition-all">next →</Link>
                         </div>
                     </div>
 
