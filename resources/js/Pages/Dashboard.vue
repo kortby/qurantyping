@@ -163,7 +163,10 @@ const formatDuration = (seconds) => {
 </script>
 
 <template>
-    <Head :title="t('dashboard')" />
+    <Head>
+        <title>My Dashboard - QuranTyping Performance</title>
+        <meta name="description" content="Track your progress, view your personal best WPM, and see your typing evolution over time in your personal QuranTyping dashboard.">
+    </Head>
 
     <AppLayout>
         <div class="py-6 animate-fade-in">

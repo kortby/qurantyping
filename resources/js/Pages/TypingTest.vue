@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Head } from '@inertiajs/vue3';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -607,6 +607,11 @@ defineOptions({ layout: AppLayout });
 </script>
 
 <template>
+    <Head>
+        <title>Quran Typing Test - Speed & Memorization | QuranTyping</title>
+        <meta name="description" content="Test your Quranic typing speed and accuracy. Practice memorization by typing surahs in Arabic with real-time feedback.">
+    </Head>
+
     <div class="flex flex-col items-center justify-start py-8 min-h-[80vh]">
         <!-- Minimalist Filters -->
         <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-12 flex flex-wrap items-center gap-6 font-mono text-sm">
