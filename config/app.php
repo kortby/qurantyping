@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'tashkil_feature' => filter_var(env('TASHKIL_FEATURE', false), FILTER_VALIDATE_BOOLEAN),
+
 ];

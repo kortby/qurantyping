@@ -48,6 +48,12 @@ class HandleInertiaRequests extends Middleware
                 'message' => fn() => $request->session()->get('message'),
                 'error' => fn() => $request->session()->get('error'),
             ],
+            'jetstream' => [
+                'flash' => fn() => [
+                    'banner' => $request->session()->get('flash.banner'),
+                    'bannerStyle' => $request->session()->get('flash.bannerStyle'),
+                ],
+            ],
             'social' => [
                 'github' => !empty(config('services.github.client_id')),
                 'google' => !empty(config('services.google.client_id')),
@@ -55,6 +61,9 @@ class HandleInertiaRequests extends Middleware
                 'has_any' => !empty(config('services.github.client_id')) ||
                     !empty(config('services.google.client_id')) ||
                     !empty(config('services.facebook.client_id')),
+            ],
+            'features' => [
+                'tashkil' => config('app.tashkil_feature', false),
             ],
         ]);
     }

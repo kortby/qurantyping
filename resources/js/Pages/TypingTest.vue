@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -11,6 +12,9 @@ const activeKey = ref(null);
 const activeCode = ref(null);
 
 const { t, currentLang, usePunctuation, setPunctuation } = useSettings();
+const page = usePage();
+
+const showTashkilFeature = computed(() => page.props.features?.tashkil ?? false);
 
 const props = defineProps({
     personalBestWpm: Number,
@@ -44,23 +48,102 @@ const isFocused = ref(false);
 const showResults = ref(false);
 const totalErrors = ref(0);
 const isShiftPressed = ref(false);
+const isTyping = ref(false);
+let typingTimeout = null;
+
+// --- Caret Position State ---
+const caretPosition = ref({ top: 0, left: 0, width: 0, height: 0, opacity: 0 });
+const containerRef = ref(null);
+
+const updateCaret = () => {
+    if (showResults.value) {
+        caretPosition.value.opacity = 0;
+        return;
+    }
+
+    // Use nextTick or a slightly longer timeout to ensure layout is settled
+    setTimeout(() => {
+        const activeSpan = document.querySelector('.cluster-active');
+        const container = containerRef.value;
+        
+        if (activeSpan && container) {
+            const rect = activeSpan.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            // In RTL, we need to be careful with left/right. 
+            // rect.left is the left edge of the character.
+            caretPosition.value = {
+                top: rect.bottom - containerRect.top - 2, // 2px offset for the underline
+                left: rect.left - containerRect.left,
+                width: rect.width,
+                height: 5, 
+                opacity: 1
+            };
+        }
+    }, 32); 
+};
+
+watch([userInput, isFocused], updateCaret);
+window.addEventListener('resize', updateCaret);
 
 const normalizeForComparison = (text) => {
     if (!text) return '';
-    return text
+    let result = text.normalize('NFC')
         .replace(/[أإآٱ]/g, 'ا')
         .replace(/[ۀة]/g, 'ه')
-        .replace(/[ىي]/g, 'ي')
-        // Strip all diacritics, tatweel, and Quranic signs for comparison
-        .replace(/[\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '')
-        .trim();
+        .replace(/[ىي]/g, 'ي');
+    
+    // If Tashkeel mode is ON, we only strip decorative/stop signs, but KEEP vowels (\u064B-\u065F)
+    if (usePunctuation.value) {
+        // Only strip Tatweel, stop signs, and the End of Ayah symbol
+        // Keep diacritics: \u064B-\u065F and \u0670 (dagger alif)
+        result = result.replace(/[\u0610-\u061A\u0640\u06D6-\u06ED\u06DD]/g, '');
+    } else {
+        // Strip everything if Tashkeel is off
+        result = result.replace(/[\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06ED\u06DD]/g, '');
+    }
+    
+    return result.trim();
 };
 
 // --- Computed Properties for Stats & Rendering ---
 const currentDisplayText = computed(() => {
     const raw = usePunctuation.value ? (quranText.value.text_punctuated || quranText.value.text) : quranText.value.text_simple;
-    // Strip Tatweel (aesthetic stretch) as it's not typed and causes index displacement
-    return raw?.replace(/\u0640/g, '') || '';
+    // Normalize to NFC and strip Tatweel (aesthetic stretch)
+    return raw?.normalize('NFC').replace(/\u0640/g, '').trim() || '';
+});
+
+// Map visual characters to logic ones (ignoring the ۝ decorative separator)
+const visualMapping = computed(() => {
+    const visual = currentDisplayText.value || '';
+    let logicText = '';
+    const vToL = new Array(visual.length).fill(-1);
+    const lToVStart = [];
+    
+    let i = 0;
+    while (i < visual.length) {
+        // Match the pattern: [optional space]۝[arabic digits][optional space]
+        // Which we treat as a single logic space
+        const match = visual.substring(i).match(/^ ?۝[٠-٩]+ ?/);
+        
+        if (match) {
+            const matchLen = match[0].length;
+            lToVStart.push(i);
+            logicText += ' ';
+            vToL[i] = logicText.length - 1;
+            // Mark the rest of the ornament characters as mapping to nothing
+            for (let j = 1; j < matchLen; j++) {
+                vToL[i + j] = -1;
+            }
+            i += matchLen;
+        } else {
+            lToVStart.push(i);
+            logicText += visual[i];
+            vToL[i] = logicText.length - 1;
+            i++;
+        }
+    }
+    return { logicText, vToL, lToVStart };
 });
 
 const sourceClusters = computed(() => {
@@ -68,18 +151,36 @@ const sourceClusters = computed(() => {
     const clusters = [];
     for (let i = 0; i < text.length; i++) {
         let cluster = text[i];
-        // Group base letter with all following diacritics/Quranic signs
-        // Ranges cover: Tashkeel, Hamzas, Small letters, Waqf signs, etc.
-        while (i + 1 < text.length && /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/.test(text[i + 1])) {
-            i++;
-            cluster += text[i];
+        let startIndex = i;
+
+        // Special case: If we hit the Ayah symbol, group it with all following Arabic digits
+        if (text[i] === '۝') {
+            let numbers = '';
+            while (i + 1 < text.length && /[٠-٩]/.test(text[i + 1])) {
+                i++;
+                numbers += text[i];
+            }
+            clusters.push({ 
+                text: '۝', 
+                numbers: numbers,
+                isSeparator: true,
+                start: startIndex, 
+                end: i + 1 
+            });
+            continue;
+        } else {
+            // Standard cluster grouping: base character + any combining marks
+            while (i + 1 < text.length && /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u06DD]/.test(text[i + 1])) {
+                i++;
+                cluster += text[i];
+            }
         }
-        clusters.push(cluster);
+        clusters.push({ text: cluster, start: startIndex, end: i + 1 });
     }
     return clusters;
 });
 
-const sourceCharacters = computed(() => sourceClusters.value);
+const sourceCharacters = computed(() => visualMapping.value.logicText.split(''));
 const typedCharacters = computed(() => userInput.value.split(''));
 
 const wpm = computed(() => {
@@ -118,17 +219,47 @@ const currentMaxAyahs = computed(() => {
     return surah ? surah.total_ayahs : 0;
 });
 
-const correctPart = computed(() => {
-    const end = firstErrorIndex.value !== -1 ? firstErrorIndex.value : userInput.value.length;
-    return sourceClusters.value.slice(0, end);
-});
-const incorrectPart = computed(() => {
-    if (firstErrorIndex.value === -1) return [];
-    return sourceClusters.value.slice(firstErrorIndex.value, userInput.value.length);
-});
-const untypedPart = computed(() => {
-    return sourceClusters.value.slice(userInput.value.length);
-});
+// Helpers for template rendering
+const getClusterStatus = (cluster) => {
+    const uLen = userInput.value.length;
+    const errorIdx = firstErrorIndex.value;
+
+    // Find the logic range this cluster covers
+    let logicStart = -1;
+    let logicEnd = -1;
+    for (let i = cluster.start; i < cluster.end; i++) {
+        const lIdx = visualMapping.value.vToL[i];
+        if (lIdx !== -1) {
+            if (logicStart === -1) logicStart = lIdx;
+            logicEnd = lIdx;
+        }
+    }
+
+    // Decorative clusters (separators)
+    if (logicStart === -1) {
+        const prevLogicIdx = visualMapping.value.vToL[cluster.start - 1];
+        if (prevLogicIdx !== -1 && uLen > prevLogicIdx) return 'correct';
+        return 'untyped';
+    }
+
+    // Active state: Where the cursor currently resides
+    if (uLen >= logicStart && uLen <= logicEnd) {
+        // If an error happened before this cluster, it remains untyped
+        if (errorIdx !== -1 && errorIdx < logicStart) return 'untyped';
+        return 'active';
+    }
+
+    // Typed state
+    if (uLen > logicEnd) {
+        // If an error exists at or before this cluster
+        if (errorIdx !== -1 && errorIdx <= logicEnd) {
+            return errorIdx < logicStart ? 'ignored-error' : 'incorrect';
+        }
+        return 'correct';
+    }
+
+    return 'untyped';
+};
 
 // --- Core Logic ---
 const increaseStartAyah = () => {
@@ -184,6 +315,25 @@ const validateAyahs = () => {
 watch([selectedSurah, startAyah, endAyah], () => {
     warningMessage.value = '';
     rangeError.value = '';
+});
+
+// Automatically pick a random 3-ayah range when a new surah is manually selected
+watch(selectedSurah, (newSurah, oldSurah) => {
+    // Skip during initial load to preserve URL params
+    if (isLoading.value || !surahs.value.length) return;
+    
+    if (newSurah && newSurah !== oldSurah) {
+        const surah = surahs.value.find(s => s.surah_number == newSurah);
+        if (surah) {
+            const total = surah.total_ayahs;
+            // Generate a random start ayah that allows for a 3-ayah range
+            const maxStart = Math.max(1, total - 2);
+            const randomStart = Math.floor(Math.random() * maxStart) + 1;
+            
+            startAyah.value = randomStart;
+            endAyah.value = Math.min(total, randomStart + 2);
+        }
+    }
 });
 
 const fetchSurahs = async () => {
@@ -268,9 +418,17 @@ const fetchTestText = async (withParams = true) => {
 
 const handleInput = (event) => {
     if (testFinished.value || isLoading.value) return;
+    
+    // Activity tracking for caret blink
+    isTyping.value = true;
+    if (typingTimeout) clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        isTyping.value = false;
+    }, 1000);
+
     if (!intervalId.value) startTimer();
     
-    const newValue = event.target.value;
+    const newValue = event.target.value.normalize('NFC');
     const addedCount = newValue.length - userInput.value.length;
     
     // Set active key for keyboard animation
@@ -389,6 +547,11 @@ const handleGlobalKeydown = (e) => {
         e.preventDefault();
         resetTest();
     }
+
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        resetTest();
+    }
 };
 
 const handleGlobalKeyup = (e) => {
@@ -417,6 +580,9 @@ onMounted(async () => {
     isLoading.value = false;
     window.addEventListener('keydown', handleGlobalKeydown);
     window.addEventListener('keyup', handleGlobalKeyup);
+    
+    // Initialize caret position
+    setTimeout(updateCaret, 500);
 });
 
 onUnmounted(() => {
@@ -488,7 +654,8 @@ defineOptions({ layout: AppLayout });
             </button>
 
             <!-- Punctuation Toggle -->
-            <button type="button" 
+            <button v-if="showTashkilFeature"
+                    type="button" 
                     @click="setPunctuation(!usePunctuation); resetTest()"
                     class="flex items-center gap-2 bg-[var(--panel-color)] border border-[var(--border-color)] px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-widest transition-all"
                     :class="usePunctuation ? 'text-[var(--caret-color)] border-[var(--caret-color)]/40 shadow-lg shadow-emerald-950/10' : 'text-[var(--sub-color)] opacity-60 hover:opacity-100'">
@@ -520,8 +687,27 @@ defineOptions({ layout: AppLayout });
         <!-- Typing Area -->
         <div v-if="currentDisplayText && !showResults" 
              @click="focusInput" 
+             ref="containerRef"
              class="relative w-full max-w-6xl py-12 transition-all duration-500 min-h-[300px] flex items-center"
              :class="{ 'opacity-100': isFocused, 'opacity-40 blur-[4px] scale-[0.98]': !isFocused }">
+            
+            <!-- Smooth Sliding Underline Caret -->
+            <div class="absolute bg-[var(--caret-color)] transition-all duration-150 z-[60] pointer-events-none rounded-full"
+                 :class="{ 'caret-blink-anim': !isTyping && isFocused }"
+                 :style="{ 
+                     transitionTimingFunction: 'cubic-bezier(0.19, 1, 0.22, 1)',
+                     top: caretPosition.top + 'px',
+                     left: caretPosition.left + 'px',
+                     width: caretPosition.width + 'px',
+                     height: caretPosition.height + 'px',
+                     opacity: isFocused ? caretPosition.opacity : 0,
+                     backgroundColor: firstErrorIndex === -1 ? '#10b981' : '#ff3131',
+                     boxShadow: firstErrorIndex === -1 
+                        ? '0 0 25px 3px #10b981, 0 0 10px #10b981, 0 0 2px white' 
+                        : '0 0 25px 3px #ff3131, 0 0 10px #ff3131, 0 0 2px white',
+                     border: '1px solid rgba(255,255,255,0.8)',
+                 }">
+            </div>
             
             <!-- Focus Message -->
             <div v-if="!isFocused" class="absolute inset-0 z-30 flex flex-col items-center justify-center cursor-pointer">
@@ -541,10 +727,32 @@ defineOptions({ layout: AppLayout });
             </div>
 
             <div class="text-4xl lg:text-5xl select-none text-right w-full transition-all duration-300" 
-                 :class="usePunctuation ? 'leading-[4.5] py-8' : 'leading-[2.2]'"
-                 style="font-family: 'Noto Naskh Arabic', serif;" dir="rtl">
+                 :style="{ 
+                     fontFamily: 'Noto Naskh Arabic, serif', 
+                     lineHeight: usePunctuation ? '6.5rem' : '4.5rem' 
+                 }" 
+                 :class="usePunctuation ? 'py-12' : 'py-8'"
+                 dir="rtl">
                 <p class="relative z-0 whitespace-pre-wrap break-words transition-all duration-300">
-                    <span v-for="(cluster, idx) in correctPart" :key="'c'+idx" class="text-[var(--main-color)]">{{ cluster }}</span><span v-for="(cluster, idx) in incorrectPart" :key="'i'+idx" class="text-[var(--error-color)] border-b-2 border-[var(--error-color)] bg-[var(--error-color)]/5">{{ cluster }}</span><template v-if="untypedPart.length > 0"><span class="text-[var(--sub-color)] border-b-2 border-[var(--caret-color)] animate-caret-blink inline-block" style="margin-bottom: -2px;">{{ untypedPart[0] }}</span><span v-for="(cluster, idx) in untypedPart.slice(1)" :key="'u'+idx" class="text-[var(--sub-color)]">{{ cluster }}</span></template>
+                    <span v-for="(cluster, idx) in sourceClusters" :key="idx" 
+                          :class="[
+                              getClusterStatus(cluster) === 'correct' ? 'text-[var(--main-color)]' : '',
+                              getClusterStatus(cluster) === 'incorrect' ? 'text-[var(--error-color)] bg-[var(--error-color)]/5' : '',
+                              getClusterStatus(cluster) === 'untyped' ? 'text-[var(--sub-color)]' : '',
+                              getClusterStatus(cluster) === 'active' ? 'text-[var(--sub-color)] cluster-active' : '',
+                              getClusterStatus(cluster) === 'ignored-error' ? 'text-[var(--sub-color)] opacity-50' : '',
+                              cluster.isSeparator ? 'ayah-ornament' : ''
+                          ]">
+                        <template v-if="cluster.isSeparator">
+                            <span class="ornament-wrap">
+                                <span class="ornament-char">{{ cluster.text }}</span>
+                                <span class="ornament-num">{{ cluster.numbers }}</span>
+                            </span>
+                        </template>
+                        <template v-else>
+                            {{ cluster.text }}
+                        </template>
+                    </span>
                 </p>
                 <input id="hidden-input" 
                        type="text" 
@@ -565,7 +773,7 @@ defineOptions({ layout: AppLayout });
                         :active-key="activeKey" 
                         :active-code="activeCode"
                         :is-shift-on="isShiftPressed"
-                        :next-key="untypedPart[0]" />
+                        :next-key="sourceCharacters[userInput.length]" />
 
         <!-- Results View -->
         <div v-if="showResults" class="w-full max-w-6xl flex flex-col items-center justify-center py-20 animate-fade-in font-cinzel">
@@ -638,5 +846,65 @@ defineOptions({ layout: AppLayout });
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+.ayah-ornament {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    color: var(--caret-color);
+    opacity: 0.8;
+    margin: 0 0.5rem;
+    position: relative;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.ornament-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.ornament-char {
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.ornament-num {
+    position: absolute;
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 0.35em;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--caret-color);
+}
+
+.ayah-ornament:hover {
+    opacity: 1;
+    text-shadow: 0 0 10px var(--caret-color);
+}
+
+.caret-blink-anim {
+    animation: caret-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes caret-pulse {
+    0%, 100% { opacity: 1; filter: brightness(1); }
+    50% { opacity: 0.4; filter: brightness(1.2); }
+}
+
+/* Smooth character color transitions */
+.cluster-active {
+    position: relative;
+}
+
+span {
+    transition: color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 </style>

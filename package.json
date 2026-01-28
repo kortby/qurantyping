@@ -23,6 +23,8 @@
     },
     "dependencies": {
         "canvas-confetti": "^1.9.4",
-        "or": "^0.2.0"
+        "chart.js": "^4.5.1",
+        "or": "^0.2.0",
+        "vue-chartjs": "^5.3.3"
     }
 }
