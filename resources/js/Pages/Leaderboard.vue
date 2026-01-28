@@ -35,6 +35,8 @@ defineProps({
                                 <th class="px-8 py-4 font-bold">{{ t('seeker') }}</th>
                                 <th class="px-8 py-4 font-bold text-center">{{ t('wpm') }}</th>
                                 <th class="px-8 py-4 font-bold text-center">{{ t('accuracy') }}</th>
+                                <th class="px-8 py-4 font-bold text-center">{{ t('errors') }}</th>
+                                <th class="px-8 py-4 font-bold text-center">{{ t('chars') }}</th>
                                 <th class="px-8 py-4 font-bold text-right">{{ t('tests_count') }}</th>
                             </tr>
                         </thead>
@@ -67,6 +69,12 @@ defineProps({
                                     <div class="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-[var(--border-color)] bg-[var(--caret-color)]/[0.02] text-[var(--caret-color)] font-bold">
                                         {{ Math.round(scorer.best_accuracy) }}%
                                     </div>
+                                </td>
+                                <td class="px-8 py-4 text-center font-bold text-[var(--error-color)]">
+                                    {{ scorer.total_errors }}
+                                </td>
+                                <td class="px-8 py-4 text-center font-bold text-[var(--caret-color)] opacity-80">
+                                    {{ scorer.char_count }}
                                 </td>
                                 <td class="px-8 py-4 text-right opacity-40 font-bold">
                                     {{ scorer.total_tests }}
