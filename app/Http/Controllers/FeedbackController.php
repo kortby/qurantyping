@@ -24,8 +24,8 @@ class FeedbackController extends Controller
         ]);
 
         // Send Email
-        Mail::to(['hasbellaoui.faycal@gmail.com', 'kortby@gmail.com'])
-            ->send(new FeedbackReceived($feedback));
+        /*Mail::to(['hasbellaoui.faycal@gmail.com', 'kortby@gmail.com'])
+            ->send(new FeedbackReceived($feedback));*/
 
         return back()->with('flash', [
             'banner' => 'Thank you for your feedback! It has been sent to our team.',
