@@ -48,6 +48,12 @@ class HandleInertiaRequests extends Middleware
                 'message' => fn() => $request->session()->get('message'),
                 'error' => fn() => $request->session()->get('error'),
             ],
+            'jetstream' => [
+                'flash' => fn() => [
+                    'banner' => $request->session()->get('flash.banner'),
+                    'bannerStyle' => $request->session()->get('flash.bannerStyle'),
+                ],
+            ],
             'social' => [
                 'github' => !empty(config('services.github.client_id')),
                 'google' => !empty(config('services.google.client_id')),

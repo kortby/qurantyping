@@ -13,11 +13,14 @@ use Inertia\Inertia;
 Route::get('/', TestPageController::class);
 Route::get('/leaderboard', LeaderboardController::class)->name('leaderboard');
 Route::get('/privacy-policy', function () {
-    return Inertia::render('PrivacyPolicy'); })->name('privacy.policy');
+    return Inertia::render('PrivacyPolicy');
+})->name('privacy.policy');
 Route::get('/terms-of-service', function () {
-    return Inertia::render('TermsOfService'); })->name('terms.show');
+    return Inertia::render('TermsOfService');
+})->name('terms.show');
 Route::get('/work-in-progress', function () {
-    return Inertia::render('WorkInProgress'); })->name('wip');
+    return Inertia::render('WorkInProgress');
+})->name('wip');
 
 // Social Authentication
 Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\Auth\SocialiteController::class, 'redirect'])->name('social.redirect');
@@ -53,4 +56,5 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
 });

@@ -1,7 +1,10 @@
 <script setup>
-import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 import { useSettings } from '../useSettings';
+import FeedbackModal from '../Components/FeedbackModal.vue';
+import AuthWarningModal from '../Components/AuthWarningModal.vue';
+import Banner from '../Components/Banner.vue';
 
 const { currentLang, currentTheme, setLang, setTheme, t } = useSettings();
 const mobileMenuOpen = ref(false);
@@ -11,10 +14,24 @@ const languages = [
     { code: 'fr', label: 'FR' },
     { code: 'ar', label: 'AR' }
 ];
+
+const page = usePage();
+const showFeedbackModal = ref(false);
+const showAuthWarningModal = ref(false);
+
+const handleFeedbackClick = () => {
+    if (page.props.auth.user) {
+        showFeedbackModal.value = true;
+    } else {
+        showAuthWarningModal.value = true;
+    }
+};
+
 </script>
 
 <template>
     <div class="min-h-screen bg-[var(--bg-color)] text-[var(--main-color)] antialiased transition-colors duration-300">
+        <Banner />
         <header class="sticky top-0 z-50 w-full bg-[var(--panel-color)]/80 backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center relative">
                 <!-- Header Glow Effect -->
@@ -201,12 +218,18 @@ const languages = [
                 <div class="pt-10 border-t border-[var(--border-color)] flex flex-col md:flex-row justify-between items-center gap-6 opacity-40">
                     <p class="font-mono text-[10px] tracking-tighter uppercase">{{ t('copyright') }}</p>
                     <div class="flex gap-8 font-cinzel text-[10px] uppercase tracking-widest font-bold">
+                        <button @click="handleFeedbackClick" class="hover:underline flex items-center gap-2">
+                            <span>💬</span> {{ t('give_feedback') }}
+                        </button>
                         <Link href="/work-in-progress" class="hover:underline">{{ t('auth.privacy_policy') }}</Link>
                         <Link href="/work-in-progress" class="hover:underline">{{ t('auth.terms_of_service') }}</Link>
                     </div>
                 </div>
             </div>
         </footer>
+
+        <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
+        <AuthWarningModal :show="showAuthWarningModal" @close="showAuthWarningModal = false" />
     </div>
 </template>
 
