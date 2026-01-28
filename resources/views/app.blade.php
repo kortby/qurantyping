@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <title> {{ env('APP_NAME') }} - إختبار سرعة الكتابة</title>
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WXG9JC9FYZ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-WXG9JC9FYZ');
+    </script>
+
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="Enhance your Quran memorization and Arabic typing speed with QuranTyping. Progress through the Quran, test your accuracy, and track your performance in a beautiful, minimalist environment.">
