@@ -262,9 +262,9 @@ const formatDuration = (seconds) => {
                 <!-- Stats Table -->
                 <div class="bg-[var(--panel-color)] rounded-[1rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-emerald-900/10">
                     <div v-if="results.data.length > 0">
-                        <table class="w-full text-left font-mono text-[9px] border-collapse">
+                        <table class="w-full text-left font-mono text-sm border-collapse">
                             <thead>
-                                <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-widest text-[7px]">
+                                <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-widest text-xs">
                                     <th class="px-4 py-2 font-bold">{{ t('wpm') }}</th>
                                     <th class="px-4 py-2 font-bold text-center">{{ t('time') }}</th>
                                     <th class="px-4 py-2 font-bold text-center">errors</th>
@@ -279,41 +279,41 @@ const formatDuration = (seconds) => {
                                     class="hover:bg-[var(--caret-color)]/[0.02] transition-all duration-300 group">
                                     <td class="px-4 py-1.5">
                                         <div class="flex items-center gap-2">
-                                            <span class="text-base font-bold" :class="result.wpm === bestWpm ? 'text-[var(--caret-color)]' : 'text-[var(--main-color)]'">
+                                            <span class="text-xl font-bold" :class="result.wpm === bestWpm ? 'text-[var(--caret-color)]' : 'text-[var(--main-color)]'">
                                                 {{ result.wpm }}
                                             </span>
                                             <span v-if="result.wpm === bestWpm" class="text-xs animate-bounce" title="Personal Best">👑</span>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-1.5 text-center text-[10px] text-[var(--main-color)] font-mono opacity-80">
+                                    <td class="px-4 py-3 text-center text-sm text-[var(--main-color)] font-mono opacity-80">
                                         {{ formatDuration(result.duration) }}
                                     </td>
-                                    <td class="px-4 py-1.5 text-center text-[10px] text-[var(--error-color)] font-bold">
+                                    <td class="px-4 py-3 text-center text-sm text-[var(--error-color)] font-bold">
                                         {{ result.total_errors ?? 0 }}
                                     </td>
-                                    <td class="px-4 py-1.5 text-center">
-                                        <div class="inline-flex items-center justify-center px-2 py-0.5 rounded-full border text-[8px]" 
+                                    <td class="px-4 py-3 text-center">
+                                        <div class="inline-flex items-center justify-center px-3 py-1 rounded-full border text-xs" 
                                              :class="result.accuracy > 95 ? 'border-green-500/30 bg-green-500/10 text-green-500' : 'border-white/10 text-[var(--sub-color)]'">
                                             {{ Math.round(result.accuracy) }}%
                                         </div>
                                     </td>
-                                    <td class="px-4 py-1.5 text-center" dir="rtl">
-                                        <div class="text-sm mb-0" style="font-family: 'Noto Naskh Arabic', serif;">
+                                    <td class="px-4 py-3 text-center" dir="rtl">
+                                        <div class="text-lg mb-1" style="font-family: 'Noto Naskh Arabic', serif;">
                                             {{ result.quran_text.surah_name_arabic }}
                                         </div>
-                                        <div class="text-[7px] font-mono text-[var(--sub-color)] opacity-60 flex items-center justify-center gap-1" dir="ltr">
+                                        <div class="text-xs font-mono text-[var(--sub-color)] opacity-60 flex items-center justify-center gap-1" dir="ltr">
                                             <span>{{ result.start_ayah }}</span>
                                             <span class="opacity-30">-</span>
                                             <span>{{ result.end_ayah }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-1.5 text-center">
+                                    <td class="px-4 py-3 text-center">
                                         <Link :href="`/?surah=${result.quran_text.surah_number}&start=${result.start_ayah || 1}&end=${result.end_ayah || 1}`" 
-                                              class="text-[8px] bg-[var(--caret-color)] text-[var(--bg-color)] px-2 py-0.5 rounded-md font-bold hover:scale-105 transition-all inline-block">
+                                              class="text-xs bg-[var(--caret-color)] text-[var(--bg-color)] px-3 py-1 rounded-md font-bold hover:scale-105 transition-all inline-block">
                                             {{ t('retake') }}
                                         </Link>
                                     </td>
-                                    <td class="px-4 py-1.5 text-right text-[var(--sub-color)] opacity-60 text-[8px]">
+                                    <td class="px-4 py-3 text-right text-[var(--sub-color)] opacity-60 text-xs">
                                         {{ formatDate(result.created_at) }}
                                     </td>
                                 </tr>
