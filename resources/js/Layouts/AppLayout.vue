@@ -216,7 +216,10 @@ const handleFeedbackClick = () => {
                 </div>
 
                 <div class="pt-10 border-t border-[var(--border-color)] flex flex-col md:flex-row justify-between items-center gap-6 opacity-40">
-                    <p class="font-mono text-[10px] tracking-tighter uppercase">{{ t('copyright') }}</p>
+                    <div class="flex items-center gap-4">
+                        <p class="font-mono text-[10px] tracking-tighter uppercase">{{ t('copyright') }}</p>
+                        <span class="px-2 py-0.5 rounded-md bg-[var(--caret-color)]/10 border border-[var(--caret-color)]/20 text-[var(--caret-color)] font-mono text-[8px] tracking-widest font-bold uppercase">v{{ $page.props.features.app_version }}</span>
+                    </div>
                     <div class="flex gap-8 font-cinzel text-[10px] uppercase tracking-widest font-bold">
                         <button @click="handleFeedbackClick" class="hover:underline flex items-center gap-2">
                             <span>💬</span> {{ t('give_feedback') }}

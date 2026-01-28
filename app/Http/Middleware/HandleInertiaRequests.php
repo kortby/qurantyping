@@ -64,6 +64,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'features' => [
                 'tashkil' => config('app.tashkil_feature', false),
+                'app_version' => config('app.version', '1.0.0'),
             ],
         ]);
     }
