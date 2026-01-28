@@ -11,7 +11,10 @@ defineProps({
 </script>
 
 <template>
-    <Head :title="t('leaderboard')" />
+    <Head>
+        <title>Leaderboard - Top Quran Typists | QuranTyping</title>
+        <meta name="description" content="See the fastest Quran typists globally. Challenge the masters and claim your place on the leaderboard of truth.">
+    </Head>
 
     <AppLayout>
         <div class="py-8 animate-fade-in min-h-[80vh]">
