@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ArabicKeyboard from '@/Components/ArabicKeyboard.vue';
 import SurahSelect from '@/Components/SurahSelect.vue';
+import QuranAudioPlayer from '@/Components/QuranAudioPlayer.vue';
 import { useSettings } from '../useSettings';
 
 const activeKey = ref(null);
@@ -653,6 +654,8 @@ defineOptions({ layout: AppLayout });
                 {{ t('random') }}
             </button>
 
+            
+
             <!-- Punctuation Toggle -->
             <button v-if="showTashkilFeature"
                     type="button" 
@@ -682,6 +685,16 @@ defineOptions({ layout: AppLayout });
                 <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1 font-mono">Errors</span>
                 <span class="font-bold text-[var(--error-color)] border-b border-[var(--error-color)]/20 pb-1">{{ totalErrors }}</span>
             </div>
+
+            <!-- Audio Player
+            <QuranAudioPlayer 
+                v-if="!showResults"
+                :surah-number="quranText.surah_number"
+                :start-ayah="quranText.start_ayah"
+                :end-ayah="quranText.end_ayah"
+                :is-test-started="isTyping"
+            /> -->
+
         </div>
 
         <!-- Typing Area -->
