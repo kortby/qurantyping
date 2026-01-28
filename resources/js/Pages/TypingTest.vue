@@ -773,6 +773,7 @@ defineOptions({ layout: AppLayout });
                         :active-key="activeKey" 
                         :active-code="activeCode"
                         :is-shift-on="isShiftPressed"
+                        :has-error="firstErrorIndex !== -1"
                         :next-key="sourceCharacters[userInput.length]" />
 
         <!-- Results View -->

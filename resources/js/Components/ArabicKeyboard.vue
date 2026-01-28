@@ -5,6 +5,7 @@ import { useSettings } from '../useSettings';
 const props = defineProps({
     activeKey: String, // The character that was just typed
     activeCode: String, // The physical key code that was just pressed
+    hasError: Boolean,  // Whether there's a typing error that needs fixing
     nextKey: String,   // The character that should be typed next
     isShiftOn: Boolean, // Whether shift is currently being held
 });
@@ -194,13 +195,16 @@ const isKeyNext = (keyObj) => {
                 <div v-for="key in row" :key="key.code" 
                     class="key-cap flex flex-col items-center justify-center transition-all duration-150 rounded-2xl font-cinzel border border-transparent shadow-md relative group"
                     :class="[
-                        key.code === 'Space' ? 'w-[640px] h-20' : (['Backspace', 'Tab', 'CapsLock', 'Enter', 'ShiftLeft', 'ShiftRight'].includes(key.code) ? 'px-8 py-2 min-w-[120px] h-20 opacity-40 uppercase text-[10px]' : 'w-20 h-20'),
+                        key.code === 'Space' ? 'w-[640px] h-10 md:h-20' : (['Backspace', 'Tab', 'CapsLock', 'Enter', 'ShiftLeft', 'ShiftRight'].includes(key.code) ? 'px-8 py-2 min-w-[120px] h-20 uppercase text-[10px]' : 'w-20 h-20'),
                         isKeyActive(key) ? 'key-active' : '',
-                        isKeyNext(key) ? 'key-next' : '',
-                        // Highlight Shift keys if the next char is a shift-character
+                        isKeyNext(key) && !props.hasError ? 'key-next' : '',
+                        key.code === 'Backspace' && props.hasError ? 'key-error' : '',
+                        // Highlighting logic for shift characters remains...
                         (['ShiftLeft', 'ShiftRight'].includes(key.code) && Object.values(shiftArabic101).includes(props.nextKey)) ? 'key-shift-hint' : '',
-                        !isKeyActive(key) && !isKeyNext(key) && !(['ShiftLeft', 'ShiftRight'].includes(key.code) && Object.values(shiftArabic101).includes(props.nextKey)) ? 'bg-[var(--bg-color)]/40 text-[var(--main-color)]' : ''
+                        // Base appearance
+                        !isKeyActive(key) && !isKeyNext(key) && !(['ShiftLeft', 'ShiftRight'].includes(key.code) && Object.values(shiftArabic101).includes(props.nextKey)) && !(key.code === 'Backspace' && props.hasError) ? 'bg-[var(--bg-color)]/40 text-[var(--main-color)]' : (['Backspace', 'Tab', 'CapsLock', 'Enter', 'ShiftLeft', 'ShiftRight'].includes(key.code) && !isKeyActive(key) && !(key.code === 'Backspace' && props.hasError) ? 'opacity-40' : '')
                     ]">
+
                     <!-- Shift Character Label (Tiny, Top Left) - Shows base char when shift is on -->
                     <span v-if="key.shiftLabel || key.label"
                           class="absolute top-2 left-3 text-xs transition-opacity text-[var(--caret-color)] font-bold"
@@ -253,6 +257,22 @@ const isKeyNext = (keyObj) => {
     transform: scale(0.9) translateY(2px);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
     z-index: 10;
+}
+
+.key-error {
+    background: var(--error-color) !important;
+    color: white !important;
+    border-color: var(--error-color) !important;
+    box-shadow: 0 0 20px rgba(255, 49, 49, 0.4);
+    animation: pulse-error 1.5s infinite;
+    font-weight: bold;
+    opacity: 1 !important;
+}
+
+@keyframes pulse-error {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 49, 49, 0.4); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 49, 49, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 49, 49, 0); }
 }
 
 @keyframes pulse-next {
