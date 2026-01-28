@@ -57,4 +57,5 @@ Route::middleware([
 ])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
+    Route::post('/user/settings/error-sound', [\App\Http\Controllers\UserSettingController::class, 'updateErrorSound'])->name('user.settings.error-sound');
 });

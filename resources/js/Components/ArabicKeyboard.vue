@@ -178,7 +178,7 @@ const isKeyNext = (keyObj) => {
 </script>
 
 <template>
-    <div class="keyboard-container mt-12 p-8 bg-[var(--panel-color)] rounded-[2.5rem] border border-[var(--border-color)] backdrop-blur-xl shadow-2xl overflow-hidden select-none relative">
+    <div class="keyboard-container mt-6 p-8 bg-[var(--panel-color)] rounded-[2.5rem] border border-[var(--border-color)] backdrop-blur-xl shadow-2xl overflow-hidden select-none relative">
         <!-- Layout Toggle / Indicator -->
         <div class="absolute top-4 right-8 flex items-center gap-3">
             <button @click="toggleLayout" 
