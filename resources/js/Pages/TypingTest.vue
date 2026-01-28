@@ -50,6 +50,7 @@ const showResults = ref(false);
 const totalErrors = ref(0);
 const isShiftPressed = ref(false);
 const isTyping = ref(false);
+const showLanguageWarning = ref(false);
 let typingTimeout = null;
 
 // --- Caret Position State ---
@@ -430,6 +431,17 @@ const handleInput = (event) => {
     if (!intervalId.value) startTimer();
     
     const newValue = event.target.value.normalize('NFC');
+    
+    // Detect non-Arabic characters (Latin) to show warning
+    const lastChar = newValue[newValue.length - 1];
+    if (lastChar && /[a-zA-Z]/.test(lastChar)) {
+        showLanguageWarning.value = true;
+        // Don't process Latin characters - keep the input as is or strip it?
+        // Let's just show the warning for now.
+    } else if (lastChar) {
+        showLanguageWarning.value = false;
+    }
+
     const addedCount = newValue.length - userInput.value.length;
     
     // Set active key for keyboard animation
@@ -703,6 +715,20 @@ defineOptions({ layout: AppLayout });
              ref="containerRef"
              class="relative w-full max-w-6xl py-12 transition-all duration-500 min-h-[300px] flex items-center"
              :class="{ 'opacity-100': isFocused, 'opacity-40 blur-[4px] scale-[0.98]': !isFocused }">
+            
+            <!-- Language Switching Warning -->
+            <transition name="fade">
+                <div v-if="showLanguageWarning && isFocused" class="absolute inset-x-0 top-0 z-[100] flex justify-center -translate-y-1/2">
+                    <div class="bg-red-500/90 text-white px-8 py-4 rounded-2xl backdrop-blur-xl border border-white/20 shadow-2xl flex items-center gap-4 animate-bounce">
+                        <span class="text-3xl">⌨️</span>
+                        <div class="flex flex-col text-left">
+                            <span class="font-cinzel font-bold text-lg leading-tight">{{ t('switch_to_arabic') }}</span>
+                            <span class="text-[10px] opacity-80 uppercase tracking-widest font-mono">English layout detected</span>
+                        </div>
+                        <button @click="showLanguageWarning = false" class="ml-4 opacity-60 hover:opacity-100 transition-opacity">✕</button>
+                    </div>
+                </div>
+            </transition>
             
             <!-- Smooth Sliding Underline Caret -->
             <div class="absolute bg-[var(--caret-color)] transition-all duration-150 z-[60] pointer-events-none rounded-full"
