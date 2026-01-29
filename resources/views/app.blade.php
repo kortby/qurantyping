@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <title> {{ env('APP_NAME') }} - إختبار سرعة الكتابة</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WXG9JC9FYZ"></script>
