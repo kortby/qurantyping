@@ -107,7 +107,8 @@ if (typeof window !== 'undefined') {
 
                             <transition name="dropdown">
                                 <div v-if="userMenuOpen" 
-                                    class="absolute right-0 mt-3 w-56 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl shadow-2xl backdrop-blur-xl py-2 z-[60] overflow-hidden">
+                                    class="absolute mt-3 w-56 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl shadow-2xl backdrop-blur-xl py-2 z-[60] overflow-hidden"
+                                    :class="currentLang === 'ar' ? 'left-0' : 'right-0'">
                                     <div class="px-4 py-3 border-b border-[var(--border-color)] mb-1">
                                         <p class="text-[10px] opacity-40 lowercase font-mono mb-0.5">{{ t('navigation.logged_in_as') || 'Logged in as' }}</p>
                                         <p class="text-xs font-bold truncate text-[var(--caret-color)]">{{ $page.props.auth.user.email }}</p>

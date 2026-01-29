@@ -86,7 +86,8 @@ export const translations = {
             profile: "Profile",
             profile_subtitle: "Manage your account settings and preferences",
             title: "Navigation",
-            leaderboard: "Leaderboard"
+            leaderboard: "Leaderboard",
+            logged_in_as: "Logged in as"
         },
         auth: {
             email: "Email",
@@ -241,7 +242,8 @@ export const translations = {
             profile: "Profil",
             profile_subtitle: "Gérez les paramètres et préférences de votre compte",
             leaderboard: "Classement",
-            title: "Navigation"
+            title: "Navigation",
+            logged_in_as: "Connecté en tant que"
         },
         auth: {
             email: "E-mail",
@@ -396,7 +398,8 @@ export const translations = {
             profile: "الملف الشخصي",
             profile_subtitle: "إدارة إعدادات حسابك وتفضيلاتك",
             leaderboard: "لوحة المتصدرين",
-            title: "التنقل"
+            title: "التنقل",
+            logged_in_as: "تم الدخول باسم"
         },
         auth: {
             email: "البريد الإلكتروني",
