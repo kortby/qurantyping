@@ -20,7 +20,7 @@ defineProps({
                 <AuthenticationCardLogo />
             </div>
 
-            <div class="w-full sm:max-w-4xl p-10 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-3xl shadow-2xl backdrop-blur-md prose prose-invert max-w-none" 
+            <div class="w-full sm:max-w-7xl p-10 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-3xl shadow-2xl backdrop-blur-md prose prose-invert max-w-none"  
                  style="color: var(--main-color);"
                  v-html="policy" />
         </div>

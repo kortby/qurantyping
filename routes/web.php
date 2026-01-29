@@ -13,10 +13,14 @@ use Inertia\Inertia;
 Route::get('/', TestPageController::class);
 Route::get('/leaderboard', LeaderboardController::class)->name('leaderboard');
 Route::get('/privacy-policy', function () {
-    return Inertia::render('PrivacyPolicy');
+    return Inertia::render('PrivacyPolicy', [
+        'policy' => \Illuminate\Support\Str::markdown(file_get_contents(resource_path('markdown/policy.md'))),
+    ]);
 })->name('privacy.policy');
 Route::get('/terms-of-service', function () {
-    return Inertia::render('TermsOfService');
+    return Inertia::render('TermsOfService', [
+        'terms' => \Illuminate\Support\Str::markdown(file_get_contents(resource_path('markdown/terms.md'))),
+    ]);
 })->name('terms.show');
 Route::get('/work-in-progress', function () {
     return Inertia::render('WorkInProgress');

@@ -224,8 +224,8 @@ const handleFeedbackClick = () => {
                         <button @click="handleFeedbackClick" class="hover:underline flex items-center gap-2">
                             <span>💬</span> {{ t('give_feedback') }}
                         </button>
-                        <Link href="/work-in-progress" class="hover:underline">{{ t('auth.privacy_policy') }}</Link>
-                        <Link href="/work-in-progress" class="hover:underline">{{ t('auth.terms_of_service') }}</Link>
+                        <Link href="/privacy-policy" class="hover:underline">{{ t('auth.privacy_policy') }}</Link>
+                        <Link href="/terms-of-service" class="hover:underline">{{ t('auth.terms_of_service') }}</Link>
                     </div>
                 </div>
             </div>
