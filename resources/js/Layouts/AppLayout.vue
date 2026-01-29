@@ -8,6 +8,7 @@ import Banner from '../Components/Banner.vue';
 
 const { currentLang, currentTheme, setLang, setTheme, t } = useSettings();
 const mobileMenuOpen = ref(false);
+const userMenuOpen = ref(false);
 
 const languages = [
     { code: 'en', label: 'EN' },
@@ -26,6 +27,15 @@ const handleFeedbackClick = () => {
         showAuthWarningModal.value = true;
     }
 };
+
+// Close dropdown on click outside
+if (typeof window !== 'undefined') {
+    window.addEventListener('click', (e) => {
+        if (!e.target.closest('.user-menu-container')) {
+            userMenuOpen.value = false;
+        }
+    });
+}
 
 </script>
 
@@ -85,19 +95,42 @@ const handleFeedbackClick = () => {
                     </div>
 
                     <!-- Desktop Auth -->
-                    <div class="hidden lg:flex items-center gap-8 font-cinzel text-xs uppercase tracking-widest">
-                        <div v-if="$page.props.auth.user" class="flex items-center gap-6">
-                            <Link href="/user/profile" class="flex flex-col items-end group text-right">
-                                <span class="opacity-60 group-hover:text-[var(--caret-color)] group-hover:opacity-100 transition-all font-bold">
-                                    {{ t('navigation.profile') }}
-                                </span>
-                                <span class="text-[9px] opacity-40 group-hover:text-[var(--caret-color)] group-hover:opacity-70 transition-all mt-0.5 font-mono normal-case tracking-normal truncate max-w-[100px]">
+                    <div class="hidden lg:flex items-center gap-8 font-cinzel text-xs uppercase tracking-widest relative user-menu-container">
+                        <div v-if="$page.props.auth.user" class="relative">
+                            <button @click="userMenuOpen = !userMenuOpen" 
+                                class="flex items-center gap-3 px-4 py-2 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] hover:border-[var(--caret-color)]/30 transition-all shadow-lg group">
+                                <span class="text-sm opacity-80 group-hover:text-[var(--caret-color)] transition-colors truncate max-w-[120px] font-bold">
                                     {{ $page.props.auth.user.name }}
                                 </span>
-                            </Link>
-                            <Link href="/logout" method="post" as="button" class="opacity-60 hover:text-[var(--error-color)] hover:opacity-100 transition-all font-bold">
-                                {{ t('logout') }}
-                            </Link>
+                                <span class="text-[10px] transform transition-transform duration-300" :class="{ 'rotate-180': userMenuOpen }">▼</span>
+                            </button>
+
+                            <transition name="dropdown">
+                                <div v-if="userMenuOpen" 
+                                    class="absolute right-0 mt-3 w-56 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl shadow-2xl backdrop-blur-xl py-2 z-[60] overflow-hidden">
+                                    <div class="px-4 py-3 border-b border-[var(--border-color)] mb-1">
+                                        <p class="text-[10px] opacity-40 lowercase font-mono mb-0.5">{{ t('navigation.logged_in_as') || 'Logged in as' }}</p>
+                                        <p class="text-xs font-bold truncate text-[var(--caret-color)]">{{ $page.props.auth.user.email }}</p>
+                                    </div>
+                                    <Link href="/user/profile" @click="userMenuOpen = false"
+                                        class="flex items-center gap-3 px-4 py-3 hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-all font-bold group">
+                                        <span class="text-base group-hover:scale-110 transition-transform">👤</span>
+                                        {{ t('navigation.profile') }}
+                                    </Link>
+                                    <Link href="/dashboard" @click="userMenuOpen = false"
+                                        class="flex items-center gap-3 px-4 py-3 hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-all font-bold group">
+                                        <span class="text-base group-hover:scale-110 transition-transform">📊</span>
+                                        {{ t('navigation.dashboard') }}
+                                    </Link>
+                                    <div class="border-t border-[var(--border-color)] mt-1">
+                                        <Link href="/logout" method="post" as="button"
+                                            class="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--error-color)]/10 hover:text-[var(--error-color)] transition-all font-bold group">
+                                            <span class="text-base group-hover:scale-110 transition-transform">🚪</span>
+                                            {{ t('logout') }}
+                                        </Link>
+                                    </div>
+                                </div>
+                            </transition>
                         </div>
                         <div v-else class="flex items-center gap-8">
                             <Link href="/login" class="opacity-60 hover:text-[var(--caret-color)] hover:opacity-100 transition-all font-bold">{{ t('login') }}</Link>
@@ -149,6 +182,11 @@ const handleFeedbackClick = () => {
                         </button>
                         <hr class="border-[var(--border-color)] opacity-20 my-4" />
                         <div v-if="$page.props.auth.user" class="flex flex-col gap-4">
+                            <div class="px-4 py-4 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl mb-2">
+                                <p class="text-[10px] opacity-40 lowercase font-mono mb-0.5">{{ t('navigation.logged_in_as') || 'Logged in as' }}</p>
+                                <p class="text-lg font-bold truncate text-[var(--caret-color)] font-cinzel">{{ $page.props.auth.user.name }}</p>
+                                <p class="text-xs opacity-60 truncate">{{ $page.props.auth.user.email }}</p>
+                            </div>
                             <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="w-full py-4 rounded-xl border border-[var(--error-color)] text-[var(--error-color)] font-bold uppercase tracking-widest text-sm">
                                 {{ t('logout') }}
                             </Link>
@@ -249,4 +287,17 @@ const handleFeedbackClick = () => {
 .text-error { color: var(--error-color); }
 .bg-main { background-color: var(--bg-color); }
 .bg-panel { background-color: var(--panel-color); }
+
+/* Dropdown Animation */
+.dropdown-enter-active {
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.dropdown-leave-active {
+    transition: all 0.2s cubic-bezier(0.47, 0, 0.745, 0.715);
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+}
 </style>
