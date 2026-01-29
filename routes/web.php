@@ -26,6 +26,12 @@ Route::get('/work-in-progress', function () {
     return Inertia::render('WorkInProgress');
 })->name('wip');
 
+Route::get('/data-deletion', function () {
+    return Inertia::render('DataDeletion', [
+        'content' => \Illuminate\Support\Str::markdown(file_get_contents(resource_path('markdown/data_deletion.md'))),
+    ]);
+})->name('data.deletion');
+
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
 
 // Social Authentication
