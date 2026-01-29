@@ -71,4 +71,4 @@ If you have any questions about QuranTyping’s privacy policy, the data we hold
 
 Email: contact@qurantyping.com
 
-*Terms based on Glitch terms*
+
