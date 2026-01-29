@@ -87,8 +87,13 @@ const handleFeedbackClick = () => {
                     <!-- Desktop Auth -->
                     <div class="hidden lg:flex items-center gap-8 font-cinzel text-xs uppercase tracking-widest">
                         <div v-if="$page.props.auth.user" class="flex items-center gap-6">
-                            <Link href="/user/profile" class="opacity-60 hover:text-[var(--caret-color)] hover:opacity-100 transition-all font-bold">
-                                {{ t('navigation.profile') }}
+                            <Link href="/user/profile" class="flex flex-col items-end group text-right">
+                                <span class="opacity-60 group-hover:text-[var(--caret-color)] group-hover:opacity-100 transition-all font-bold">
+                                    {{ t('navigation.profile') }}
+                                </span>
+                                <span class="text-[9px] opacity-40 group-hover:text-[var(--caret-color)] group-hover:opacity-70 transition-all mt-0.5 font-mono normal-case tracking-normal truncate max-w-[100px]">
+                                    {{ $page.props.auth.user.name }}
+                                </span>
                             </Link>
                             <Link href="/logout" method="post" as="button" class="opacity-60 hover:text-[var(--error-color)] hover:opacity-100 transition-all font-bold">
                                 {{ t('logout') }}
