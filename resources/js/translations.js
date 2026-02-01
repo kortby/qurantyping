@@ -74,6 +74,10 @@ export const translations = {
         feedback_success: "Thank you for your feedback!",
         feedback_auth_warning: "You must be logged in to send feedback.",
         feedback_placeholder: "Tell us what's on your mind...",
+        guest_test_title: "Great performance!",
+        guest_test_message: "Create an account to save your progress, track your improvements, and see your rank on the leaderboard.",
+        guest_test_save_cta: "Create account to save this result",
+        guest_test_skip: "Maybe later",
         work_in_progress: {
             title: "Under Construction",
             subtitle: "Working for Excellence",
@@ -230,6 +234,10 @@ export const translations = {
         feedback_success: "Merci pour votre commentaire !",
         feedback_auth_warning: "Vous devez être connecté pour envoyer un commentaire.",
         feedback_placeholder: "Dites-nous ce que vous en pensez...",
+        guest_test_title: "Belle performance !",
+        guest_test_message: "Créez un compte pour sauvegarder vos progrès, suivre vos améliorations et voir votre rang dans le classement.",
+        guest_test_save_cta: "Créer un compte pour sauvegarder ce résultat",
+        guest_test_skip: "Peut-être plus tard",
         work_in_progress: {
             title: "En Construction",
             subtitle: "Travail pour l'Excellence",
@@ -386,6 +394,10 @@ export const translations = {
         feedback_success: "شكراً لك على ملاحظاتك!",
         feedback_auth_warning: "يجب تسجيل الدخول لإرسال الملاحظات.",
         feedback_placeholder: "أخبرنا بما يدور في ذهنك...",
+        guest_test_title: "أداء رائع!",
+        guest_test_message: "أنشئ حساباً لحفظ تقدمك، ومتابعة تحسن مستواك، ورؤية ترتيبك في لوحة المتصدرين.",
+        guest_test_save_cta: "أنشئ حساباً لحفظ هذه النتيجة",
+        guest_test_skip: "ربما لاحقاً",
         work_in_progress: {
             title: "قيد التطوير",
             subtitle: "نعمل بجد للتميز",
