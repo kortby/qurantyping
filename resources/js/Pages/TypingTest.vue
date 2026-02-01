@@ -7,6 +7,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import ArabicKeyboard from '@/Components/ArabicKeyboard.vue';
 import SurahSelect from '@/Components/SurahSelect.vue';
 import QuranAudioPlayer from '@/Components/QuranAudioPlayer.vue';
+import GuestTestModal from '@/Components/GuestTestModal.vue';
 import { useSettings } from '../useSettings';
 
 const activeKey = ref(null);
@@ -52,6 +53,8 @@ const isShiftPressed = ref(false);
 const isTyping = ref(false);
 const showLanguageWarning = ref(false);
 let typingTimeout = null;
+
+const showGuestModal = ref(false);
 
 // Error Sound Logic
 const errorSoundEnabled = ref(page.props.auth?.user?.error_sound ?? true);
@@ -555,7 +558,7 @@ const finishTest = async () => {
             }
         });
 
-        await axios.post('/test/complete', {
+        const testData = {
             quran_text_id: quranText.value.id,
             wpm: wpm.value,
             raw_wpm: wpm.value,
@@ -568,7 +571,16 @@ const finishTest = async () => {
             start_ayah: quranText.value.start_ayah,
             end_ayah: quranText.value.end_ayah,
             total_errors: totalErrors.value,
-        });
+        };
+
+        if (!page.props.auth?.user) {
+            localStorage.setItem('cached_typing_test', JSON.stringify(testData));
+            setTimeout(() => {
+                showGuestModal.value = true;
+            }, 1000);
+        }
+
+        await axios.post('/test/complete', testData);
     } catch (error) {
         console.error("Failed to save test result:", error);
     }
@@ -917,6 +929,8 @@ defineOptions({ layout: AppLayout });
                 </div>
             </div>
         </div>
+
+        <GuestTestModal :show="showGuestModal" @close="showGuestModal = false" />
 
         <!-- Footer Context Info -->
         <div v-if="!showResults && quranText.surah_name_arabic" class="mt-auto py-12 text-[var(--sub-color)] font-mono text-xs flex gap-8 items-center bg-[var(--panel-color)] px-8 rounded-full border border-white/5 backdrop-blur-md opacity-60 hover:opacity-100 transition-opacity">

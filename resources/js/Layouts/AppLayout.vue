@@ -1,6 +1,7 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { ref, watch, onMounted } from 'vue';
+import { Link, usePage, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { useSettings } from '../useSettings';
 import FeedbackModal from '../Components/FeedbackModal.vue';
 import AuthWarningModal from '../Components/AuthWarningModal.vue';
@@ -35,6 +36,44 @@ if (typeof window !== 'undefined') {
             userMenuOpen.value = false;
         }
     });
+
+    const syncCachedTest = () => {
+        if (!page.props.auth?.user) return;
+
+        const cachedTest = localStorage.getItem('cached_typing_test');
+        if (!cachedTest) return;
+
+        try {
+            const data = JSON.parse(cachedTest);
+            axios.post('/test/complete', data)
+                .then(() => {
+                    localStorage.removeItem('cached_typing_test');
+                    // Refresh current page data to show new test results/stats
+                    router.reload({ 
+                        only: ['results', 'bestWpm', 'averageWpm', 'personalBestWpm', 'topScorers'],
+                        preserveScroll: true,
+                        preserveState: true
+                    });
+                })
+                .catch(e => {
+                    console.error('Failed to sync cached test:', e);
+                    // If it's a validation error (422) or other definitive failure, remove it
+                    if (e.response && (e.response.status === 422 || e.response.status === 401)) {
+                        localStorage.removeItem('cached_typing_test');
+                    }
+                });
+        } catch (e) {
+            console.error('Failed to parse cached test:', e);
+            localStorage.removeItem('cached_typing_test');
+        }
+    };
+
+    onMounted(syncCachedTest);
+
+    // Watch for auth changes (e.g., after login/registration without a full page reload)
+    watch(() => page.props.auth?.user, (user) => {
+        if (user) syncCachedTest();
+    }, { immediate: true });
 }
 
 </script>

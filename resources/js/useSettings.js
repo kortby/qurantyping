@@ -20,6 +20,10 @@ export function useSettings() {
     const setLang = (lang) => {
         currentLang.value = lang;
         localStorage.setItem('lang', lang);
+
+        // Set cookie for backend locale synchronization
+        document.cookie = `lang=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+
         document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
     };
