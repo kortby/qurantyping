@@ -32,22 +32,14 @@ const hasAny = computed(() => page.props.social.has_any);
 </script>
 
 <template>
-    <div v-if="hasAny" class="mt-8 space-y-4">
-        <div class="relative flex items-center justify-center">
-            <div class="flex-grow border-t border-[var(--border-color)]"></div>
-            <span class="flex-shrink mx-4 text-[10px] font-cinzel text-[var(--sub-color)] uppercase tracking-[0.3em] font-bold">or continue with</span>
-            <div class="flex-grow border-t border-[var(--border-color)]"></div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" :class="{'sm:grid-cols-2': providers.length === 2, 'sm:grid-cols-1': providers.length === 1}">
-            <a v-for="provider in providers" 
-               :key="provider.name"
-               :href="route('social.redirect', { provider: provider.name })"
-               class="flex items-center justify-center gap-3 px-4 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--panel-color)] hover:border-[var(--caret-color)] hover:bg-[var(--main-color)]/[0.05] transition-all duration-300 group shadow-lg shadow-black/5"
-            >
-                <div v-html="provider.svg" class="transition-transform group-hover:scale-110 duration-300"></div>
-                <span class="text-[10px] font-cinzel font-bold text-[var(--main-color)] uppercase tracking-widest">{{ provider.label }}</span>
-            </a>
-        </div>
+    <div v-if="hasAny" class="grid grid-cols-1 sm:grid-cols-3 gap-4" :class="{'sm:grid-cols-2': providers.length === 2, 'sm:grid-cols-1': providers.length === 1}">
+        <a v-for="provider in providers" 
+            :key="provider.name"
+            :href="route('social.redirect', { provider: provider.name })"
+            class="flex items-center justify-center gap-3 px-4 py-3 rounded-2xl border border-[var(--border-color)] bg-[var(--panel-color)] hover:border-[var(--caret-color)] hover:bg-[var(--main-color)]/[0.05] transition-all duration-300 group shadow-lg shadow-black/5"
+        >
+            <div v-html="provider.svg" class="transition-transform group-hover:scale-110 duration-300"></div>
+            <span class="text-[10px] font-cinzel font-bold text-[var(--main-color)] uppercase tracking-widest">{{ provider.label }}</span>
+        </a>
     </div>
 </template>

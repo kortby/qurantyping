@@ -6,6 +6,7 @@ import { useSettings } from '../useSettings';
 import FeedbackModal from '../Components/FeedbackModal.vue';
 import AuthWarningModal from '../Components/AuthWarningModal.vue';
 import Banner from '../Components/Banner.vue';
+import SocialButtons from '@/Components/SocialButtons.vue';
 
 const { currentLang, currentTheme, setLang, setTheme, t } = useSettings();
 const mobileMenuOpen = ref(false);
@@ -198,8 +199,8 @@ if (typeof window !== 'undefined') {
         <transition name="fade">
             <div v-if="mobileMenuOpen" class="fixed inset-0 z-40 lg:hidden">
                 <div class="absolute inset-0 bg-[var(--bg-color)]/95 backdrop-blur-xl"></div>
-                <div class="relative h-full flex flex-col p-8 pt-32">
-                    <nav class="flex flex-col gap-8 font-cinzel text-2xl font-bold tracking-widest text-center">
+                <div class="relative h-full flex flex-col p-6 pt-24">
+                    <nav class="flex flex-col gap-4 font-cinzel text-xl font-bold tracking-widest text-center">
                         <Link href="/" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('leaderboard') }}</Link>
                         <template v-if="$page.props.auth.user">
@@ -208,19 +209,19 @@ if (typeof window !== 'undefined') {
                         </template>
                     </nav>
 
-                    <div class="mt-auto flex flex-col gap-6">
-                        <div class="flex justify-center gap-4">
+                    <div class="mt-8 flex flex-col gap-4">
+                        <div class="flex justify-center gap-2">
                             <button v-for="lang in languages" :key="lang.code" @click="setLang(lang.code)"
-                                class="px-6 py-3 rounded-xl text-sm font-cinzel font-bold border border-[var(--border-color)]"
+                                class="px-4 py-2 rounded-lg text-xs font-cinzel font-bold border border-[var(--border-color)]"
                                 :class="currentLang === lang.code ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'bg-[var(--panel-color)] text-[var(--sub-color)]'">
                                 {{ lang.label }}
                             </button>
                         </div>
                         <button @click="setTheme(currentTheme === 'dark' ? 'light' : 'dark')"
-                            class="w-full py-4 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] text-xl font-cinzel">
+                            class="w-full py-3 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] text-sm font-cinzel">
                             {{ currentTheme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode' }}
                         </button>
-                        <hr class="border-[var(--border-color)] opacity-20 my-4" />
+                        <hr class="border-[var(--border-color)] opacity-20 my-2" />
                         <div v-if="$page.props.auth.user" class="flex flex-col gap-4">
                             <div class="px-4 py-4 bg-[var(--panel-color)] border border-[var(--border-color)] rounded-2xl mb-2">
                                 <p class="text-[10px] opacity-40 lowercase font-mono mb-0.5">{{ t('navigation.logged_in_as') || 'Logged in as' }}</p>
@@ -232,15 +233,26 @@ if (typeof window !== 'undefined') {
                             </Link>
                         </div>
                         <div v-else class="flex flex-col gap-4">
-                            <Link href="/login" @click="mobileMenuOpen = false" class="w-full py-4 rounded-xl border border-[var(--border-color)] text-[var(--main-color)] text-center font-bold uppercase tracking-widest text-sm">
+                            <div v-if="$page.props.social?.has_any">
+                                <SocialButtons />
+                                <div class="relative flex items-center justify-center my-4 opacity-60">
+                                    <div class="flex-grow border-t border-[var(--border-color)]"></div>
+                                    <span class="flex-shrink mx-4 text-[9px] font-cinzel text-[var(--sub-color)] uppercase tracking-widest">
+                                        {{ t('or_login_with_email') || 'OR' }}
+                                    </span>
+                                    <div class="flex-grow border-t border-[var(--border-color)]"></div>
+                                </div>
+                            </div>
+
+                            <Link href="/login" @click="mobileMenuOpen = false" class="w-full py-3 rounded-xl border border-[var(--border-color)] text-[var(--main-color)] text-center font-bold uppercase tracking-widest text-xs">
                                 {{ t('login') }}
                             </Link>
-                            <Link href="/register" @click="mobileMenuOpen = false" class="w-full py-4 rounded-xl bg-[var(--caret-color)] text-[var(--bg-color)] text-center font-bold uppercase tracking-widest text-sm shadow-xl shadow-emerald-950/20">
+                            <Link href="/register" @click="mobileMenuOpen = false" class="w-full py-3 rounded-xl bg-[var(--caret-color)] text-[var(--bg-color)] text-center font-bold uppercase tracking-widest text-xs shadow-lg shadow-emerald-950/20">
                                 {{ t('register') }}
                             </Link>
                         </div>
                         <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" 
-                           class="w-full py-4 rounded-xl bg-red-600 text-white text-center font-bold uppercase tracking-widest text-sm shadow-xl shadow-red-950/20 flex items-center justify-center gap-3 mt-4">
+                           class="w-full py-3 rounded-xl bg-red-600 text-white text-center font-bold uppercase tracking-widest text-xs shadow-lg shadow-red-950/20 flex items-center justify-center gap-3 mt-2">
                             <span>❤️</span> {{ t('donate') }}
                         </a>
                     </div>

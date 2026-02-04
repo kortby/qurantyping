@@ -666,9 +666,9 @@ defineOptions({ layout: AppLayout });
         <meta name="description" content="Test your Quranic typing speed and accuracy. Practice memorization by typing surahs in Arabic with real-time feedback.">
     </Head>
 
-    <div class="flex flex-col items-center justify-start py-8 min-h-[80vh]">
+    <div class="flex flex-col items-center justify-start py-8 px-4 md:px-0 min-h-[80vh]">
         <!-- Minimalist Filters -->
-        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-2 flex flex-wrap items-center gap-6 font-mono text-sm">
+        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-2 flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 font-mono text-sm max-w-full">
             <SurahSelect 
                 v-model="selectedSurah" 
                 :options="surahs" 
@@ -740,7 +740,7 @@ defineOptions({ layout: AppLayout });
         </form>
 
         <!-- Live Stats (during test) -->
-        <div v-if="!showResults" class="w-full max-w-6xl mb-2 flex gap-12 font-cinzel text-xl text-[var(--caret-color)] select-none">
+        <div v-if="!showResults" class="w-full max-w-6xl mb-2 flex flex-wrap gap-4 justify-between md:justify-start md:gap-12 font-cinzel text-sm md:text-xl text-[var(--caret-color)] select-none px-2 md:px-0">
             <div class="flex flex-col">
                 <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1 font-mono">{{ t('wpm') }}</span>
                 <span class="font-bold border-b border-[var(--border-color)] pb-1">{{ wpm }}</span>
@@ -840,12 +840,13 @@ defineOptions({ layout: AppLayout });
                 </div>
             </div>
 
-            <div class="text-4xl lg:text-5xl select-none text-right w-full transition-all duration-300" 
+            <div class="text-2xl md:text-4xl lg:text-5xl select-none text-right w-full transition-all duration-300" 
                  :style="{ 
                      fontFamily: 'Noto Naskh Arabic, serif', 
-                     lineHeight: usePunctuation ? '6.5rem' : '4.5rem' 
                  }" 
-                 :class="usePunctuation ? 'py-4' : 'py-2'"
+                 :class="[
+                     usePunctuation ? 'py-4 leading-[4rem] md:leading-[6.5rem]' : 'py-2 leading-[3rem] md:leading-[4.5rem]'
+                 ]"
                  dir="rtl">
                 <p class="relative z-0 whitespace-pre-wrap break-words transition-all duration-300">
                     <span v-for="(cluster, idx) in sourceClusters" :key="idx" 
@@ -884,6 +885,7 @@ defineOptions({ layout: AppLayout });
 
         <!-- Animated Keyboard -->
         <ArabicKeyboard v-if="currentDisplayText && !showResults" 
+                        class="hidden lg:block"
                         :active-key="activeKey" 
                         :active-code="activeCode"
                         :is-shift-on="isShiftPressed"
@@ -892,18 +894,18 @@ defineOptions({ layout: AppLayout });
 
         <!-- Results View -->
         <div v-if="showResults" class="w-full max-w-6xl flex flex-col items-center justify-center py-20 animate-fade-in font-cinzel">
-            <div class="flex flex-col md:flex-row gap-20 mb-16 items-center">
+            <div class="flex flex-col md:flex-row gap-8 md:gap-20 mb-16 items-center">
                 <div class="flex flex-col items-center group">
                     <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('wpm') }}</span>
-                    <span class="text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ wpm }}</span>
+                    <span class="text-6xl md:text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ wpm }}</span>
                 </div>
                 <div class="flex flex-col items-center group">
                     <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('accuracy') }}</span>
-                    <span class="text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ accuracy }}%</span>
+                    <span class="text-6xl md:text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ accuracy }}%</span>
                 </div>
                 <div class="flex flex-col items-center group">
                     <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--error-color)] transition-colors">Errors</span>
-                    <span class="text-8xl text-[var(--error-color)] font-bold drop-shadow-sm">{{ totalErrors }}</span>
+                    <span class="text-6xl md:text-8xl text-[var(--error-color)] font-bold drop-shadow-sm">{{ totalErrors }}</span>
                 </div>
             </div>
             
@@ -933,7 +935,7 @@ defineOptions({ layout: AppLayout });
         <GuestTestModal :show="showGuestModal" @close="showGuestModal = false" />
 
         <!-- Footer Context Info -->
-        <div v-if="!showResults && quranText.surah_name_arabic" class="mt-auto py-12 text-[var(--sub-color)] font-mono text-xs flex gap-8 items-center bg-[var(--panel-color)] px-8 rounded-full border border-white/5 backdrop-blur-md opacity-60 hover:opacity-100 transition-opacity">
+        <div v-if="!showResults && quranText.surah_name_arabic" class="mt-auto py-6 md:py-12 text-[var(--sub-color)] font-mono text-xs flex flex-col md:flex-row gap-4 md:gap-8 items-center bg-[var(--panel-color)] px-8 rounded-2xl md:rounded-full border border-white/5 backdrop-blur-md opacity-60 hover:opacity-100 transition-opacity text-center md:text-left">
             <div class="flex items-center gap-3">
                 <kbd class="bg-[var(--main-color)] text-[var(--bg-color)] px-2 py-0.5 rounded font-bold">TAB</kbd>
                 <span>{{ t('restart') }}</span>
