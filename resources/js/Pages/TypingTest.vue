@@ -666,9 +666,9 @@ defineOptions({ layout: AppLayout });
         <meta name="description" content="Test your Quranic typing speed and accuracy. Practice memorization by typing surahs in Arabic with real-time feedback.">
     </Head>
 
-    <div class="flex flex-col items-center justify-start py-8 px-4 md:px-0 min-h-[80vh]">
+    <div class="flex flex-col items-center justify-start py-8 px-6 md:px-8 lg:px-0 min-h-[80vh]">
         <!-- Minimalist Filters -->
-        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-2 flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 font-mono text-sm max-w-full">
+        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-2 flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 lg:gap-6 font-mono text-sm max-w-full">
             <SurahSelect 
                 v-model="selectedSurah" 
                 :options="surahs" 
@@ -740,7 +740,7 @@ defineOptions({ layout: AppLayout });
         </form>
 
         <!-- Live Stats (during test) -->
-        <div v-if="!showResults" class="w-full max-w-6xl mb-2 flex flex-wrap gap-4 justify-between md:justify-start md:gap-12 font-cinzel text-sm md:text-xl text-[var(--caret-color)] select-none px-2 md:px-0">
+        <div v-if="!showResults" class="w-full max-w-6xl mb-2 flex flex-wrap gap-6 justify-between md:justify-start md:gap-8 lg:gap-12 font-cinzel text-base md:text-lg lg:text-xl text-[var(--caret-color)] select-none px-2 md:px-0">
             <div class="flex flex-col">
                 <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1 font-mono">{{ t('wpm') }}</span>
                 <span class="font-bold border-b border-[var(--border-color)] pb-1">{{ wpm }}</span>
@@ -840,12 +840,12 @@ defineOptions({ layout: AppLayout });
                 </div>
             </div>
 
-            <div class="text-2xl md:text-4xl lg:text-5xl select-none text-right w-full transition-all duration-300" 
+            <div class="text-3xl md:text-4xl lg:text-5xl select-none text-right w-full transition-all duration-300" 
                  :style="{ 
                      fontFamily: 'Noto Naskh Arabic, serif', 
                  }" 
                  :class="[
-                     usePunctuation ? 'py-4 leading-[4rem] md:leading-[6.5rem]' : 'py-2 leading-[3rem] md:leading-[4.5rem]'
+                     usePunctuation ? 'py-4 leading-[4.5rem] md:leading-[5.5rem] lg:leading-[6.5rem]' : 'py-2 leading-[3.5rem] md:leading-[4rem] lg:leading-[4.5rem]'
                  ]"
                  dir="rtl">
                 <p class="relative z-0 whitespace-pre-wrap break-words transition-all duration-300">
@@ -893,11 +893,11 @@ defineOptions({ layout: AppLayout });
                         :next-key="sourceCharacters[userInput.length]" />
 
         <!-- Results View -->
-        <div v-if="showResults" class="w-full max-w-6xl flex flex-col items-center justify-center py-20 animate-fade-in font-cinzel">
+        <div v-if="showResults" class="w-full max-w-6xl flex flex-col items-center justify-center py-12 md:py-16 lg:py-20 animate-fade-in font-cinzel">
             <div class="flex flex-col md:flex-row gap-8 md:gap-20 mb-16 items-center">
                 <div class="flex flex-col items-center group">
                     <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('wpm') }}</span>
-                    <span class="text-6xl md:text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ wpm }}</span>
+                    <span class="text-6xl md:text-7xl lg:text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ wpm }}</span>
                 </div>
                 <div class="flex flex-col items-center group">
                     <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('accuracy') }}</span>
