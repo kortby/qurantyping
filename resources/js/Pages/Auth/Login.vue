@@ -44,6 +44,18 @@ const submit = () => {
                     <AuthenticationCardLogo />
                 </template>
 
+                <div v-if="$page.props.social?.has_any" class="mb-6">
+                    <SocialButtons />
+                    
+                    <div class="relative flex items-center justify-center mt-6">
+                        <div class="flex-grow border-t border-[var(--border-color)]"></div>
+                        <span class="flex-shrink mx-4 text-[10px] font-cinzel text-[var(--sub-color)] uppercase tracking-[0.3em] font-bold">
+                            {{ t('or_login_with_email') || 'OR LOGIN WITH EMAIL' }}
+                        </span>
+                        <div class="flex-grow border-t border-[var(--border-color)]"></div>
+                    </div>
+                </div>
+
                 <div v-if="status" class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
                     {{ status }}
                 </div>
@@ -97,8 +109,6 @@ const submit = () => {
                         </PrimaryButton>
                     </div>
                 </form>
-
-                <SocialButtons />
             </AuthenticationCard>
         </div>
     </AppLayout>

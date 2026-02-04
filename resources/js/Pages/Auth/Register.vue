@@ -38,6 +38,18 @@ const submit = () => {
                     <AuthenticationCardLogo />
                 </template>
 
+                <div v-if="$page.props.social?.has_any" class="mb-6">
+                    <SocialButtons />
+                    
+                    <div class="relative flex items-center justify-center mt-6">
+                        <div class="flex-grow border-t border-[var(--border-color)]"></div>
+                        <span class="flex-shrink mx-4 text-[10px] font-cinzel text-[var(--sub-color)] uppercase tracking-[0.3em] font-bold">
+                            {{ t('or_register_with_email') || 'OR REGISTER WITH EMAIL' }}
+                        </span>
+                        <div class="flex-grow border-t border-[var(--border-color)]"></div>
+                    </div>
+                </div>
+
                 <div v-if="$page.props.flash.error" class="mb-6 font-medium text-sm text-[var(--error-color)] bg-[var(--error-color)]/10 p-4 rounded-xl border border-[var(--error-color)]/20">
                     {{ $page.props.flash.error }}
                 </div>
@@ -127,7 +139,7 @@ const submit = () => {
                     </div>
                 </form>
 
-                <SocialButtons />
+
             </AuthenticationCard>
         </div>
     </AppLayout>
