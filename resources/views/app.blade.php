@@ -8,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!-- Google tag (gtag.js) -->
+    @production
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WXG9JC9FYZ"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -19,6 +20,7 @@
 
         gtag('config', 'G-WXG9JC9FYZ');
     </script>
+    @endproduction
 
     <!-- SEO Meta Tags -->
     <meta name="description"
