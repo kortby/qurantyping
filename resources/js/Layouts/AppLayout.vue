@@ -219,7 +219,7 @@ if (typeof window !== 'undefined') {
                         </div>
                         <button @click="setTheme(currentTheme === 'dark' ? 'light' : 'dark')"
                             class="w-full py-3 rounded-xl bg-[var(--panel-color)] border border-[var(--border-color)] text-sm font-cinzel">
-                            {{ currentTheme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode' }}
+                            {{ currentTheme === 'dark' ? `🌙 ${t('dark_mode')}` : `☀️ ${t('light_mode')}` }}
                         </button>
                         <hr class="border-[var(--border-color)] opacity-20 my-2" />
                         <div v-if="$page.props.auth.user" class="flex flex-col gap-4">
