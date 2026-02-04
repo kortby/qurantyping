@@ -7,19 +7,34 @@ use App\Http\Controllers\TestPageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\App;
 use Inertia\Inertia;
 
 
 Route::get('/', TestPageController::class);
 Route::get('/leaderboard', LeaderboardController::class)->name('leaderboard');
 Route::get('/privacy-policy', function () {
+    $lang = App::getLocale();
+    $file = resource_path("markdown/policy.{$lang}.md");
+
+    if (!file_exists($file)) {
+        $file = resource_path('markdown/policy.md');
+    }
+
     return Inertia::render('PrivacyPolicy', [
-        'policy' => \Illuminate\Support\Str::markdown(file_get_contents(resource_path('markdown/policy.md'))),
+        'policy' => \Illuminate\Support\Str::markdown(file_get_contents($file)),
     ]);
 })->name('privacy.policy');
 Route::get('/terms-of-service', function () {
+    $lang = App::getLocale();
+    $file = resource_path("markdown/terms.{$lang}.md");
+
+    if (!file_exists($file)) {
+        $file = resource_path('markdown/terms.md');
+    }
+
     return Inertia::render('TermsOfService', [
-        'terms' => \Illuminate\Support\Str::markdown(file_get_contents(resource_path('markdown/terms.md'))),
+        'terms' => \Illuminate\Support\Str::markdown(file_get_contents($file)),
     ]);
 })->name('terms.show');
 Route::get('/work-in-progress', function () {
@@ -31,6 +46,14 @@ Route::get('/data-deletion', function () {
         'content' => \Illuminate\Support\Str::markdown(file_get_contents(resource_path('markdown/data_deletion.md'))),
     ]);
 })->name('data.deletion');
+
+Route::get('/debug-lang', function () {
+    return response()->json([
+        'cookie_lang' => request()->cookie('lang'),
+        'all_cookies' => request()->cookies->all(),
+    ]);
+});
+
 
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
 
