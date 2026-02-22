@@ -88,7 +88,7 @@ export const translations = {
             begins_in: "Contest Begins In",
             live_now: "LIVE NOW",
             live_title: "Ramadan Contest • The 27th Night",
-            live_desc: "Your typing speed and accuracy is being recorded! Score >{wpm} WPM & {acc}% acc.",
+            live_desc: "Your typing speed and accuracy is being recorded! Min requirements: {wpm} WPM, {acc}% accuracy & {chars} characters.",
             peak: "Laylat al-Qadr Peak",
             closes_in: "Contest Closes In",
             ended_title: "The Ramadan Contest has ended!",
@@ -98,21 +98,22 @@ export const translations = {
             inactive_desc: "The Global Ramadan typing contest is currently closed. Keep an eye out for the next 48-hour global window!",
             leaderboard_title: "🌙 Ramadan Typing Contest",
             first_prize: "1st Place Prize: $100 USD",
-            qualification: "Qualification: >{wpm} WPM & {acc}% acc.",
+            qualification: "Qualification: {wpm} WPM, {acc}% Accuracy & {chars} Characters",
             first_to_qualify: "The contest just started. Be the first to qualify! 🏆",
             raw: "Raw",
             correct: "Correct",
             length: "Length",
             name: "Name",
             eligible: "Eligible",
-            eligible_tooltip: "This score qualifies for the Ramadan contest.",
+            eligible_tooltip: "Qualified: {wpm} WPM, {acc}% Accuracy & {chars} Characters.",
             back_to_dashboard: "Back to Dashboard",
             view_rules: "View Rules",
             hide_rules: "Hide Rules",
             rules_title: "Contest Qualification Rules",
             rule_1: "You must achieve a minimum speed of {wpm} WPM.",
             rule_2: "You must maintain a minimum accuracy of {acc}%.",
-            rule_3: "Only tests completed during the 48-hour LIVE window are eligible for the global prize."
+            rule_3: "Only tests completed during the 48-hour LIVE window are eligible for the global prize.",
+            rule_4: "You must type at least {chars} characters in a single test."
         },
         work_in_progress: {
             title: "Under Construction",
@@ -284,7 +285,7 @@ export const translations = {
             begins_in: "Le Concours Commence Dans",
             live_now: "EN DIRECT",
             live_title: "Concours du Ramadan • La 27ème Nuit",
-            live_desc: "Votre vitesse et votre précision de frappe sont enregistrées ! Score >{wpm} mots/min & {acc}% préc.",
+            live_desc: "Votre vitesse et votre précision de frappe sont enregistrées ! Exigences minimales : {wpm} mots/min, {acc}% précision et {chars} caractères.",
             peak: "Pic de Laylat al-Qadr",
             closes_in: "Fermeture du Concours Dans",
             ended_title: "Le concours du Ramadan est terminé !",
@@ -294,21 +295,22 @@ export const translations = {
             inactive_desc: "Le concours mondial de dactylographie du Ramadan est actuellement fermé. Restez à l'affût pour la prochaine fenêtre mondiale de 48 heures !",
             leaderboard_title: "🌙 Concours de Dactylographie du Ramadan",
             first_prize: "Prix 1ère place : 100 $ USD",
-            qualification: "Qualification : >{wpm} mots/min & {acc}% préc.",
+            qualification: "Qualification : {wpm} mots/min, {acc}% Précision et {chars} Caractères",
             first_to_qualify: "Le concours vient de commencer. Soyez le premier à vous qualifier ! 🏆",
             raw: "Brut",
             correct: "Correct",
             length: "Longueur",
             name: "Nom",
             eligible: "Éligible",
-            eligible_tooltip: "Ce score est qualifié pour le concours du Ramadan.",
+            eligible_tooltip: "Qualifié : {wpm} mots/min, {acc}% Précision et {chars} Caractères.",
             back_to_dashboard: "Retour au tableau de bord",
             view_rules: "Voir les règles",
             hide_rules: "Masquer les règles",
             rules_title: "Règles de qualification du concours",
             rule_1: "Vous devez atteindre une vitesse minimale de {wpm} mots/min.",
             rule_2: "Vous devez maintenir une précision minimale de {acc}%.",
-            rule_3: "Seuls les tests terminés pendant la fenêtre EN DIRECT de 48 heures sont éligibles pour le prix mondial."
+            rule_3: "Seuls les tests terminés pendant la fenêtre EN DIRECT de 48 heures sont éligibles pour le prix mondial.",
+            rule_4: "Vous devez taper au moins {chars} caractères dans un seul test."
         },
         work_in_progress: {
             title: "En Construction",
@@ -480,7 +482,7 @@ export const translations = {
             begins_in: "تبدأ المسابقة بعد",
             live_now: "مباشر الآن",
             live_title: "مسابقة رمضان • ليلة 27",
-            live_desc: "يتم تسجيل سرعة الطباعة والدقة الخاصة بك! احصل على >{wpm} ك/د & {acc}% دقة.",
+            live_desc: "يتم تسجيل سرعة الطباعة والدقة الخاصة بك! الحد الأدنى: {wpm} ك/د، {acc}% دقة و {chars} حرفاً.",
             peak: "ذروة ليلة القدر",
             closes_in: "تغلق المسابقة بعد",
             ended_title: "انتهت مسابقة رمضان!",
@@ -490,21 +492,22 @@ export const translations = {
             inactive_desc: "مسابقة رمضان العالمية للطباعة مغلقة حالياً. ترقب نافذة الـ 48 ساعة العالمية القادمة!",
             leaderboard_title: "🌙 مسابقة رمضان للطباعة",
             first_prize: "جائزة المركز الأول: 100 دولار أمريكي",
-            qualification: "التأهل: >{wpm} ك/د & {acc}% دقة.",
+            qualification: "شروط التأهل: {wpm} ك/د، {acc}% دقة و {chars} حرفاً",
             first_to_qualify: "لقد بدأت المسابقة للتو. كن أول من يتأهل! 🏆",
             raw: "الخام",
             correct: "صحيح",
             length: "الطول",
             name: "الاسم",
             eligible: "مؤهل",
-            eligible_tooltip: "هذه النتيجة مؤهلة لمسابقة رمضان.",
+            eligible_tooltip: "مؤهل: {wpm} ك/د، {acc}% دقة و {chars} حرفاً.",
             back_to_dashboard: "العودة إلى لوحة التحكم",
             view_rules: "عرض القوانين",
             hide_rules: "إخفاء القوانين",
             rules_title: "شروط التأهل للمسابقة",
             rule_1: "يجب تحقيق سرعة لا تقل عن {wpm} كلمة/دقيقة.",
             rule_2: "يجب الحفاظ على دقة لا تقل عن {acc}%.",
-            rule_3: "فقط الاختبارات التي تكتمل خلال الـ 48 ساعة المباشرة مؤهلة للجائزة العالمية."
+            rule_3: "فقط الاختبارات التي تكتمل خلال الـ 48 ساعة المباشرة مؤهلة للجائزة العالمية.",
+            rule_4: "يجب طباعة ما لا يقل عن {chars} حرفاً في الاختبار الواحد."
         },
         work_in_progress: {
             title: "قيد التطوير",

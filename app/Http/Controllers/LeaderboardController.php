@@ -27,7 +27,7 @@ class LeaderboardController extends Controller
                 'ranked_tests.accuracy as best_accuracy',
                 'ranked_tests.total_errors',
                 'ranked_tests.char_count',
-                DB::raw('(ranked_tests.wpm >= ' . config('contest.min_wpm') . ' AND ranked_tests.accuracy >= ' . config('contest.min_accuracy') . ') as is_eligible'),
+                DB::raw('(ranked_tests.wpm >= ' . config('contest.min_wpm') . ' AND ranked_tests.accuracy >= ' . config('contest.min_accuracy') . ' AND ranked_tests.char_count >= ' . config('contest.min_char_count') . ') as is_eligible'),
                 DB::raw('(SELECT count(*) FROM tests WHERE tests.user_id = ranked_tests.user_id) as total_tests')
             )
             ->orderByDesc('best_wpm')
@@ -44,6 +44,7 @@ class LeaderboardController extends Controller
 
         return Inertia::render('Leaderboard', [
             'topScorers' => $topScorers,
+            'contest_config' => app(\App\Services\ContestService::class)->getConfig(),
         ]);
     }
 }

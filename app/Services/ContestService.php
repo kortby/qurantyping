@@ -75,9 +75,11 @@ class ContestService
     {
         $wpm = is_array($test) ? $test['wpm'] : $test->wpm;
         $accuracy = is_array($test) ? $test['accuracy'] : $test->accuracy;
+        $charCount = is_array($test) ? $test['char_count'] : $test->char_count;
 
         return $wpm >= config('contest.min_wpm')
-            && $accuracy >= config('contest.min_accuracy');
+            && $accuracy >= config('contest.min_accuracy')
+            && $charCount >= config('contest.min_char_count');
     }
 
     public function getConfig(): array
@@ -86,6 +88,7 @@ class ContestService
             'active' => $this->isActive(),
             'min_wpm' => config('contest.min_wpm'),
             'min_accuracy' => config('contest.min_accuracy'),
+            'min_char_count' => config('contest.min_char_count'),
             'ramadan_day' => $this->getRamadanDay(),
             'start_time' => $this->getStartTime()?->toIso8601String(),
             'end_time' => $this->getEndTime()?->toIso8601String(),

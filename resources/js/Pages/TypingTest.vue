@@ -161,6 +161,8 @@ const currentDisplayText = computed(() => {
     return raw?.normalize('NFC').replace(/\u0640/g, '').trim() || '';
 });
 
+const logicCharacterCount = computed(() => visualMapping.value.logicText.length);
+
 // Map visual characters to logic ones (ignoring the ۝ decorative separator)
 const visualMapping = computed(() => {
     const visual = currentDisplayText.value || '';
@@ -742,6 +744,16 @@ defineOptions({ layout: AppLayout });
                 {{ t(usePunctuation ? 'tashkeel_on' : 'tashkeel_off') }}
             </button>
 
+            <!-- Character Count Badge -->
+            <div v-if="logicCharacterCount > 0" 
+                 class="flex items-center gap-2 border px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-widest font-bold animate-fade-in transition-all duration-300"
+                 :class="logicCharacterCount >= (contestConfig?.min_char_count || 100) 
+                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-500 shadow-lg shadow-emerald-500/10' 
+                    : 'bg-[var(--caret-color)]/10 border-[var(--caret-color)]/30 text-[var(--caret-color)] shadow-lg shadow-emerald-950/5'">
+                <span class="text-lg">📏</span>
+                {{ logicCharacterCount }} {{ t('chars') }}
+            </div>
+
         </form>
 
         <!-- Live Stats (during test) -->
@@ -759,8 +771,8 @@ defineOptions({ layout: AppLayout });
                 <span class="font-bold border-b border-[var(--border-color)] pb-1">{{ timer }}s</span>
             </div>
             <div class="flex flex-col">
-                <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1 font-mono">Errors</span>
-                <span class="font-bold text-[var(--error-color)] border-b border-[var(--error-color)]/20 pb-1">{{ totalErrors }}</span>
+                <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1 font-mono">Progress</span>
+                <span class="font-bold border-b border-[var(--border-color)] pb-1">{{ userInput.length }} / {{ logicCharacterCount }}</span>
             </div>
 
              <!-- Error Sound Toggle (Right Float) -->

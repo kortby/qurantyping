@@ -7,6 +7,7 @@ const { t } = useSettings();
 
 defineProps({
     topScorers: Array,
+    contest_config: Object,
 });
 </script>
 
@@ -46,7 +47,10 @@ defineProps({
                                 <td class="px-8 py-4 text-center relative overflow-hidden">
                                      <div v-if="scorer.is_eligible" 
                                           class="absolute left-[-36px] top-[10px] w-[140px] -rotate-45 bg-[var(--caret-color)] text-emerald-950 text-[8px] font-bold uppercase tracking-widest py-0.5 text-center shadow-[0_2px_4px_rgba(0,0,0,0.3)] opacity-95 cursor-help hover:opacity-100 transition-opacity"
-                                          :title="t('contest.eligible_tooltip')">
+                                          :title="t('contest.eligible_tooltip')
+                                                 .replace('{wpm}', contest_config.min_wpm)
+                                                 .replace('{acc}', contest_config.min_accuracy)
+                                                 .replace('{chars}', contest_config.min_char_count)">
                                          {{ t('contest.eligible') }}
                                      </div>
                                     <div class="flex items-center justify-center">

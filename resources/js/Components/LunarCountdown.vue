@@ -108,7 +108,7 @@ const showRules = ref(false);
                         {{ t('contest.live_title') }}
                     </h2>
                     <p class="text-sm text-[var(--sub-color)] max-w-md mx-auto mb-4">
-                        {{ t('contest.live_desc').replace('{wpm}', config.min_wpm).replace('{acc}', config.min_accuracy) }}
+                        {{ t('contest.live_desc').replace('{wpm}', config.min_wpm).replace('{acc}', config.min_accuracy).replace('{chars}', config.min_char_count) }}
                     </p>
                     
                     <!-- Prize & Rules -->
@@ -152,20 +152,24 @@ const showRules = ref(false);
             <!-- Expandable Rules Section -->
             <div v-show="showRules" class="w-full mt-6 pt-6 border-t border-[var(--border-color)] text-left"
                  :class="currentLang === 'ar' ? 'text-right' : 'text-left'">
-                <h4 class="text-[var(--main-color)] font-bold text-sm uppercase tracking-widest mb-4 flex items-center gap-2" :class="currentLang === 'ar' ? 'justify-start rtl:flex-row-reverse' : ''">
-                    <span class="text-lg">📜</span> {{ t('contest.rules_title') }}
+                <h4 class="text-[var(--main-color)] font-bold text-lg md:text-xl uppercase tracking-widest mb-6 flex items-center gap-3" :class="currentLang === 'ar' ? 'justify-start rtl:flex-row-reverse' : ''">
+                    <span class="text-2xl">📜</span> {{ t('contest.rules_title') }}
                 </h4>
-                <ul class="space-y-3 text-sm text-[var(--sub-color)] w-full max-w-2xl mx-auto md:mx-0">
-                    <li class="flex items-start gap-2">
-                        <span class="text-[var(--caret-color)] mt-0.5 shadow-[0_0_10px_var(--caret-color)]">✦</span>
+                <ul class="space-y-4 text-base md:text-lg text-[var(--sub-color)] w-full max-w-3xl mx-auto md:mx-0">
+                    <li class="flex items-start gap-3">
+                        <span class="text-[var(--caret-color)] mt-1.5 shadow-[0_0_10px_var(--caret-color)]">✦</span>
                         <span v-html="t('contest.rule_1').replace('{wpm}', config.min_wpm)"></span>
                     </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-[var(--caret-color)] mt-0.5 shadow-[0_0_10px_var(--caret-color)]">✦</span>
+                    <li class="flex items-start gap-3">
+                        <span class="text-[var(--caret-color)] mt-1.5 shadow-[0_0_10px_var(--caret-color)]">✦</span>
                         <span v-html="t('contest.rule_2').replace('{acc}', config.min_accuracy)"></span>
                     </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-[var(--caret-color)] mt-0.5 shadow-[0_0_10px_var(--caret-color)]">✦</span>
+                    <li class="flex items-start gap-3">
+                        <span class="text-[var(--caret-color)] mt-1.5 shadow-[0_0_10px_var(--caret-color)]">✦</span>
+                        <span v-html="t('contest.rule_4').replace('{chars}', config.min_char_count)"></span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="text-[var(--caret-color)] mt-1.5 shadow-[0_0_10px_var(--caret-color)]">✦</span>
                         <span v-html="t('contest.rule_3')"></span>
                     </li>
                 </ul>

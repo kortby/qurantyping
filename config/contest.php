@@ -12,5 +12,6 @@ return [
     // Min requirements
     'min_wpm' => env('CONTEST_MIN_WPM', 150),
     'min_accuracy' => env('CONTEST_MIN_ACCURACY', 98),
+    'min_char_count' => env('CONTEST_MIN_CHAR_COUNT', 100),
     'year' => env('CONTEST_YEAR', 2025),
 ];
