@@ -18,7 +18,7 @@ defineProps({
 
     <AppLayout>
         <div class="py-8 animate-fade-in min-h-[80vh]">
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <div class="text-center mb-10">
                     <h1 class="text-4xl font-cinzel text-[var(--caret-color)] font-bold mb-2 tracking-widest">{{ t('leaderboard') }}</h1>
@@ -43,7 +43,12 @@ defineProps({
                         <tbody class="divide-y divide-[var(--border-color)]">
                             <tr v-for="(scorer, index) in topScorers" :key="index" 
                                 class="hover:bg-[var(--caret-color)]/[0.03] transition-all duration-500 group">
-                                <td class="px-8 py-4 text-center">
+                                <td class="px-8 py-4 text-center relative overflow-hidden">
+                                     <div v-if="scorer.is_eligible" 
+                                          class="absolute left-[-36px] top-[10px] w-[140px] -rotate-45 bg-[var(--caret-color)] text-emerald-950 text-[8px] font-bold uppercase tracking-widest py-0.5 text-center shadow-[0_2px_4px_rgba(0,0,0,0.3)] opacity-95 cursor-help hover:opacity-100 transition-opacity"
+                                          :title="t('contest.eligible_tooltip')">
+                                         {{ t('contest.eligible') }}
+                                     </div>
                                     <div class="flex items-center justify-center">
                                         <div v-if="index === 0" class="text-4xl filter drop-shadow-md">🥇</div>
                                         <div v-else-if="index === 1" class="text-3xl filter drop-shadow-md">🥈</div>
@@ -53,9 +58,19 @@ defineProps({
                                 </td>
                                 <td class="px-8 py-4">
                                     <div class="flex flex-col">
-                                        <span class="text-lg font-cinzel font-bold text-[var(--main-color)] group-hover:text-[var(--caret-color)] transition-colors">
-                                            {{ scorer.name }}
-                                        </span>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-lg font-cinzel font-bold text-[var(--main-color)] group-hover:text-[var(--caret-color)] transition-colors">
+                                                {{ scorer.name }}
+                                            </span>
+                                            <div v-if="scorer.badges && scorer.badges.length > 0" class="flex items-center gap-1.5">
+                                                <div v-for="badge in scorer.badges" :key="badge.id" 
+                                                      :title="badge.name + (badge.description ? ' - ' + badge.description : '')"
+                                                      class="flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/30 text-sm cursor-help hover:scale-110 hover:bg-amber-500/20 transition-all shadow-[0_0_10px_rgba(245,158,11,0.1)]"
+                                                >
+                                                    {{ badge.icon }}
+                                                </div>
+                                            </div>
+                                        </div>
                                         <span class="text-[9px] uppercase tracking-widest opacity-40">{{ t('devoted_reader') }}</span>
                                     </div>
                                 </td>

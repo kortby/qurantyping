@@ -94,4 +94,14 @@ class User extends Authenticatable
     {
         return $this->hasManyThrough(Result::class, Test::class);
     }
+
+    /**
+     * Get the badges awarded to the user.
+     */
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')
+            ->withPivot('awarded_at')
+            ->withTimestamps();
+    }
 }

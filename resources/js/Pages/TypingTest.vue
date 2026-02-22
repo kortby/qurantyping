@@ -8,6 +8,7 @@ import ArabicKeyboard from '@/Components/ArabicKeyboard.vue';
 import SurahSelect from '@/Components/SurahSelect.vue';
 import QuranAudioPlayer from '@/Components/QuranAudioPlayer.vue';
 import GuestTestModal from '@/Components/GuestTestModal.vue';
+import LunarCountdown from '@/Components/LunarCountdown.vue';
 import { useSettings } from '../useSettings';
 
 const activeKey = ref(null);
@@ -20,6 +21,7 @@ const showTashkilFeature = computed(() => page.props.features?.tashkil ?? false)
 
 const props = defineProps({
     personalBestWpm: Number,
+    contestConfig: Object,
 });
 
 const currentPB = ref(props.personalBestWpm || 0);
@@ -667,8 +669,11 @@ defineOptions({ layout: AppLayout });
     </Head>
 
     <div class="flex flex-col items-center justify-start py-8 px-6 md:px-8 lg:px-0 min-h-[80vh]">
+        <!-- Global Ramadan Countdown -->
+        <LunarCountdown v-if="contestConfig?.enabled" :config="contestConfig" />
+
         <!-- Minimalist Filters -->
-        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-2 flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 lg:gap-6 font-mono text-sm max-w-full">
+        <form @submit.prevent="fetchTestText" class="w-full max-w-6xl mb-2 flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 lg:gap-6 font-mono text-sm">
             <SurahSelect 
                 v-model="selectedSurah" 
                 :options="surahs" 
