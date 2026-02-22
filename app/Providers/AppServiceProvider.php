@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Test;
+use App\Observers\TestObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,8 +24,9 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::define('viewPulse', function ($user) {
             return in_array($user->email, [
                 'hasbellaoui.faycal@gmail.com',
-                'kortby@gmail.com'
             ]);
         });
+
+        Test::observe(TestObserver::class);
     }
 }

@@ -26,7 +26,17 @@ class Test extends Model
         'start_ayah',
         'end_ayah',
         'total_errors',
+        'is_contest_entry',
     ];
+
+    protected $casts = [
+        'is_contest_entry' => 'boolean',
+    ];
+
+    public function scopeContestEntries($query)
+    {
+        return $query->where('is_contest_entry', true);
+    }
 
     /**
      * Get the user that owns the test.

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\TestPageController;
+use App\Http\Controllers\ContestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,7 @@ use Inertia\Inertia;
 
 Route::get('/', TestPageController::class);
 Route::get('/leaderboard', LeaderboardController::class)->name('leaderboard');
+Route::get('/contest', [ContestController::class, 'index'])->name('contest.index');
 Route::get('/privacy-policy', function () {
     $lang = App::getLocale();
     $file = resource_path("markdown/policy.{$lang}.md");

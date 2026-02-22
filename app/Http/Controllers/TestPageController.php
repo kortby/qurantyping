@@ -19,8 +19,11 @@ class TestPageController extends Controller
             $bestWpm = \App\Models\Test::where('user_id', auth()->id())->max('wpm') ?? 0;
         }
 
+        $contestService = app(\App\Services\ContestService::class);
+
         return Inertia::render('TypingTest', [
             'personalBestWpm' => (int) $bestWpm,
+            'contestConfig' => $contestService->getConfig(),
         ]);
     }
 }

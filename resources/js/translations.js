@@ -82,6 +82,38 @@ export const translations = {
         guest_test_message: "Create an account to save your progress, track your improvements, and see your rank on the leaderboard.",
         guest_test_save_cta: "Create account to save this result",
         guest_test_skip: "Maybe later",
+        contest: {
+            global_title: "Global Ramadan Typing Contest 🌍",
+            global_desc: "Open globally for 48 hours to align with the 27th Night of Ramadan across all timezones. Regardless of your location, the competition starts at the same exact moment globally!",
+            begins_in: "Contest Begins In",
+            live_now: "LIVE NOW",
+            live_title: "Ramadan Contest • The 27th Night",
+            live_desc: "Your typing speed and accuracy is being recorded! Score >{wpm} WPM & {acc}% acc.",
+            peak: "Laylat al-Qadr Peak",
+            closes_in: "Contest Closes In",
+            ended_title: "The Ramadan Contest has ended!",
+            ended_desc: "Thank you to everyone around the world for participating.",
+            view_leaderboard: "View Global Leaderboard",
+            inactive_title: "Contest is not active",
+            inactive_desc: "The Global Ramadan typing contest is currently closed. Keep an eye out for the next 48-hour global window!",
+            leaderboard_title: "🌙 Ramadan Typing Contest",
+            first_prize: "1st Place Prize: $100 USD",
+            qualification: "Qualification: >{wpm} WPM & {acc}% acc.",
+            first_to_qualify: "The contest just started. Be the first to qualify! 🏆",
+            raw: "Raw",
+            correct: "Correct",
+            length: "Length",
+            name: "Name",
+            eligible: "Eligible",
+            eligible_tooltip: "This score qualifies for the Ramadan contest.",
+            back_to_dashboard: "Back to Dashboard",
+            view_rules: "View Rules",
+            hide_rules: "Hide Rules",
+            rules_title: "Contest Qualification Rules",
+            rule_1: "You must achieve a minimum speed of {wpm} WPM.",
+            rule_2: "You must maintain a minimum accuracy of {acc}%.",
+            rule_3: "Only tests completed during the 48-hour LIVE window are eligible for the global prize."
+        },
         work_in_progress: {
             title: "Under Construction",
             subtitle: "Working for Excellence",
@@ -246,6 +278,38 @@ export const translations = {
         guest_test_message: "Créez un compte pour sauvegarder vos progrès, suivre vos améliorations et voir votre rang dans le classement.",
         guest_test_save_cta: "Créer un compte pour sauvegarder ce résultat",
         guest_test_skip: "Peut-être plus tard",
+        contest: {
+            global_title: "Concours Mondial de Dactylographie du Ramadan 🌍",
+            global_desc: "Ouvert mondialement pendant 48 heures pour coïncider avec la 27ème nuit du Ramadan dans tous les fuseaux horaires. Peu importe votre emplacement, le concours commence exactement au même moment à l'échelle mondiale !",
+            begins_in: "Le Concours Commence Dans",
+            live_now: "EN DIRECT",
+            live_title: "Concours du Ramadan • La 27ème Nuit",
+            live_desc: "Votre vitesse et votre précision de frappe sont enregistrées ! Score >{wpm} mots/min & {acc}% préc.",
+            peak: "Pic de Laylat al-Qadr",
+            closes_in: "Fermeture du Concours Dans",
+            ended_title: "Le concours du Ramadan est terminé !",
+            ended_desc: "Merci à tous les participants à travers le monde.",
+            view_leaderboard: "Voir le Classement Mondial",
+            inactive_title: "Le concours n'est pas actif",
+            inactive_desc: "Le concours mondial de dactylographie du Ramadan est actuellement fermé. Restez à l'affût pour la prochaine fenêtre mondiale de 48 heures !",
+            leaderboard_title: "🌙 Concours de Dactylographie du Ramadan",
+            first_prize: "Prix 1ère place : 100 $ USD",
+            qualification: "Qualification : >{wpm} mots/min & {acc}% préc.",
+            first_to_qualify: "Le concours vient de commencer. Soyez le premier à vous qualifier ! 🏆",
+            raw: "Brut",
+            correct: "Correct",
+            length: "Longueur",
+            name: "Nom",
+            eligible: "Éligible",
+            eligible_tooltip: "Ce score est qualifié pour le concours du Ramadan.",
+            back_to_dashboard: "Retour au tableau de bord",
+            view_rules: "Voir les règles",
+            hide_rules: "Masquer les règles",
+            rules_title: "Règles de qualification du concours",
+            rule_1: "Vous devez atteindre une vitesse minimale de {wpm} mots/min.",
+            rule_2: "Vous devez maintenir une précision minimale de {acc}%.",
+            rule_3: "Seuls les tests terminés pendant la fenêtre EN DIRECT de 48 heures sont éligibles pour le prix mondial."
+        },
         work_in_progress: {
             title: "En Construction",
             subtitle: "Travail pour l'Excellence",
@@ -410,6 +474,38 @@ export const translations = {
         guest_test_message: "أنشئ حساباً لحفظ تقدمك، ومتابعة تحسن مستواك، ورؤية ترتيبك في لوحة المتصدرين.",
         guest_test_save_cta: "أنشئ حساباً لحفظ هذه النتيجة",
         guest_test_skip: "ربما لاحقاً",
+        contest: {
+            global_title: "مسابقة رمضان العالمية للطباعة 🌍",
+            global_desc: "مفتوحة عالمياً لمدة 48 ساعة لتتزامن مع ليلة 27 من رمضان في جميع المناطق الزمنية. بغض النظر عن موقعك، تبدأ المسابقة في نفس اللحظة بالضبط على مستوى العالم!",
+            begins_in: "تبدأ المسابقة بعد",
+            live_now: "مباشر الآن",
+            live_title: "مسابقة رمضان • ليلة 27",
+            live_desc: "يتم تسجيل سرعة الطباعة والدقة الخاصة بك! احصل على >{wpm} ك/د & {acc}% دقة.",
+            peak: "ذروة ليلة القدر",
+            closes_in: "تغلق المسابقة بعد",
+            ended_title: "انتهت مسابقة رمضان!",
+            ended_desc: "شكراً لجميع المشاركين من جميع أنحاء العالم.",
+            view_leaderboard: "عرض لوحة المتصدرين العالمية",
+            inactive_title: "المسابقة غير فعالة",
+            inactive_desc: "مسابقة رمضان العالمية للطباعة مغلقة حالياً. ترقب نافذة الـ 48 ساعة العالمية القادمة!",
+            leaderboard_title: "🌙 مسابقة رمضان للطباعة",
+            first_prize: "جائزة المركز الأول: 100 دولار أمريكي",
+            qualification: "التأهل: >{wpm} ك/د & {acc}% دقة.",
+            first_to_qualify: "لقد بدأت المسابقة للتو. كن أول من يتأهل! 🏆",
+            raw: "الخام",
+            correct: "صحيح",
+            length: "الطول",
+            name: "الاسم",
+            eligible: "مؤهل",
+            eligible_tooltip: "هذه النتيجة مؤهلة لمسابقة رمضان.",
+            back_to_dashboard: "العودة إلى لوحة التحكم",
+            view_rules: "عرض القوانين",
+            hide_rules: "إخفاء القوانين",
+            rules_title: "شروط التأهل للمسابقة",
+            rule_1: "يجب تحقيق سرعة لا تقل عن {wpm} كلمة/دقيقة.",
+            rule_2: "يجب الحفاظ على دقة لا تقل عن {acc}%.",
+            rule_3: "فقط الاختبارات التي تكتمل خلال الـ 48 ساعة المباشرة مؤهلة للجائزة العالمية."
+        },
         work_in_progress: {
             title: "قيد التطوير",
             subtitle: "نعمل بجد للتميز",
