@@ -77,6 +77,7 @@ class User extends Authenticatable
             'auto_advance' => 'boolean',
             'last_practiced_on' => 'date',
             'streak_grace_used_on' => 'date',
+            'last_login_at' => 'datetime',
         ];
     }
 

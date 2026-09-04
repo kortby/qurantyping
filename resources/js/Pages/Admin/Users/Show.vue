@@ -85,6 +85,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                                 {{ user.email_verified_at ? 'Verified' : 'Unverified' }}
                             </span>
                             · Joined {{ formatDate(user.created_at) }}
+                            · Last login {{ user.last_login_at ? formatDate(user.last_login_at) : 'never' }}
                             <span v-if="user.oauth_provider"> · via {{ user.oauth_provider }}</span>
                         </p>
                     </div>
