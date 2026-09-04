@@ -8,16 +8,18 @@ class ContestService
 {
     public function isActive(): bool
     {
-        if (!config('contest.enabled'))
+        if (! config('contest.enabled')) {
             return false;
+        }
 
         $now = Carbon::now();
 
         $start = $this->getStartTime();
         $end = $this->getEndTime();
 
-        if (!$start || !$end)
+        if (! $start || ! $end) {
             return false;
+        }
 
         return $now->between($start, $end);
     }
@@ -25,8 +27,9 @@ class ContestService
     public function getStartTime(): ?Carbon
     {
         $startDate = config('contest.ramadan_start_date');
-        if (!$startDate)
+        if (! $startDate) {
             return null;
+        }
 
         // Mid 26th day: 25 full days + 12 hours from the exact start of Ramadan
         return Carbon::parse($startDate)->addDays(25)->addHours(12);
@@ -35,8 +38,9 @@ class ContestService
     public function getEndTime(): ?Carbon
     {
         $startDate = config('contest.ramadan_start_date');
-        if (!$startDate)
+        if (! $startDate) {
             return null;
+        }
 
         // Mid 28th day: 27 full days + 12 hours from the exact start of Ramadan
         return Carbon::parse($startDate)->addDays(27)->addHours(12);
@@ -45,8 +49,9 @@ class ContestService
     public function get27thNightTarget(): ?Carbon
     {
         $startDate = config('contest.ramadan_start_date');
-        if (!$startDate)
+        if (! $startDate) {
             return null;
+        }
 
         // Let's define the 27th night focal point as Sunset of the 26th day.
         // For a global reference, we'll arbitrarily use 18:00 UTC (6 PM) on the 26th day.
@@ -59,8 +64,9 @@ class ContestService
         $ramadanStart = Carbon::parse(config('contest.ramadan_start_date'));
         $today = Carbon::now();
 
-        if ($today->lt($ramadanStart))
+        if ($today->lt($ramadanStart)) {
             return null;
+        }
 
         $day = $ramadanStart->diffInDays($today) + 1;
 
@@ -73,9 +79,9 @@ class ContestService
      */
     public function testQualifies($test): bool
     {
-        $wpm = is_array($test) ? $test['wpm'] : $test->wpm;
-        $accuracy = is_array($test) ? $test['accuracy'] : $test->accuracy;
-        $charCount = is_array($test) ? $test['char_count'] : $test->char_count;
+        $wpm = is_array($test) ? ($test['wpm'] ?? 0) : $test->wpm;
+        $accuracy = is_array($test) ? ($test['accuracy'] ?? 0) : $test->accuracy;
+        $charCount = is_array($test) ? ($test['char_count'] ?? 0) : $test->char_count;
 
         return $wpm >= config('contest.min_wpm')
             && $accuracy >= config('contest.min_accuracy')
