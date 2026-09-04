@@ -82,6 +82,16 @@ if (typeof window !== 'undefined') {
 <template>
     <div class="min-h-screen bg-[var(--bg-color)] text-[var(--main-color)] antialiased transition-colors duration-300">
         <Banner />
+
+        <!-- Impersonation Banner -->
+        <div v-if="$page.props.auth.impersonating"
+            class="sticky top-0 z-[60] w-full bg-amber-500 text-amber-950 px-6 py-2 flex items-center justify-center gap-4 font-cinzel text-xs uppercase tracking-widest font-bold shadow-lg">
+            <span>🛡️ {{ t('navigation.impersonating_as') }} {{ $page.props.auth.user.name }}</span>
+            <Link href="/impersonate/leave" method="post" as="button"
+                class="px-3 py-1 rounded-md bg-amber-950 text-amber-100 hover:bg-amber-900 transition-colors">
+                {{ t('navigation.stop_impersonating') }}
+            </Link>
+        </div>
         <header class="sticky top-0 z-50 w-full bg-[var(--panel-color)]/80 backdrop-blur-xl border-b border-[var(--border-color)] transition-all duration-300">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center relative">
                 <!-- Header Glow Effect -->
@@ -104,6 +114,7 @@ if (typeof window !== 'undefined') {
                         <template v-if="$page.props.auth.user">
                             <Link href="/dashboard" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/user/profile" class="hover:text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('navigation.profile') }}</Link>
+                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" class="text-[var(--caret-color)] hover:opacity-100 transition-all border-b border-transparent hover:border-[var(--caret-color)] pb-1">{{ t('navigation.admin') }}</Link>
                         </template>
                     </nav>
                 </div>
@@ -163,6 +174,11 @@ if (typeof window !== 'undefined') {
                                         <span class="text-base group-hover:scale-110 transition-transform">📊</span>
                                         {{ t('navigation.dashboard') }}
                                     </Link>
+                                    <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="userMenuOpen = false"
+                                        class="flex items-center gap-3 px-4 py-3 hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-all font-bold group">
+                                        <span class="text-base group-hover:scale-110 transition-transform">🛡️</span>
+                                        {{ t('navigation.admin') }}
+                                    </Link>
                                     <div class="border-t border-[var(--border-color)] mt-1">
                                         <Link href="/logout" method="post" as="button"
                                             class="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--error-color)]/10 hover:text-[var(--error-color)] transition-all font-bold group">
@@ -206,6 +222,7 @@ if (typeof window !== 'undefined') {
                         <template v-if="$page.props.auth.user">
                             <Link href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/user/profile" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
+                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="mobileMenuOpen = false" class="text-[var(--caret-color)] transition-colors">{{ t('navigation.admin') }}</Link>
                         </template>
                     </nav>
 
