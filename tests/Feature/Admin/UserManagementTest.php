@@ -65,10 +65,35 @@ it('ignores an unknown sort column', function () {
         ->assertOk();
 });
 
-it('shows a user detail page', function () {
+it('lists and sorts by the streak / hifz / certificate columns', function () {
+    User::factory()->create(['name' => 'Low'])->forceFill(['current_streak' => 1])->save();
+    User::factory()->create(['name' => 'High'])->forceFill(['current_streak' => 40])->save();
+
+    $this->actingAs($this->admin)->get('/admin/users?sort=current_streak&direction=desc')
+        ->assertOk()
+        ->assertSeeInOrder(['High', 'Low']);
+
+    $this->actingAs($this->admin)->get('/admin/users?sort=hifz_ayahs&direction=desc')->assertOk();
+    $this->actingAs($this->admin)->get('/admin/users?sort=certificates_count&direction=asc')->assertOk();
+});
+
+it('shows a user detail page with practice progress', function () {
     $target = User::factory()->create();
 
-    $this->actingAs($this->admin)->get("/admin/users/{$target->id}")->assertOk();
+    \App\Models\Certificate::create([
+        'user_id' => $target->id,
+        'surah_number' => 108,
+        'surah_name_english' => 'Al-Kawthar',
+        'surah_name_arabic' => 'الكوثر',
+        'ayah_count' => 3,
+        'accuracy' => 97.5,
+        'issued_at' => now(),
+    ]);
+
+    $this->actingAs($this->admin)->get("/admin/users/{$target->id}")
+        ->assertOk()
+        ->assertSee('Al-Kawthar')
+        ->assertSee('97.5');
 });
 
 it('updates a user name and email', function () {

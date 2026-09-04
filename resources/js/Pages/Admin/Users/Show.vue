@@ -13,6 +13,7 @@ import TextInput from '@/Components/TextInput.vue';
 const props = defineProps({
     user: Object,
     stats: Object,
+    progress: Object,
     badges: Array,
     recentTests: Array,
     sessions: Array,
@@ -106,6 +107,45 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                     <div class="bg-[var(--panel-color)] rounded-2xl border border-[var(--border-color)] p-5 text-center">
                         <p class="text-3xl font-cinzel font-bold text-[var(--caret-color)]">{{ stats.avg_wpm }}</p>
                         <p class="text-[9px] uppercase tracking-widest opacity-40 mt-1">Avg WPM</p>
+                    </div>
+                </div>
+
+                <!-- Practice & memorisation -->
+                <div v-if="progress" class="border border-[var(--border-color)] p-6 space-y-5">
+                    <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)]">Practice &amp; memorisation</h2>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-sm">
+                        <div>
+                            <p class="text-[9px] uppercase tracking-[0.2em] text-[var(--sub-color)]">Streak</p>
+                            <p class="text-xl text-[var(--main-color)] tabular-nums">{{ progress.streak.current }}<span class="text-[var(--sub-color)] text-xs"> / {{ progress.streak.longest }} best</span></p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-[0.2em] text-[var(--sub-color)]">Today's goal</p>
+                            <p class="text-xl tabular-nums" :class="progress.streak.goal.met ? 'text-[var(--caret-color)]' : 'text-[var(--main-color)]'">{{ progress.streak.goal.chars_today }}<span class="text-[var(--sub-color)] text-xs"> / {{ progress.streak.goal.target }}</span></p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-[0.2em] text-[var(--sub-color)]">Hifz ayahs</p>
+                            <p class="text-xl text-[var(--main-color)] tabular-nums">{{ progress.hifz.total }}<span class="text-[var(--sub-color)] text-xs"> · {{ progress.hifz.review }} mature</span></p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-[0.2em] text-[var(--sub-color)]">Due now</p>
+                            <p class="text-xl tabular-nums" :class="progress.hifz.due > 0 ? 'text-[var(--caret-color)]' : 'text-[var(--main-color)]'">{{ progress.hifz.due }}</p>
+                        </div>
+                    </div>
+
+                    <p class="font-mono text-[11px] text-[var(--sub-color)]">
+                        Last practised {{ progress.streak.practiced_today ? 'today' : (user.last_practiced_on ?? '—') }}
+                        · {{ progress.hifz.daily_new }} new/day
+                        · auto-advance {{ progress.hifz.auto_advance ? 'on' : 'off' }}
+                    </p>
+
+                    <div v-if="progress.certificates.length">
+                        <p class="text-[9px] uppercase tracking-[0.2em] text-[var(--sub-color)] mb-2 font-mono">Certificates ({{ progress.certificates.length }})</p>
+                        <ul class="flex flex-wrap gap-2 font-mono text-xs">
+                            <li v-for="c in progress.certificates" :key="c.surah_number" class="border border-[var(--border-color)] px-2.5 py-1">
+                                {{ c.surah_name_english }} · {{ c.accuracy }}% · {{ c.issued_at }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
 

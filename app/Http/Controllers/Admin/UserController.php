@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\User;
+use App\Services\CertificateService;
+use App\Services\HifzService;
+use App\Services\StreakService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -20,7 +23,10 @@ class UserController extends Controller
      *
      * @var list<string>
      */
-    protected array $sortable = ['name', 'email', 'tests_count', 'email_verified_at', 'created_at'];
+    protected array $sortable = [
+        'name', 'email', 'tests_count', 'email_verified_at', 'created_at',
+        'current_streak', 'hifz_ayahs', 'certificates_count',
+    ];
 
     public function index(Request $request): Response
     {
@@ -31,6 +37,8 @@ class UserController extends Controller
             : 'created_at';
         $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
 
+        $today = Carbon::now(config('app.timezone'))->toDateString();
+
         return Inertia::render('Admin/Users/Index', [
             'filters' => ['search' => $search ?: null, 'sort' => $sort, 'direction' => $direction],
             'users' => fn () => User::query()
@@ -40,7 +48,12 @@ class UserController extends Controller
                             ->orWhere('email', 'like', "%{$search}%");
                     });
                 })
-                ->withCount('tests')
+                ->withCount([
+                    'tests',
+                    'hifzProgress as hifz_ayahs',
+                    'hifzProgress as hifz_due' => fn ($q) => $q->whereDate('due_on', '<=', $today),
+                    'certificates as certificates_count',
+                ])
                 ->orderBy($sort, $direction)
                 ->orderBy('id', 'desc')
                 ->paginate(20)
@@ -51,14 +64,24 @@ class UserController extends Controller
                     'email' => $user->email,
                     'email_verified_at' => $user->email_verified_at,
                     'tests_count' => $user->tests_count,
+                    'current_streak' => (int) $user->current_streak,
+                    'last_practiced_on' => $user->last_practiced_on?->toDateString(),
+                    'hifz_ayahs' => (int) $user->hifz_ayahs,
+                    'hifz_due' => (int) $user->hifz_due,
+                    'certificates_count' => (int) $user->certificates_count,
                     'created_at' => $user->created_at,
                     'is_super_admin' => $user->isSuperAdmin(),
                 ]),
         ]);
     }
 
-    public function show(Request $request, User $user): Response
-    {
+    public function show(
+        Request $request,
+        User $user,
+        StreakService $streaks,
+        HifzService $hifz,
+        CertificateService $certificates,
+    ): Response {
         return Inertia::render('Admin/Users/Show', [
             'user' => [
                 'id' => $user->id,
@@ -70,11 +93,27 @@ class UserController extends Controller
                 'oauth_provider' => $user->oauth_provider,
                 'is_super_admin' => $user->isSuperAdmin(),
                 'is_self' => $user->is($request->user()),
+                'last_practiced_on' => $user->last_practiced_on?->toDateString(),
             ],
             'stats' => fn (): array => [
                 'tests_count' => (int) $user->tests()->count(),
                 'best_wpm' => (int) $user->tests()->max('wpm'),
                 'avg_wpm' => (int) round((float) $user->tests()->avg('wpm')),
+            ],
+            'progress' => fn (): array => [
+                'streak' => $streaks->forInertia($user),
+                'hifz' => $hifz->stats($user) + [
+                    'daily_new' => (int) $user->hifz_daily_new,
+                    'auto_advance' => (bool) $user->auto_advance,
+                ],
+                'certificates' => $certificates->forUser($user)->map(fn ($c): array => [
+                    'surah_number' => $c->surah_number,
+                    'surah_name_english' => $c->surah_name_english,
+                    'surah_name_arabic' => $c->surah_name_arabic,
+                    'ayah_count' => $c->ayah_count,
+                    'accuracy' => (float) $c->accuracy,
+                    'issued_at' => $c->issued_at->toDateString(),
+                ]),
             ],
             'badges' => fn () => $user->badges()->get(['badges.id', 'name', 'icon']),
             'recentTests' => fn () => $user->tests()
