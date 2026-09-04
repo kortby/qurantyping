@@ -1,10 +1,12 @@
 <script setup>
 import { ref } from 'vue';
+import { useSettings } from '../useSettings';
 
 const props = defineProps({
     cert: { type: Object, required: true },
 });
 
+const { t } = useSettings();
 const busy = ref(false);
 
 const formatDate = (d) => new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
@@ -126,16 +128,16 @@ const saveImage = async () => {
 <template>
     <figure class="jadwal relative flex flex-col items-center text-center gap-3 py-8 px-6">
         <figcaption class="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--sub-color)]">
-            Certificate of completion
+            {{ t('certificates.heading') }}
         </figcaption>
 
         <p class="text-4xl sm:text-5xl text-[var(--main-color)] leading-tight" dir="rtl" style="font-family: 'Noto Naskh Arabic', serif;">
             {{ cert.surah_name_arabic }}
         </p>
-        <p class="font-cinzel text-lg text-[var(--main-color)]">Surah {{ cert.surah_name_english }}</p>
+        <p class="font-cinzel text-lg text-[var(--main-color)]">{{ t('certificates.surah_prefix') }} {{ cert.surah_name_english }}</p>
 
         <p class="font-mono text-xs text-[var(--sub-color)]">
-            {{ cert.ayah_count }} ayahs · {{ cert.accuracy }}% accuracy or better
+            {{ t('certificates.detail').replace('{count}', cert.ayah_count).replace('{acc}', cert.accuracy) }}
         </p>
 
         <span aria-hidden="true" class="my-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--rule-color)]">
@@ -151,7 +153,7 @@ const saveImage = async () => {
             :disabled="busy"
             class="mt-2 min-h-[36px] px-4 border border-[var(--border-color)] font-cinzel text-[11px] uppercase tracking-[0.12em] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors disabled:opacity-50"
         >
-            {{ busy ? 'Preparing…' : 'Save image' }}
+            {{ busy ? t('certificates.preparing') : t('certificates.save_image') }}
         </button>
     </figure>
 </template>

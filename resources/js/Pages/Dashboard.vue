@@ -184,14 +184,14 @@ const formatDuration = (seconds) => {
                                 :href="`/?after=${$page.props.auth.resume.after}`"
                                 class="inline-flex items-center min-h-[36px] border border-[var(--lapis-color)] text-[var(--lapis-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
                             >
-                                Continue · {{ $page.props.auth.resume.label }}
+                                {{ t('passage.continue') }} · {{ $page.props.auth.resume.label }}
                             </Link>
                             <Link
                                 v-if="certificatesCount"
                                 href="/certificates"
                                 class="inline-flex items-center min-h-[36px] border border-[var(--caret-color)] text-[var(--caret-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
                             >
-                                {{ certificatesCount }} certificate{{ certificatesCount === 1 ? '' : 's' }}
+                                {{ t('certificates.count').replace('{n}', certificatesCount) }}
                             </Link>
                         </div>
                     </div>
