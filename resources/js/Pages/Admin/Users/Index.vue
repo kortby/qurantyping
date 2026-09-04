@@ -39,6 +39,9 @@ const columns = [
     { key: 'name', label: 'Name', align: 'text-left' },
     { key: 'email', label: 'Email', align: 'text-left' },
     { key: 'tests_count', label: 'Tests', align: 'text-center' },
+    { key: 'current_streak', label: 'Streak', align: 'text-center' },
+    { key: 'hifz_ayahs', label: 'Hifz', align: 'text-center' },
+    { key: 'certificates_count', label: 'Certs', align: 'text-center' },
     { key: 'email_verified_at', label: 'Verified', align: 'text-center' },
     { key: 'created_at', label: 'Joined', align: 'text-center' },
 ];
@@ -71,7 +74,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleDateString() : 'â€
 
                 <div class="border border-[var(--border-color)]">
                     <div class="overflow-x-auto">
-                        <table class="w-full min-w-[640px] text-left font-mono text-sm">
+                        <table class="w-full min-w-[880px] text-left font-mono text-sm">
                             <thead>
                                 <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-[0.15em] text-[10px]">
                                     <th v-for="col in columns" :key="col.key" class="px-6 py-3 font-semibold" :class="col.align">
@@ -102,6 +105,17 @@ const formatDate = (value) => value ? new Date(value).toLocaleDateString() : 'â€
                                     </td>
                                     <td class="px-6 py-4 text-[var(--sub-color)]">{{ user.email }}</td>
                                     <td class="px-6 py-4 text-center text-[var(--caret-color)] tabular-nums">{{ user.tests_count }}</td>
+                                    <td class="px-6 py-4 text-center tabular-nums">
+                                        <span :class="user.current_streak > 0 ? 'text-[var(--caret-color)]' : 'text-[var(--sub-color)]'">{{ user.current_streak }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center tabular-nums">
+                                        <span class="text-[var(--main-color)]">{{ user.hifz_ayahs }}</span><span
+                                            v-if="user.hifz_due"
+                                            class="text-[var(--caret-color)] text-[10px] ml-1"
+                                            :title="`${user.hifz_due} due`"
+                                        >Â·{{ user.hifz_due }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center tabular-nums" :class="user.certificates_count ? 'text-[var(--caret-color)]' : 'text-[var(--sub-color)]'">{{ user.certificates_count }}</td>
                                     <td class="px-6 py-4 text-center">
                                         <span
                                             :title="user.email_verified_at ? 'Verified' : 'Unverified'"

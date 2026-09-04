@@ -89,6 +89,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's per-ayah hifz review state.
+     */
+    public function hifzProgress(): HasMany
+    {
+        return $this->hasMany(UserAyahProgress::class);
+    }
+
+    /**
+     * Get the user's surah completion certificates.
+     */
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    /**
      * Determine whether the user has super-admin access.
      */
     public function isSuperAdmin(): bool
