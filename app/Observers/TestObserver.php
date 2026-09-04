@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Test;
+use App\Services\CertificateService;
 use App\Services\ContestService;
 use App\Services\QuranNavigator;
 use App\Services\StreakService;
@@ -13,6 +14,7 @@ class TestObserver
         private ContestService $contest,
         private StreakService $streaks,
         private QuranNavigator $navigator,
+        private CertificateService $certificates,
     ) {}
 
     public function creating(Test $test): void
@@ -26,5 +28,6 @@ class TestObserver
     {
         $this->streaks->recordTest($test);
         $this->navigator->rememberProgress($test);
+        $this->certificates->recordTest($test);
     }
 }

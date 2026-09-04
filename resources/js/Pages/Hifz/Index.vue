@@ -26,11 +26,16 @@ const saveDailyNew = () => {
     <AppLayout>
         <div class="py-10 sm:py-12 animate-fade-in min-h-[80vh]">
             <div class="max-w-3xl mx-auto px-4 sm:px-6">
-                <header class="mb-8">
-                    <h1 class="text-2xl font-cinzel font-semibold text-[var(--caret-color)]">Hifz</h1>
-                    <p class="text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-[0.3em] mt-1">
-                        Type from memory · spaced review
-                    </p>
+                <header class="mb-8 flex items-end justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-cinzel font-semibold text-[var(--caret-color)]">Hifz</h1>
+                        <p class="text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-[0.3em] mt-1">
+                            Type from memory · spaced review
+                        </p>
+                    </div>
+                    <Link href="/certificates" class="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--sub-color)] hover:text-[var(--main-color)] transition-colors whitespace-nowrap">
+                        Certificates →
+                    </Link>
                 </header>
 
                 <!-- First run -->
