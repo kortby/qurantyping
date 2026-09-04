@@ -15,12 +15,24 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
+    /**
+     * Columns the users list may be sorted by.
+     *
+     * @var list<string>
+     */
+    protected array $sortable = ['name', 'email', 'tests_count', 'email_verified_at', 'created_at'];
+
     public function index(Request $request): Response
     {
         $search = trim((string) $request->query('search', ''));
 
+        $sort = in_array($request->query('sort'), $this->sortable, true)
+            ? $request->query('sort')
+            : 'created_at';
+        $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
+
         return Inertia::render('Admin/Users/Index', [
-            'filters' => ['search' => $search ?: null],
+            'filters' => ['search' => $search ?: null, 'sort' => $sort, 'direction' => $direction],
             'users' => fn () => User::query()
                 ->when($search !== '', function ($query) use ($search): void {
                     $query->where(function ($query) use ($search): void {
@@ -29,7 +41,8 @@ class UserController extends Controller
                     });
                 })
                 ->withCount('tests')
-                ->latest()
+                ->orderBy($sort, $direction)
+                ->orderBy('id', 'desc')
                 ->paginate(20)
                 ->withQueryString()
                 ->through(fn (User $user): array => [

@@ -51,7 +51,7 @@ const closeModal = () => {
         </template>
 
         <template #content>
-            <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
+            <div class="max-w-xl text-sm text-[var(--sub-color)]">
                 {{ t('auth.delete_account_warning') }}
             </div>
 

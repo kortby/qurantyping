@@ -159,21 +159,21 @@ const clearPhotoFileInput = () => {
                 <InputError :message="form.errors.email" class="mt-2" />
 
                 <div v-if="$page.props.jetstream.hasEmailVerification && user.email_verified_at === null">
-                    <p class="text-sm mt-2 dark:text-white">
+                    <p class="text-sm mt-2 text-[var(--main-color)]">
                         {{ t('auth.verify_email_message') /* Note: Simplified for now */ }}
 
                         <Link
                             :href="route('verification.send')"
                             method="post"
                             as="button"
-                            class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+                            class="underline text-sm text-[var(--sub-color)] hover:text-[var(--main-color)] underline focus:outline-none"
                             @click.prevent="sendEmailVerification"
                         >
                             {{ t('auth.resend_verification') }}
                         </Link>
                     </p>
 
-                    <div v-show="verificationLinkSent" class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
+                    <div v-show="verificationLinkSent" class="mt-2 font-medium text-sm text-emerald-500">
                         {{ t('auth.verification_link_sent') }}
                     </div>
                 </div>
