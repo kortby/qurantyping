@@ -4,13 +4,27 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTestRequest;
-use Illuminate\Http\Request;
 use App\Models\QuranText;
 use App\Models\Test;
+use App\Services\QuranNavigator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
+    public function __construct(private readonly QuranNavigator $navigator) {}
+
+    /**
+     * Surah, juz' and page indexes for the passage selector.
+     */
+    public function getScopes(): JsonResponse
+    {
+        return response()->json([
+            'juz' => $this->navigator->juzIndex(),
+            'page_count' => $this->navigator->pageCount(),
+        ]);
+    }
+
     /**
      * Get a list of all Surahs for the selection dropdown.
      */
@@ -31,18 +45,38 @@ class TestController extends Controller
      */
     public function getTextForTest(Request $request): JsonResponse
     {
-        // If no parameters are provided, pick a random surah and 3 consecutive ayahs
-        if (!$request->has('surah_number')) {
+        if ($request->filled('after')) {
+            // Resume / auto-advance: the passage after a given ayah.
+            $request->validate(['after' => 'integer|min:1']);
+            $location = $this->navigator->nextAfter((int) $request->query('after'));
+
+            if (! $location) {
+                return response()->json(['message' => 'You have reached the end of the Quran.'], 409);
+            }
+
+            ['surah_number' => $surahNumber, 'start_ayah' => $startAyah, 'end_ayah' => $endAyah] = $location;
+        } elseif ($request->filled('scope') && $request->query('scope') !== 'surah') {
+            // Structured navigation by juz' or mushaf page.
+            $validated = $request->validate([
+                'scope' => 'in:juz,page',
+                'value' => 'required|integer|min:1',
+            ]);
+            $location = $this->navigator->resolve($validated['scope'], (int) $validated['value']);
+
+            if (! $location) {
+                return response()->json(['message' => 'No text found for that selection.'], 404);
+            }
+
+            ['surah_number' => $surahNumber, 'start_ayah' => $startAyah, 'end_ayah' => $endAyah] = $location;
+        } elseif (! $request->has('surah_number')) {
+            // No parameters: a random surah and 3 consecutive ayahs.
             $randomAyah = QuranText::inRandomOrder()->first();
             $surahNumber = $randomAyah->surah_number;
 
-            // Try to get 3 consecutive ayahs starting from a random point 
-            // but ensuring we don't go past the end of the surah
             $maxAyahInSurah = QuranText::where('surah_number', $surahNumber)->max('ayah_number');
             $startAyah = rand(1, max(1, $maxAyahInSurah - 2));
             $endAyah = min($maxAyahInSurah, $startAyah + 2);
         } else {
-            // Validate the incoming request parameters
             $validated = $request->validate([
                 'surah_number' => 'required|integer|min:1|max:114',
                 'start_ayah' => 'required|integer|min:1',
@@ -65,11 +99,11 @@ class TestController extends Controller
 
         // Combine the text of all fetched Ayahs into a single string with a decorative separator
         $combinedTextSimple = $ayahs->map(function ($ayah) {
-            return trim($ayah->text_arabic_simple) . ' ۝' . $this->convertToArabicNumbers($ayah->ayah_number) . ' ';
+            return trim($ayah->text_arabic_simple).' ۝'.$this->convertToArabicNumbers($ayah->ayah_number).' ';
         })->implode('');
 
         $combinedTextPunctuated = $ayahs->map(function ($ayah) {
-            return trim($ayah->surah_arabic_ponctuation) . ' ۝' . $this->convertToArabicNumbers($ayah->ayah_number) . ' ';
+            return trim($ayah->surah_arabic_ponctuation).' ۝'.$this->convertToArabicNumbers($ayah->ayah_number).' ';
         })->implode('');
 
         // Remove trailing space if any
@@ -86,6 +120,7 @@ class TestController extends Controller
 
         return response()->json([
             'id' => $ayahs->first()->id,
+            'last_quran_text_id' => $ayahs->last()->id,
             'text' => $combinedTextSimple, // Keep for backward compatibility
             'text_simple' => $combinedTextSimple,
             'text_punctuated' => $combinedTextPunctuated,
@@ -123,6 +158,7 @@ class TestController extends Controller
         for ($i = 0; $i < strlen($numStr); $i++) {
             $result .= $arabicDigits[$numStr[$i]];
         }
+
         return $result;
     }
 }

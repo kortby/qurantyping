@@ -77,6 +77,7 @@ Route::get('/user', function (Request $request) {
 Route::get('api/test/new', [TestController::class, 'getNewTest']);
 
 Route::get('api/surahs', [TestController::class, 'getSurahs']);
+Route::get('api/quran/scopes', [TestController::class, 'getScopes']);
 Route::get('api/test/text', [TestController::class, 'getTextForTest']);
 Route::post('/test/complete', [TestController::class, 'store']);
 
@@ -98,6 +99,7 @@ Route::middleware([
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
     Route::post('/user/settings/error-sound', [UserSettingController::class, 'updateErrorSound'])->name('user.settings.error-sound');
     Route::post('/user/settings/daily-goal', [UserSettingController::class, 'updateDailyGoal'])->name('user.settings.daily-goal');
+    Route::post('/user/settings/auto-advance', [UserSettingController::class, 'updateAutoAdvance'])->name('user.settings.auto-advance');
 });
 
 // Admin users management (super admins only).

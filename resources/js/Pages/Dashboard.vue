@@ -177,6 +177,13 @@ const formatDuration = (seconds) => {
                     <div>
                         <h1 class="text-2xl font-cinzel font-semibold text-[var(--caret-color)] tracking-tight">{{ t('dashboard') }}</h1>
                         <p class="text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-[0.3em] mt-1">{{ t('recent_performance') }}</p>
+                        <Link
+                            v-if="$page.props.auth?.resume"
+                            :href="`/?after=${$page.props.auth.resume.after}`"
+                            class="inline-flex items-center mt-3 min-h-[36px] border border-[var(--lapis-color)] text-[var(--lapis-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
+                        >
+                            Continue · {{ $page.props.auth.resume.label }}
+                        </Link>
                     </div>
                     <div class="flex gap-3">
                         <div class="flex-1 sm:flex-none border border-[var(--border-color)] px-4 py-2 text-center sm:text-right">

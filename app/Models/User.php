@@ -38,6 +38,7 @@ class User extends Authenticatable
         'oauth_provider',
         'error_sound',
         'daily_goal_chars',
+        'auto_advance',
     ];
 
     /**
@@ -72,6 +73,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'error_sound' => 'boolean',
+            'auto_advance' => 'boolean',
             'last_practiced_on' => 'date',
             'streak_grace_used_on' => 'date',
         ];

@@ -34,4 +34,17 @@ class UserSettingController extends Controller
 
         return back();
     }
+
+    public function updateAutoAdvance(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'enabled' => ['required', 'boolean'],
+        ]);
+
+        $request->user()->forceFill([
+            'auto_advance' => $request->boolean('enabled'),
+        ])->save();
+
+        return back();
+    }
 }
