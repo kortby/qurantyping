@@ -69,3 +69,29 @@ it('forbids leaving impersonation when not impersonating', function () {
         ->post('/impersonate/leave')
         ->assertForbidden();
 });
+
+it('keeps the impersonated session alive on the next request behind auth:sanctum', function () {
+    $target = User::factory()->create(['password' => bcrypt('a-different-secret')]);
+
+    // A real authed request first, so AuthenticateSession commits the admin's
+    // fingerprint the way a browser would before the "login as" click.
+    $this->actingAs($this->admin)->get('/admin/users')->assertOk();
+
+    $this->post("/admin/users/{$target->id}/impersonate")->assertRedirect('/');
+
+    // The follow-up navigation must load, not bounce to /login.
+    $this->get('/dashboard')->assertOk();
+    $this->get('/dashboard')->assertOk();
+    $this->assertAuthenticatedAs($target, 'web');
+});
+
+it('restores the admin session fingerprint when leaving', function () {
+    $target = User::factory()->create(['password' => bcrypt('a-different-secret')]);
+
+    $this->actingAs($this->admin)->get('/admin/users')->assertOk();
+    $this->post("/admin/users/{$target->id}/impersonate");
+    $this->post('/impersonate/leave')->assertRedirect(route('admin.users.index', absolute: false));
+
+    $this->get('/admin/users')->assertOk();
+    $this->assertAuthenticatedAs($this->admin, 'web');
+});

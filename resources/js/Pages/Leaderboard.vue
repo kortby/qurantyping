@@ -28,7 +28,7 @@ defineProps({
                 </div>
 
                 <!-- Leaderboard Table -->
-                <div class="bg-[var(--panel-color)] rounded-[3rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-2xl">
+                <div class="bg-[var(--panel-color)] overflow-hidden border border-[var(--border-color)]">
                     <table class="w-full text-left font-mono text-sm border-collapse">
                         <thead>
                             <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-[0.3em] text-[10px]">
@@ -112,7 +112,7 @@ defineProps({
                 <!-- Call to Action -->
                 <div class="mt-8 text-center text-xs">
                     <p class="text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-widest mb-4 opacity-60">{{ t('challenge_masters') }}</p>
-                    <Link href="/" class="inline-flex items-center gap-2 bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 rounded-xl font-cinzel font-bold uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-950/40">
+                    <Link href="/" class="inline-flex items-center gap-2 bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 font-cinzel font-bold uppercase tracking-widest hover:opacity-90 transition-opacity">
                         <span class="text-lg">⌨️</span>
                         {{ t('start_testing') }}
                     </Link>

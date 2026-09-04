@@ -45,18 +45,18 @@
         content="Enhance your Quran memorization and Arabic typing speed with QuranTyping. Test your accuracy and track your performance.">
     <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
 
-    {{-- Import a beautiful Arabic font --}}
+    {{-- Naskh for scripture, IBM Plex for the interface --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400..700&family=Cinzel:wght@400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400..700&display=swap"
         rel="stylesheet">
 
     @vite('resources/js/app.js')
     @inertiaHead
 </head>
 
-<body class="bg-gray-900 text-gray-200 antialiased">
+<body class="antialiased">
     @inertia
 </body>
 {{-- Ensure the @routes directive is here --}}
