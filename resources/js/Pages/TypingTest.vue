@@ -5,7 +5,7 @@ import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ArabicKeyboard from '@/Components/ArabicKeyboard.vue';
-import SurahSelect from '@/Components/SurahSelect.vue';
+import PassageSelect from '@/Components/PassageSelect.vue';
 import QuranAudioPlayer from '@/Components/QuranAudioPlayer.vue';
 import GuestTestModal from '@/Components/GuestTestModal.vue';
 import LunarCountdown from '@/Components/LunarCountdown.vue';
@@ -397,73 +397,105 @@ const fetchSurahs = async () => {
 const warningMessage = ref('');
 const rangeError = ref('');
 
-const fetchTestText = async (withParams = true) => {
-    // Validate range values before request
-    if (withParams && selectedSurah.value) {
-        const surah = surahs.value.find(s => s.surah_number == selectedSurah.value);
-        if (surah) {
-            // Clamp to valid bounds
-            const max = surah.total_ayahs;
-            let start = parseInt(startAyah.value) || 1;
-            let end = parseInt(endAyah.value) || 1;
+// The passage scope currently driving the selector: 'surah' | 'juz' | 'page'.
+const scope = ref('surah');
 
-            start = Math.max(1, Math.min(start, max));
-            end = Math.max(1, Math.min(end, max));
+const applyPassage = (data) => {
+    quranText.value = data;
+    selectedSurah.value = data.surah_number;
+    startAyah.value = data.start_ayah;
+    endAyah.value = data.end_ayah;
 
-            if (start > end) end = start;
+    const url = new URL(window.location);
+    ['scope', 'value', 'after'].forEach(k => url.searchParams.delete(k));
+    url.searchParams.set('surah', data.surah_number);
+    url.searchParams.set('start', data.start_ayah);
+    url.searchParams.set('end', data.end_ayah);
+    window.history.pushState({}, '', url);
 
-            startAyah.value = start;
-            endAyah.value = end;
-        }
-    }
+    resetTest();
+};
 
-    // Reset warnings
+/**
+ * opts: {} / true          → current sūrah + ayah range
+ *       false / {random}    → a random passage
+ *       { scope, value }    → structured navigation (juz' / page)
+ *       { after }           → the passage after a given ayah (resume / advance)
+ */
+const fetchTestText = async (opts = {}) => {
+    if (opts === false) opts = { random: true };
+    if (opts === true) opts = {};
+
     warningMessage.value = '';
     rangeError.value = '';
 
-    try {
-        let params = {};
-        if (withParams) {
-            params = {
-                surah_number: selectedSurah.value,
-                start_ayah: startAyah.value,
-                end_ayah: endAyah.value,
-            };
+    let params;
+    if (opts.after) {
+        params = { after: opts.after };
+    } else if (opts.scope && opts.scope !== 'surah') {
+        params = { scope: opts.scope, value: opts.value };
+    } else if (opts.random) {
+        params = {};
+    } else {
+        const surah = surahs.value.find(s => s.surah_number == selectedSurah.value);
+        if (surah) {
+            const max = surah.total_ayahs;
+            let start = Math.max(1, Math.min(parseInt(startAyah.value) || 1, max));
+            let end = Math.max(1, Math.min(parseInt(endAyah.value) || 1, max));
+            if (start > end) end = start;
+            startAyah.value = start;
+            endAyah.value = end;
         }
+        params = { surah_number: selectedSurah.value, start_ayah: startAyah.value, end_ayah: endAyah.value };
+    }
+
+    try {
         const response = await axios.get('/api/test/text', { params });
-        quranText.value = response.data;
-        // Sync UI filters with whatever the server returned (important for random selection)
-        selectedSurah.value = quranText.value.surah_number;
-        startAyah.value = quranText.value.start_ayah;
-        endAyah.value = quranText.value.end_ayah;
-        // Update URL to reflect current test
-        const url = new URL(window.location);
-        url.searchParams.set('surah', selectedSurah.value);
-        url.searchParams.set('start', startAyah.value);
-        url.searchParams.set('end', endAyah.value);
-        window.history.pushState({}, '', url);
-        resetTest();
+        applyPassage(response.data);
     } catch (error) {
-        console.error("Failed to fetch test text:", error);
-        if (error.response?.status === 400 && error.response?.data?.message) {
-            // Determine if it's a range issue or word count issue
-            if (error.response.data.message.includes('range')) {
-                rangeError.value = t('range_error');
+        const status = error.response?.status;
+        const message = error.response?.data?.message || '';
+
+        if (status === 409 || status === 422) {
+            warningMessage.value = message || t('range_error');
+        } else if (status === 400 && message) {
+            if (message.toLowerCase().includes('word')) {
+                if (opts.scope || opts.after || opts.random) fetchTestText({ random: true });
+                else warningMessage.value = t('text_too_short');
             } else {
-                // If text is too short during random selection, try again
-                if (!withParams) {
-                    fetchTestText(false);
-                } else {
-                    warningMessage.value = t('text_too_short');
-                }
+                rangeError.value = t('range_error');
             }
-        } else if (error.response?.status === 404) {
-            // If 404, the range was likely invalid, recover by fetching random
-            fetchTestText(false);
+        } else if (status === 404) {
+            fetchTestText({ random: true });
+        } else {
+            console.error('Failed to fetch test text:', error);
         }
     } finally {
         isLoading.value = false;
     }
+};
+
+const autoAdvance = ref(page.props.auth?.user?.auto_advance ?? false);
+
+const toggleAutoAdvance = () => {
+    autoAdvance.value = !autoAdvance.value;
+    if (page.props.auth?.user) {
+        router.post(route('user.settings.auto-advance'), { enabled: autoAdvance.value }, {
+            preserveScroll: true,
+            preserveState: true,
+        });
+    }
+};
+
+const nextPassage = () => {
+    if (quranText.value?.last_quran_text_id) {
+        fetchTestText({ after: quranText.value.last_quran_text_id });
+    }
+};
+
+const resumePractice = () => {
+    const resume = page.props.auth?.resume;
+    if (resume?.after) fetchTestText({ after: resume.after });
 };
 
 const handleInput = (event) => {
@@ -638,7 +670,12 @@ onMounted(async () => {
     
     // Check for query parameters to pre-load a specific test
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('surah')) {
+    if (urlParams.has('after')) {
+        await fetchTestText({ after: parseInt(urlParams.get('after')) });
+    } else if (urlParams.has('scope') && urlParams.get('scope') !== 'surah') {
+        scope.value = urlParams.get('scope');
+        await fetchTestText({ scope: urlParams.get('scope'), value: parseInt(urlParams.get('value')) || 1 });
+    } else if (urlParams.has('surah')) {
         selectedSurah.value = parseInt(urlParams.get('surah'));
         startAyah.value = parseInt(urlParams.get('start')) || 1;
         endAyah.value = parseInt(urlParams.get('end')) || 1;
@@ -675,16 +712,19 @@ defineOptions({ layout: AppLayout });
         <LunarCountdown v-if="contestConfig?.enabled" :config="contestConfig" />
 
         <!-- Passage selectors -->
-        <form @submit.prevent="fetchTestText" class="w-full max-w-4xl mb-4 flex flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 font-mono text-sm">
-            <SurahSelect
+        <form @submit.prevent="fetchTestText()" class="w-full max-w-4xl mb-4 flex flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 font-mono text-sm">
+            <PassageSelect
                 class="w-full sm:w-auto"
-                v-model="selectedSurah"
-                :options="surahs"
+                :surah="selectedSurah"
+                :surahs="surahs"
                 :label="t('surah')"
                 :placeholder="t('select_surah') || 'Select Surah'"
-                @update:model-value="handleSurahSelected"
+                @update:surah="v => selectedSurah = v"
+                @surah-picked="handleSurahSelected"
+                @scope-change="s => scope = s"
+                @select="opts => fetchTestText(opts)"
             />
-            <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-1.5 border border-[var(--border-color)]">
+            <div v-if="scope === 'surah'" class="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-1.5 border border-[var(--border-color)]">
                 <span class="text-[var(--sub-color)] text-[10px] uppercase tracking-[0.2em] hidden sm:inline">{{ t('ayats') }}</span>
                 <button type="button" @click="decreaseStartAyah" aria-label="Start ayah down" class="w-9 h-9 shrink-0 flex items-center justify-center border border-[var(--border-color)] text-lg text-[var(--main-color)] hover:border-[var(--caret-color)] hover:text-[var(--caret-color)] transition-colors">−</button>
                 <input
@@ -713,6 +753,26 @@ defineOptions({ layout: AppLayout });
             </button>
             <button type="button" @click="fetchTestText(false)" class="min-h-[40px] text-[var(--sub-color)] border border-[var(--border-color)] px-5 font-cinzel text-xs hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors uppercase tracking-[0.12em]">
                 {{ t('random') }}
+            </button>
+
+            <button
+                v-if="page.props.auth?.resume"
+                type="button"
+                @click="resumePractice"
+                class="min-h-[40px] border border-[var(--lapis-color)] text-[var(--lapis-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
+            >
+                Continue · {{ page.props.auth.resume.label }}
+            </button>
+
+            <button
+                v-if="page.props.auth?.user"
+                type="button"
+                @click="toggleAutoAdvance"
+                :title="autoAdvance ? 'Auto-advance to the next passage is on' : 'Turn on auto-advance'"
+                class="min-h-[40px] border px-4 text-xs font-mono uppercase tracking-[0.12em] transition-colors"
+                :class="autoAdvance ? 'text-[var(--caret-color)] border-[var(--caret-color)]' : 'text-[var(--sub-color)] border-[var(--border-color)] hover:text-[var(--main-color)]'"
+            >
+                Auto-advance {{ autoAdvance ? 'on' : 'off' }}
             </button>
 
             <button v-if="showTashkilFeature"
@@ -915,7 +975,20 @@ defineOptions({ layout: AppLayout });
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full px-6 sm:w-auto sm:px-0">
-                    <button @click="resetTest" class="w-full sm:w-auto min-h-[44px] px-8 bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold hover:opacity-90 transition-opacity">
+                    <button
+                        v-if="autoAdvance && quranText.last_quran_text_id"
+                        @click="nextPassage"
+                        class="w-full sm:w-auto min-h-[44px] px-8 bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold hover:opacity-90 transition-opacity"
+                    >
+                        Next passage →
+                    </button>
+                    <button
+                        @click="resetTest"
+                        class="w-full sm:w-auto min-h-[44px] px-8 font-cinzel font-semibold transition-opacity hover:opacity-90"
+                        :class="autoAdvance && quranText.last_quran_text_id
+                            ? 'border border-[var(--border-color)] text-[var(--sub-color)]'
+                            : 'bg-[var(--caret-color)] text-[var(--bg-color)]'"
+                    >
                         {{ t('restart_hint') }}
                     </button>
                     <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" class="w-full sm:w-auto min-h-[44px] flex items-center justify-center px-8 border border-[var(--border-color)] font-cinzel text-xs uppercase tracking-[0.12em] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors">
