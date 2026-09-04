@@ -20,13 +20,13 @@ defineOptions({ layout: AppLayout });
         <div class="text-center mb-12">
             <h1 class="text-4xl md:text-5xl font-cinzel font-bold text-[var(--caret-color)] mb-4">{{ t('contest.leaderboard_title') }}</h1>
             <p class="text-[var(--sub-color)] font-mono text-sm tracking-widest max-w-2xl mx-auto">
-                <span class="bg-[var(--panel-color)] px-3 py-1 rounded-full border border-[var(--border-color)]">
+                <span class="bg-[var(--panel-color)] px-3 py-1 border border-[var(--border-color)]">
                     {{ t('contest.qualification').replace('{wpm}', config.min_wpm).replace('{acc}', config.min_accuracy) }}
                 </span>
             </p>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-[var(--border-color)] shadow-2xl bg-[var(--panel-color)]">
+        <div class="overflow-x-auto border border-[var(--border-color)] bg-[var(--panel-color)]">
             <table class="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                     <tr class="bg-[var(--bg-color)] border-b border-[var(--border-color)]">
@@ -47,12 +47,9 @@ defineOptions({ layout: AppLayout });
                             {{ t('contest.first_to_qualify') }}
                         </td>
                     </tr>
-                    <tr v-for="(entry, i) in leaderboard" :key="entry.id" class="border-b border-[var(--border-color)] last:border-0 hover:bg-black/10 transition-colors">
+                    <tr v-for="(entry, i) in leaderboard" :key="entry.id" class="border-b border-[var(--border-color)] last:border-0 hover:bg-[var(--caret-color)]/[0.03] transition-colors">
                         <td class="p-4 text-center font-bold text-[var(--main-color)] opacity-70">
-                            <span v-if="i === 0" class="text-2xl" title="1st Place">🥇</span>
-                            <span v-else-if="i === 1" class="text-2xl" title="2nd Place">🥈</span>
-                            <span v-else-if="i === 2" class="text-2xl" title="3rd Place">🥉</span>
-                            <span v-else>{{ i + 1 }}</span>
+                            <span :class="i < 3 ? 'text-[var(--caret-color)] font-semibold' : ''">{{ i + 1 }}</span>
                         </td>
                         <td class="p-4 text-[var(--main-color)] font-bold tracking-wide">{{ entry.user.name }}</td>
                         <td class="p-4 text-right text-[var(--caret-color)] font-bold text-lg">{{ entry.wpm }}</td>
