@@ -19,8 +19,7 @@ class ImpersonationController extends Controller
 
         $request->session()->put('impersonator_id', $request->user()->id);
 
-        Auth::guard('web')->login($user);
-        $this->syncSessionPasswordHash($request, $user);
+        $this->switchTo($request, $user);
 
         return redirect('/');
     }
@@ -29,24 +28,34 @@ class ImpersonationController extends Controller
     {
         abort_unless($request->session()->has('impersonator_id'), 403);
 
-        $original = Auth::guard('web')->loginUsingId($request->session()->pull('impersonator_id'));
+        $original = User::find($request->session()->pull('impersonator_id'));
 
         if ($original) {
-            $this->syncSessionPasswordHash($request, $original);
+            $this->switchTo($request, $original);
+        } else {
+            Auth::guard('web')->logout();
         }
 
         return redirect()->route('admin.users.index');
     }
 
     /**
-     * Realign the session's stored password hash with the now-active user.
+     * Log the session in as the given user and leave the auth state consistent.
      *
-     * Jetstream's AuthenticateSession middleware logs the session out on the
-     * next request when this hash no longer matches the authenticated user, so
-     * after switching users programmatically it must be refreshed by hand.
+     * After the session login this also (1) forgets the already-resolved guard
+     * instances so the rest of this request — including Jetstream's
+     * AuthenticateSession terminating callback — resolves the new user instead
+     * of the one sanctum cached before the switch, and (2) drops the stale
+     * session password-hash fingerprints (web + sanctum, since the route runs
+     * behind auth:sanctum) so they are rewritten for the new user. Without this
+     * the first navigation after switching users is logged straight out to
+     * /login.
      */
-    protected function syncSessionPasswordHash(Request $request, Authenticatable $user): void
+    protected function switchTo(Request $request, Authenticatable $user): void
     {
-        $request->session()->put('password_hash_web', $user->getAuthPassword());
+        Auth::guard('web')->login($user);
+        Auth::forgetGuards();
+
+        $request->session()->forget(['password_hash_web', 'password_hash_sanctum']);
     }
 }
