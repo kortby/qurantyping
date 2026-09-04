@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\StreakService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -46,6 +47,9 @@ class HandleInertiaRequests extends Middleware
                     'is_super_admin' => $request->user()->isSuperAdmin(),
                 ] : null,
                 'impersonating' => $request->session()->has('impersonator_id'),
+                'streak' => fn () => $request->user()
+                    ? app(StreakService::class)->forInertia($request->user())
+                    : null,
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

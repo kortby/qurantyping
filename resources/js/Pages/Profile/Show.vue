@@ -5,6 +5,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { useSettings } from '../../useSettings';
 import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm.vue';
 import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOtherBrowserSessionsForm.vue';
+import PracticeGoalForm from '@/Pages/Profile/Partials/PracticeGoalForm.vue';
 import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
@@ -54,8 +55,9 @@ const tabs = [
 
                 <main class="pb-16">
                     <transition name="fade-slide" mode="out-in">
-                        <div v-if="activeTab === 'profile'" key="profile">
+                        <div v-if="activeTab === 'profile'" key="profile" class="space-y-10">
                             <UpdateProfileInformationForm :user="$page.props.auth.user" />
+                            <PracticeGoalForm />
                         </div>
 
                         <div v-else-if="activeTab === 'security'" key="security" class="space-y-10">

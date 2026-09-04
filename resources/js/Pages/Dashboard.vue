@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import DailyGoal from '@/Components/DailyGoal.vue';
 import { useSettings } from '../useSettings';
 import { Line } from 'vue-chartjs';
 import {
@@ -188,6 +189,8 @@ const formatDuration = (seconds) => {
                         </div>
                     </div>
                 </div>
+
+                <DailyGoal class="mb-6" />
 
                 <!-- Evolution Chart -->
                 <div v-if="chartData.length > 1" class="mb-6 border border-[var(--border-color)] p-4">
