@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ContestController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
@@ -106,6 +107,8 @@ Route::middleware([
     Route::get('/hifz', [HifzController::class, 'index'])->name('hifz.index');
     Route::get('/hifz/session', [HifzController::class, 'session'])->name('hifz.session');
     Route::post('/hifz/grade', [HifzController::class, 'grade'])->name('hifz.grade');
+
+    Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
 });
 
 // Admin users management (super admins only).
