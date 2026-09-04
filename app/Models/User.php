@@ -37,6 +37,7 @@ class User extends Authenticatable
         'oauth_id',
         'oauth_provider',
         'error_sound',
+        'daily_goal_chars',
     ];
 
     /**
@@ -71,7 +72,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'error_sound' => 'boolean',
+            'last_practiced_on' => 'date',
+            'streak_grace_used_on' => 'date',
         ];
+    }
+
+    /**
+     * Get the user's per-day practice activity.
+     */
+    public function dailyActivity(): HasMany
+    {
+        return $this->hasMany(DailyActivity::class);
     }
 
     /**

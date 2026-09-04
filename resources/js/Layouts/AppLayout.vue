@@ -7,6 +7,7 @@ import FeedbackModal from '../Components/FeedbackModal.vue';
 import AuthWarningModal from '../Components/AuthWarningModal.vue';
 import Banner from '../Components/Banner.vue';
 import SocialButtons from '@/Components/SocialButtons.vue';
+import StreakBadge from '@/Components/StreakBadge.vue';
 
 const { currentLang, currentTheme, setLang, setTheme, t } = useSettings();
 const mobileMenuOpen = ref(false);
@@ -142,6 +143,7 @@ if (typeof window !== 'undefined') {
 
                     <!-- Desktop Auth -->
                     <div class="hidden lg:flex items-center gap-6 text-sm relative user-menu-container">
+                        <StreakBadge v-if="$page.props.auth.user" class="text-sm" />
                         <div v-if="$page.props.auth.user" class="relative">
                             <button @click="userMenuOpen = !userMenuOpen"
                                 class="flex items-center gap-2 px-3 py-1.5 border border-[var(--border-color)] hover:border-[var(--caret-color)] transition-colors group">
@@ -214,6 +216,7 @@ if (typeof window !== 'undefined') {
                             <Link href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/user/profile" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.admin') }}</Link>
+                            <StreakBadge class="justify-center pt-1" />
                         </template>
                     </nav>
 

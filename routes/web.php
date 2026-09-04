@@ -97,6 +97,7 @@ Route::middleware([
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
     Route::post('/user/settings/error-sound', [UserSettingController::class, 'updateErrorSound'])->name('user.settings.error-sound');
+    Route::post('/user/settings/daily-goal', [UserSettingController::class, 'updateDailyGoal'])->name('user.settings.daily-goal');
 });
 
 // Admin users management (super admins only).
