@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Models\Test;
+use App\Models\User;
 use App\Observers\TestObserver;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,11 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Gate::define('viewPulse', function ($user) {
-            return in_array($user->email, [
-                'hasbellaoui.faycal@gmail.com',
-            ]);
-        });
+        Gate::define('viewAdmin', fn (User $user): bool => $user->isSuperAdmin());
+        Gate::define('viewPulse', fn (User $user): bool => $user->isSuperAdmin());
 
         Test::observe(TestObserver::class);
     }

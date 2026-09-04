@@ -43,25 +43,27 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'error_sound' => $request->user()->error_sound,
+                    'is_super_admin' => $request->user()->isSuperAdmin(),
                 ] : null,
+                'impersonating' => $request->session()->has('impersonator_id'),
             ],
             'flash' => [
-                'message' => fn() => $request->session()->get('message'),
-                'error' => fn() => $request->session()->get('error'),
+                'message' => fn () => $request->session()->get('message'),
+                'error' => fn () => $request->session()->get('error'),
             ],
             'jetstream' => [
-                'flash' => fn() => [
+                'flash' => fn () => [
                     'banner' => $request->session()->get('flash.banner'),
                     'bannerStyle' => $request->session()->get('flash.bannerStyle'),
                 ],
             ],
             'social' => [
-                'github' => !empty(config('services.github.client_id')),
-                'google' => !empty(config('services.google.client_id')),
-                'facebook' => !empty(config('services.facebook.client_id')),
-                'has_any' => !empty(config('services.github.client_id')) ||
-                    !empty(config('services.google.client_id')) ||
-                    !empty(config('services.facebook.client_id')),
+                'github' => ! empty(config('services.github.client_id')),
+                'google' => ! empty(config('services.google.client_id')),
+                'facebook' => ! empty(config('services.facebook.client_id')),
+                'has_any' => ! empty(config('services.github.client_id')) ||
+                    ! empty(config('services.google.client_id')) ||
+                    ! empty(config('services.facebook.client_id')),
             ],
             'features' => [
                 'tashkil' => config('app.tashkil_feature', false),

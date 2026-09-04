@@ -3,8 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,8 +18,9 @@ class User extends Authenticatable
 {
     use HasApiTokens;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
@@ -72,6 +75,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine whether the user has super-admin access.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return in_array($this->email, config('admin.super_admins', []), true);
+    }
+
+    /**
      * Get all of the typing tests for the User.
      */
     public function tests(): HasMany
@@ -90,7 +101,7 @@ class User extends Authenticatable
     /**
      * Get all of the results for the User through the tests.
      */
-    public function results(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function results(): HasManyThrough
     {
         return $this->hasManyThrough(Result::class, Test::class);
     }

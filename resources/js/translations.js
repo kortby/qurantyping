@@ -128,7 +128,10 @@ export const translations = {
             profile_subtitle: "Manage your account settings and preferences",
             title: "Navigation",
             leaderboard: "Leaderboard",
-            logged_in_as: "Logged in as"
+            logged_in_as: "Logged in as",
+            admin: "Admin",
+            impersonating_as: "Impersonating",
+            stop_impersonating: "Stop impersonating"
         },
         auth: {
             email: "Email",
@@ -325,7 +328,10 @@ export const translations = {
             profile_subtitle: "Gérez les paramètres et préférences de votre compte",
             leaderboard: "Classement",
             title: "Navigation",
-            logged_in_as: "Connecté en tant que"
+            logged_in_as: "Connecté en tant que",
+            admin: "Admin",
+            impersonating_as: "Usurpation de",
+            stop_impersonating: "Arrêter l'usurpation"
         },
         auth: {
             email: "E-mail",
@@ -522,7 +528,10 @@ export const translations = {
             profile_subtitle: "إدارة إعدادات حسابك وتفضيلاتك",
             leaderboard: "لوحة المتصدرين",
             title: "التنقل",
-            logged_in_as: "تم الدخول باسم"
+            logged_in_as: "تم الدخول باسم",
+            admin: "الإدارة",
+            impersonating_as: "انتحال هوية",
+            stop_impersonating: "إيقاف انتحال الهوية"
         },
         auth: {
             email: "البريد الإلكتروني",
