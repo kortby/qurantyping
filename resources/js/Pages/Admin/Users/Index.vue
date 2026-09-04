@@ -75,6 +75,7 @@ const timeAgo = (value) => {
                         <h1 class="text-2xl font-cinzel font-semibold text-[var(--caret-color)]">Users</h1>
                         <p class="text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-[0.3em] mt-1">
                             {{ users.total }} registered
+                            <Link href="/admin/feedback" class="ml-2 text-[var(--lapis-color)] hover:opacity-80 transition-opacity">Feedback →</Link>
                         </p>
                     </div>
                     <input

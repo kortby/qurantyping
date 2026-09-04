@@ -130,6 +130,7 @@ export const translations = {
             leaderboard: "Leaderboard",
             logged_in_as: "Logged in as",
             admin: "Admin",
+            feedback: "Feedback",
             hifz: "Hifz",
             impersonating_as: "Impersonating",
             stop_impersonating: "Stop impersonating"
@@ -403,6 +404,7 @@ export const translations = {
             title: "Navigation",
             logged_in_as: "Connecté en tant que",
             admin: "Admin",
+            feedback: "Retours",
             hifz: "Hifz",
             impersonating_as: "Usurpation de",
             stop_impersonating: "Arrêter l'usurpation"
@@ -676,6 +678,7 @@ export const translations = {
             title: "التنقل",
             logged_in_as: "تم الدخول باسم",
             admin: "الإدارة",
+            feedback: "الملاحظات",
             hifz: "الحفظ",
             impersonating_as: "انتحال هوية",
             stop_impersonating: "إيقاف انتحال الهوية"
