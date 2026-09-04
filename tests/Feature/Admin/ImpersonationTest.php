@@ -69,3 +69,24 @@ it('forbids leaving impersonation when not impersonating', function () {
         ->post('/impersonate/leave')
         ->assertForbidden();
 });
+
+it('realigns the session password hash so follow-up requests keep the session', function () {
+    $target = User::factory()->create(['password' => bcrypt('a-different-secret')]);
+
+    $this->actingAs($this->admin)->post("/admin/users/{$target->id}/impersonate");
+
+    // AuthenticateSession compares this against the active user on every request.
+    expect(session('password_hash_web'))->toBe($target->getAuthPassword());
+
+    $this->get('/dashboard')->assertOk();
+    $this->assertAuthenticatedAs($target, 'web');
+});
+
+it('restores the admin session password hash when leaving', function () {
+    $target = User::factory()->create(['password' => bcrypt('a-different-secret')]);
+
+    $this->actingAs($this->admin)->post("/admin/users/{$target->id}/impersonate");
+    $this->post('/impersonate/leave');
+
+    expect(session('password_hash_web'))->toBe($this->admin->getAuthPassword());
+});
