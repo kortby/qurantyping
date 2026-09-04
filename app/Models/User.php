@@ -39,6 +39,7 @@ class User extends Authenticatable
         'error_sound',
         'daily_goal_chars',
         'auto_advance',
+        'hifz_daily_new',
     ];
 
     /**

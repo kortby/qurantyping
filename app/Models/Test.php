@@ -27,6 +27,8 @@ class Test extends Model
         'end_ayah',
         'total_errors',
         'is_contest_entry',
+        'hifz_level',
+        'peeks',
     ];
 
     protected $casts = [

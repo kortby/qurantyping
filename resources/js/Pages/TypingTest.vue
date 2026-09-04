@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, onUnmounted, watch } from 'vue';
-import { usePage, Head, router } from '@inertiajs/vue3';
+import { usePage, Head, Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -498,6 +498,70 @@ const resumePractice = () => {
     if (resume?.after) fetchTestText({ after: resume.after });
 };
 
+/* ---------- Hifz mode ---------- */
+const hifzMode = ref(false);
+const hifzSessionMode = ref('due');   // 'due' | 'new'
+const revealLevel = ref(2);           // 1 guided · 2 faint · 3 blind
+const peeking = ref(false);
+const peeks = ref(0);
+const lastTestId = ref(null);
+const hifzMessage = ref('');
+
+const effectiveLevel = computed(() => (peeking.value ? 1 : revealLevel.value));
+
+const revealClass = (cluster) => {
+    if (!hifzMode.value || effectiveLevel.value === 1 || cluster.isSeparator) return '';
+    const status = getClusterStatus(cluster);
+    if (status === 'correct' || status === 'incorrect') return '';
+    return effectiveLevel.value === 2 ? 'hz-faint' : 'hz-blind';
+};
+
+const startPeek = () => { peeking.value = true; };
+const endPeek = () => {
+    if (peeking.value) { peeking.value = false; peeks.value++; }
+};
+
+const suggestedGrade = computed(() => {
+    const words = (currentDisplayText.value || '').split(/\s+/).filter(Boolean).length;
+    const budget = Math.max(1, Math.floor(words / 2));
+    if (accuracy.value < 80 || peeks.value > budget) return 0;
+    if (accuracy.value < 92 || peeks.value >= 3) return 1;
+    if (accuracy.value < 98 || peeks.value >= 1) return 2;
+    return 3;
+});
+
+const gradeLabels = ['Again', 'Hard', 'Good', 'Easy'];
+
+const loadHifzSession = async (mode) => {
+    hifzMode.value = true;
+    hifzSessionMode.value = mode;
+    hifzMessage.value = '';
+    peeks.value = 0;
+    try {
+        const { data } = await axios.get('/hifz/session', { params: { mode } });
+        scope.value = 'surah';
+        selectedSurah.value = data.surah_number;
+        startAyah.value = data.start_ayah;
+        endAyah.value = data.end_ayah;
+        await fetchTestText();
+    } catch (e) {
+        hifzMessage.value = e.response?.data?.message || 'Could not load a hifz passage.';
+        isLoading.value = false;
+    }
+};
+
+const submitGrade = async (grade) => {
+    if (!lastTestId.value) return;
+    try {
+        await axios.post('/hifz/grade', { test_id: lastTestId.value, grade });
+    } catch (e) {
+        // fall through to loading the next passage regardless
+    }
+    lastTestId.value = null;
+    await loadHifzSession(hifzSessionMode.value);
+    if (hifzMessage.value) router.visit('/hifz');
+};
+
 const handleInput = (event) => {
     if (testFinished.value || isLoading.value) return;
     
@@ -609,6 +673,11 @@ const finishTest = async () => {
             total_errors: totalErrors.value,
         };
 
+        if (hifzMode.value) {
+            testData.hifz_level = revealLevel.value;
+            testData.peeks = peeks.value;
+        }
+
         if (!page.props.auth?.user) {
             localStorage.setItem('cached_typing_test', JSON.stringify(testData));
             setTimeout(() => {
@@ -616,7 +685,8 @@ const finishTest = async () => {
             }, 1000);
         }
 
-        await axios.post('/test/complete', testData);
+        const { data } = await axios.post('/test/complete', testData);
+        lastTestId.value = data?.id ?? null;
     } catch (error) {
         console.error("Failed to save test result:", error);
     }
@@ -670,7 +740,9 @@ onMounted(async () => {
     
     // Check for query parameters to pre-load a specific test
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('after')) {
+    if (urlParams.get('hifz') === '1') {
+        await loadHifzSession(urlParams.get('mode') === 'new' ? 'new' : 'due');
+    } else if (urlParams.has('after')) {
         await fetchTestText({ after: parseInt(urlParams.get('after')) });
     } else if (urlParams.has('scope') && urlParams.get('scope') !== 'surah') {
         scope.value = urlParams.get('scope');
@@ -839,12 +911,35 @@ defineOptions({ layout: AppLayout });
         </div>
 
         <!-- Sürah header cartouche -->
-        <div v-if="!showResults && quranText.surah_name_arabic" class="w-full max-w-4xl mb-2 flex justify-center sm:justify-start animate-fade-in">
+        <div v-if="!showResults && quranText.surah_name_arabic" class="w-full max-w-4xl mb-2 flex flex-wrap gap-3 justify-center sm:justify-between items-center animate-fade-in">
             <span class="cartouche">
                 <span class="name" dir="rtl">{{ quranText.surah_name_arabic }}</span>
                 <span class="font-mono">{{ quranText.surah_number }}:{{ quranText.start_ayah }}–{{ quranText.end_ayah }}</span>
             </span>
+
+            <div v-if="hifzMode" class="flex items-center gap-2 font-mono text-[11px]">
+                <div class="flex border border-[var(--border-color)] divide-x divide-[var(--border-color)]">
+                    <button
+                        v-for="(lbl, i) in ['Guided', 'Faint', 'Blind']" :key="i"
+                        type="button"
+                        @click="revealLevel = i + 1"
+                        class="px-2.5 py-1 uppercase tracking-[0.1em] transition-colors"
+                        :class="revealLevel === i + 1 ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'text-[var(--sub-color)] hover:text-[var(--main-color)]'"
+                    >{{ lbl }}</button>
+                </div>
+                <button
+                    type="button"
+                    @pointerdown.prevent="startPeek" @pointerup="endPeek" @pointerleave="endPeek"
+                    class="px-3 py-1 border uppercase tracking-[0.1em] select-none transition-colors"
+                    :class="peeking ? 'border-[var(--caret-color)] text-[var(--caret-color)]' : 'border-[var(--border-color)] text-[var(--sub-color)]'"
+                >Peek</button>
+                <span class="text-[var(--sub-color)]">{{ peeks }}</span>
+            </div>
         </div>
+
+        <p v-if="hifzMessage" class="w-full max-w-4xl mb-4 text-sm font-mono text-[var(--sub-color)]">
+            {{ hifzMessage }} · <Link href="/hifz" class="text-[var(--lapis-color)]">back to Hifz</Link>
+        </p>
 
         <!-- Typing Area — the jadwal -->
         <div v-if="currentDisplayText && !showResults"
@@ -912,7 +1007,8 @@ defineOptions({ layout: AppLayout });
                               getClusterStatus(cluster) === 'untyped' ? 'text-[var(--sub-color)]' : '',
                               getClusterStatus(cluster) === 'active' ? 'text-[var(--sub-color)] cluster-active' : '',
                               getClusterStatus(cluster) === 'ignored-error' ? 'text-[var(--sub-color)] opacity-50' : '',
-                              cluster.isSeparator ? 'ayah-ornament' : ''
+                              cluster.isSeparator ? 'ayah-ornament' : '',
+                              revealClass(cluster)
                           ]">
                         <template v-if="cluster.isSeparator">
                             <span class="ornament-wrap">
@@ -974,7 +1070,28 @@ defineOptions({ layout: AppLayout });
                     {{ accuracy === 100 ? t('perfect') : (accuracy > 90 ? t('excellent') : t('keep_practicing')) }}
                 </p>
 
-                <div class="flex flex-col sm:flex-row items-center gap-3 w-full px-6 sm:w-auto sm:px-0">
+                <!-- Hifz grading -->
+                <div v-if="hifzMode" class="w-full flex flex-col items-center gap-3">
+                    <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--sub-color)]">
+                        How well did you know it?
+                        <span v-if="peeks"> · {{ peeks }} peek{{ peeks === 1 ? '' : 's' }}</span>
+                    </p>
+                    <div class="flex gap-2 w-full max-w-md px-6 sm:px-0">
+                        <button
+                            v-for="(lbl, g) in gradeLabels" :key="g"
+                            @click="submitGrade(g)"
+                            class="flex-1 min-h-[44px] font-cinzel text-xs uppercase tracking-[0.1em] border transition-colors"
+                            :class="g === suggestedGrade
+                                ? 'bg-[var(--caret-color)] text-[var(--bg-color)] border-[var(--caret-color)]'
+                                : 'border-[var(--border-color)] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)]'"
+                        >{{ lbl }}</button>
+                    </div>
+                    <Link href="/hifz" class="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--sub-color)] hover:text-[var(--main-color)] transition-colors">
+                        end session
+                    </Link>
+                </div>
+
+                <div v-else class="flex flex-col sm:flex-row items-center gap-3 w-full px-6 sm:w-auto sm:px-0">
                     <button
                         v-if="autoAdvance && quranText.last_quran_text_id"
                         @click="nextPassage"

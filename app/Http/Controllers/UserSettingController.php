@@ -47,4 +47,17 @@ class UserSettingController extends Controller
 
         return back();
     }
+
+    public function updateHifzDailyNew(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'hifz_daily_new' => ['required', 'integer', 'min:1', 'max:50'],
+        ]);
+
+        $request->user()->forceFill([
+            'hifz_daily_new' => $validated['hifz_daily_new'],
+        ])->save();
+
+        return back();
+    }
 }
