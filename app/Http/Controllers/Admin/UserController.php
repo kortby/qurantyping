@@ -24,7 +24,7 @@ class UserController extends Controller
      * @var list<string>
      */
     protected array $sortable = [
-        'name', 'email', 'tests_count', 'email_verified_at', 'created_at',
+        'name', 'email', 'tests_count', 'created_at', 'last_login_at',
         'current_streak', 'hifz_ayahs', 'certificates_count',
     ];
 
@@ -70,6 +70,7 @@ class UserController extends Controller
                     'hifz_due' => (int) $user->hifz_due,
                     'certificates_count' => (int) $user->certificates_count,
                     'created_at' => $user->created_at,
+                    'last_login_at' => $user->last_login_at,
                     'is_super_admin' => $user->isSuperAdmin(),
                 ]),
         ]);
@@ -94,6 +95,7 @@ class UserController extends Controller
                 'is_super_admin' => $user->isSuperAdmin(),
                 'is_self' => $user->is($request->user()),
                 'last_practiced_on' => $user->last_practiced_on?->toDateString(),
+                'last_login_at' => $user->last_login_at?->toIso8601String(),
             ],
             'stats' => fn (): array => [
                 'tests_count' => (int) $user->tests()->count(),

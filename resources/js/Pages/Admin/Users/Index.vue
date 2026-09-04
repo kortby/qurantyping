@@ -42,11 +42,24 @@ const columns = [
     { key: 'current_streak', label: 'Streak', align: 'text-center' },
     { key: 'hifz_ayahs', label: 'Hifz', align: 'text-center' },
     { key: 'certificates_count', label: 'Certs', align: 'text-center' },
-    { key: 'email_verified_at', label: 'Verified', align: 'text-center' },
+    { key: 'last_login_at', label: 'Last login', align: 'text-center' },
     { key: 'created_at', label: 'Joined', align: 'text-center' },
 ];
 
 const formatDate = (value) => value ? new Date(value).toLocaleDateString() : '—';
+
+const timeAgo = (value) => {
+    if (!value) return 'never';
+    const s = Math.round((Date.now() - new Date(value)) / 1000);
+    if (s < 60) return 'just now';
+    const m = Math.round(s / 60);
+    if (m < 60) return `${m}m ago`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const d = Math.round(h / 24);
+    if (d < 30) return `${d}d ago`;
+    return new Date(value).toLocaleDateString();
+};
 </script>
 
 <template>
@@ -116,12 +129,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleDateString() : '�
                                         >·{{ user.hifz_due }}</span>
                                     </td>
                                     <td class="px-6 py-4 text-center tabular-nums" :class="user.certificates_count ? 'text-[var(--caret-color)]' : 'text-[var(--sub-color)]'">{{ user.certificates_count }}</td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span
-                                            :title="user.email_verified_at ? 'Verified' : 'Unverified'"
-                                            :class="user.email_verified_at ? 'text-emerald-500' : 'text-[var(--error-color)]'"
-                                        >{{ user.email_verified_at ? '✓' : '✗' }}</span>
-                                    </td>
+                                    <td class="px-6 py-4 text-center text-[var(--sub-color)]" :title="user.last_login_at ? new Date(user.last_login_at).toLocaleString() : ''">{{ timeAgo(user.last_login_at) }}</td>
                                     <td class="px-6 py-4 text-center text-[var(--sub-color)]">{{ formatDate(user.created_at) }}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end gap-2">

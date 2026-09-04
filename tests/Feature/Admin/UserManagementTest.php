@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Certificate;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Config;
@@ -65,7 +66,7 @@ it('ignores an unknown sort column', function () {
         ->assertOk();
 });
 
-it('lists and sorts by the streak / hifz / certificate columns', function () {
+it('lists and sorts by the streak / hifz / certificate / last-login columns', function () {
     User::factory()->create(['name' => 'Low'])->forceFill(['current_streak' => 1])->save();
     User::factory()->create(['name' => 'High'])->forceFill(['current_streak' => 40])->save();
 
@@ -75,12 +76,25 @@ it('lists and sorts by the streak / hifz / certificate columns', function () {
 
     $this->actingAs($this->admin)->get('/admin/users?sort=hifz_ayahs&direction=desc')->assertOk();
     $this->actingAs($this->admin)->get('/admin/users?sort=certificates_count&direction=asc')->assertOk();
+    $this->actingAs($this->admin)->get('/admin/users?sort=last_login_at&direction=desc')->assertOk();
+});
+
+it('stamps last_login_at when a user signs in, but not on impersonation', function () {
+    $user = User::factory()->create();
+    expect($user->last_login_at)->toBeNull();
+
+    $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect();
+    expect($user->fresh()->last_login_at)->not->toBeNull();
+
+    $target = User::factory()->create();
+    $this->actingAs($this->admin)->post("/admin/users/{$target->id}/impersonate");
+    expect($target->fresh()->last_login_at)->toBeNull();
 });
 
 it('shows a user detail page with practice progress', function () {
     $target = User::factory()->create();
 
-    \App\Models\Certificate::create([
+    Certificate::create([
         'user_id' => $target->id,
         'surah_number' => 108,
         'surah_name_english' => 'Al-Kawthar',
