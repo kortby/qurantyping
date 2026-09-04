@@ -71,7 +71,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                 </div>
 
                 <!-- Header -->
-                <div class="bg-[var(--panel-color)] rounded-[2rem] border border-[var(--border-color)] backdrop-blur-xl shadow-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-6">
+                <div class="bg-[var(--panel-color)] border border-[var(--border-color)] p-6 flex flex-col sm:flex-row sm:items-center gap-6">
                     <img :src="user.profile_photo_url" :alt="user.name" class="w-20 h-20 rounded-2xl object-cover border border-[var(--border-color)]" />
                     <div class="flex-1">
                         <div class="flex items-center gap-3">
@@ -110,7 +110,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                 </div>
 
                 <!-- Edit -->
-                <form @submit.prevent="submit" class="bg-[var(--panel-color)] rounded-[2rem] border border-[var(--border-color)] backdrop-blur-xl shadow-2xl p-6 space-y-4">
+                <form @submit.prevent="submit" class="bg-[var(--panel-color)] border border-[var(--border-color)] p-6 space-y-4">
                     <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)]">Edit account</h2>
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div>
@@ -136,7 +136,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                 </form>
 
                 <!-- Badges -->
-                <div class="bg-[var(--panel-color)] rounded-[2rem] border border-[var(--border-color)] p-6">
+                <div class="bg-[var(--panel-color)] border border-[var(--border-color)] p-6">
                     <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)] mb-4">Badges</h2>
                     <div v-if="badges.length" class="flex flex-wrap gap-2">
                         <span v-for="badge in badges" :key="badge.id" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 font-mono text-xs">
@@ -147,7 +147,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                 </div>
 
                 <!-- Recent tests -->
-                <div class="bg-[var(--panel-color)] rounded-[2rem] border border-[var(--border-color)] overflow-hidden">
+                <div class="bg-[var(--panel-color)] border border-[var(--border-color)] overflow-hidden">
                     <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)] p-6 pb-3">Recent tests</h2>
                     <table v-if="recentTests.length" class="w-full text-left font-mono text-sm">
                         <thead>
@@ -173,7 +173,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                 </div>
 
                 <!-- Browser sessions -->
-                <div class="bg-[var(--panel-color)] rounded-[2rem] border border-[var(--border-color)] p-6">
+                <div class="bg-[var(--panel-color)] border border-[var(--border-color)] p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)]">Browser sessions</h2>
                         <DangerButton v-if="sessions.length" type="button" @click="revokeSessions">Revoke all</DangerButton>
@@ -188,7 +188,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleString() : '—';
                 </div>
 
                 <!-- API tokens -->
-                <div class="bg-[var(--panel-color)] rounded-[2rem] border border-[var(--border-color)] p-6">
+                <div class="bg-[var(--panel-color)] border border-[var(--border-color)] p-6">
                     <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)] mb-4">API tokens</h2>
                     <ul v-if="tokens.length" class="space-y-2 font-mono text-xs">
                         <li v-for="token in tokens" :key="token.id" class="flex items-center justify-between gap-4 border-b border-[var(--border-color)] pb-2 last:border-0">

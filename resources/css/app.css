@@ -2,38 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Palette — the illuminated mushaf: ivory paper, gold rule, lapis accent.
+ * :root = lamplight (dark, default). .lite-mode = paper (light).
+ */
 :root {
-    --bg-color: #0d1e1c;
-    /* Deep Islamic Emerald */
-    --main-color: #e2e8f0;
-    --caret-color: #c5a059;
-    /* Burnished Gold */
-    --sub-color: #5a7a76;
-    --error-color: #e57373;
-    --accent-color: rgba(197, 160, 89, 0.8);
-    --panel-color: rgba(15, 35, 33, 0.7);
-    --border-color: rgba(197, 160, 89, 0.15);
+    --bg-color: #14140f;
+    --main-color: #ece3cf;
+    --caret-color: #c99a3f;
+    /* Gold — accent + metal */
+    --sub-color: #8a7f66;
+    --error-color: #d65a43;
+    /* Tomato — stop-signs, errors */
+    --accent-color: rgba(201, 160, 89, 0.85);
+    --panel-color: #1b1a14;
+    --border-color: rgba(201, 160, 89, 0.2);
+    --rule-color: rgba(201, 160, 89, 0.55);
+    /* Gold hairline for the jadwal frame */
+    --lapis-color: #7d9ae0;
+    /* Lapis — links, focus, active (lighter on dark) */
 }
 
 .lite-mode {
-    --bg-color: #fcfaf2;
-    /* Soft Parchment */
-    --main-color: #2c3e50;
-    --caret-color: #8e6d2a;
-    /* Deep Gold */
-    --sub-color: #94a3b8;
-    --error-color: #ef4444;
-    --accent-color: rgba(142, 109, 42, 0.8);
-    --panel-color: rgba(255, 255, 255, 0.8);
-    --border-color: rgba(142, 109, 42, 0.1);
+    --bg-color: #f6f1e7;
+    /* Warm ivory paper */
+    --main-color: #1f1c17;
+    --caret-color: #9a6f28;
+    /* Bronze-gold */
+    --sub-color: #8c8371;
+    --error-color: #b8402b;
+    --accent-color: rgba(154, 111, 40, 0.9);
+    --panel-color: #fbf7ee;
+    --border-color: rgba(154, 111, 40, 0.18);
+    --rule-color: rgba(154, 111, 40, 0.5);
+    --lapis-color: #1c3f94;
 }
 
 body {
-    font-family: 'Playfair Display', 'Noto Naskh Arabic', serif;
+    font-family: 'IBM Plex Sans', 'Noto Naskh Arabic', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-color);
-    background-image:
-        radial-gradient(circle at 2px 2px, var(--border-color) 1px, transparent 0);
-    background-size: 40px 40px;
     color: var(--main-color);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -42,12 +49,20 @@ h1,
 h2,
 h3,
 .font-cinzel {
-    font-family: 'Cinzel', serif;
-    letter-spacing: 0.05em;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0;
 }
 
 .font-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--lapis-color);
+    outline-offset: 2px;
 }
 
 /* Scrollbar */
@@ -69,6 +84,39 @@ h3,
     background: var(--main-color);
 }
 
+/* The jadwal — the ruled frame around the reading passage.
+   Uses outline (not border) so it adds no layout box and the caret
+   math in TypingTest stays exact. */
+.jadwal {
+    outline: 3px double var(--rule-color);
+    outline-offset: -1px;
+    padding: 1.75rem clamp(1rem, 4vw, 3rem);
+    background-color: var(--panel-color);
+}
+
+.jadwal-draw {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.jadwal-draw rect {
+    fill: none;
+    stroke: var(--rule-color);
+    stroke-width: 1;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: jadwal-draw 1.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes jadwal-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
 .animate-fade-in {
     animation: fade-in 0.5s ease-out forwards;
 }
@@ -76,11 +124,23 @@ h3,
 @keyframes fade-in {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .animate-fade-in,
+    .jadwal-draw rect {
+        animation: none;
+    }
+
+    .jadwal-draw rect {
+        stroke-dashoffset: 0;
     }
 }

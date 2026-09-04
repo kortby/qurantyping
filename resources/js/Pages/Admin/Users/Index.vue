@@ -48,7 +48,7 @@ const formatDate = (value) => value ? new Date(value).toLocaleDateString() : 'â€
                     />
                 </div>
 
-                <div class="bg-[var(--panel-color)] rounded-[2rem] overflow-hidden border border-[var(--border-color)] backdrop-blur-xl shadow-2xl">
+                <div class="bg-[var(--panel-color)] overflow-hidden border border-[var(--border-color)]">
                     <table class="w-full text-left font-mono text-sm border-collapse">
                         <thead>
                             <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-[0.3em] text-[10px]">
