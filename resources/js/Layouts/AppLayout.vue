@@ -176,6 +176,10 @@ if (typeof window !== 'undefined') {
                                         class="block px-4 py-2.5 text-[var(--lapis-color)] hover:bg-[var(--caret-color)]/10 transition-colors">
                                         {{ t('navigation.admin') }}
                                     </Link>
+                                    <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/feedback" @click="userMenuOpen = false"
+                                        class="block px-4 py-2.5 text-[var(--lapis-color)] hover:bg-[var(--caret-color)]/10 transition-colors">
+                                        {{ t('navigation.feedback') }}
+                                    </Link>
                                     <div class="border-t border-[var(--border-color)] mt-1">
                                         <Link href="/logout" method="post" as="button"
                                             class="w-full text-left block px-4 py-2.5 text-[var(--sub-color)] hover:text-[var(--error-color)] transition-colors">
@@ -222,6 +226,7 @@ if (typeof window !== 'undefined') {
                             </Link>
                             <Link href="/user/profile" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.admin') }}</Link>
+                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/feedback" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.feedback') }}</Link>
                             <StreakBadge class="justify-center pt-1" />
                         </template>
                     </nav>

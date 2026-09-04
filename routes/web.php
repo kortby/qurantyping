@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\TestController;
@@ -126,6 +127,11 @@ Route::middleware([
     Route::delete('users/{user}/sessions', [AdminUserController::class, 'revokeSessions'])->name('users.sessions.revoke');
     Route::delete('users/{user}/tokens/{token}', [AdminUserController::class, 'destroyToken'])->name('users.tokens.destroy');
     Route::post('users/{user}/impersonate', [ImpersonationController::class, 'start'])->name('users.impersonate');
+
+    Route::get('feedback', [AdminFeedbackController::class, 'index'])->name('feedback.index');
+    Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])->name('feedback.show');
+    Route::patch('feedback/{feedback}', [AdminFeedbackController::class, 'update'])->name('feedback.update');
+    Route::delete('feedback/{feedback}', [AdminFeedbackController::class, 'destroy'])->name('feedback.destroy');
 });
 
 // Reachable while impersonating (the active user is not an admin at that point).
