@@ -42,6 +42,29 @@ it('filters the users list by search term', function () {
         ->assertDontSee('bilal@example.com');
 });
 
+it('sorts the users list by a whitelisted column', function () {
+    User::factory()->create(['name' => 'Aaron First']);
+    User::factory()->create(['name' => 'Zev Last']);
+
+    $this->actingAs($this->admin)
+        ->get('/admin/users?sort=name&direction=asc')
+        ->assertOk()
+        ->assertSeeInOrder(['Aaron First', 'Zev Last']);
+
+    $this->actingAs($this->admin)
+        ->get('/admin/users?sort=name&direction=desc')
+        ->assertOk()
+        ->assertSeeInOrder(['Zev Last', 'Aaron First']);
+});
+
+it('ignores an unknown sort column', function () {
+    User::factory()->count(3)->create();
+
+    $this->actingAs($this->admin)
+        ->get('/admin/users?sort=password&direction=asc')
+        ->assertOk();
+});
+
 it('shows a user detail page', function () {
     $target = User::factory()->create();
 

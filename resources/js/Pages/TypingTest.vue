@@ -675,128 +675,122 @@ defineOptions({ layout: AppLayout });
         <LunarCountdown v-if="contestConfig?.enabled" :config="contestConfig" />
 
         <!-- Passage selectors -->
-        <form @submit.prevent="fetchTestText" class="w-full max-w-4xl mb-4 flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 font-mono text-sm">
+        <form @submit.prevent="fetchTestText" class="w-full max-w-4xl mb-4 flex flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 font-mono text-sm">
             <SurahSelect
+                class="w-full sm:w-auto"
                 v-model="selectedSurah"
                 :options="surahs"
                 :label="t('surah')"
                 :placeholder="t('select_surah') || 'Select Surah'"
                 @update:model-value="handleSurahSelected"
             />
-            <div class="flex items-center gap-3 px-4 py-2 border border-[var(--border-color)]">
-                <span class="text-[var(--sub-color)] text-[10px] uppercase tracking-[0.2em]">{{ t('ayats') }}</span>
-                <div class="flex items-center gap-2">
-                    <!-- Start Ayah Stepper -->
-                    <button type="button" @click="decreaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
-                        -
-                    </button>
-                    <input 
-                        v-model.number="startAyah" 
-                        type="number" 
-                        min="1" 
-                        :max="currentMaxAyahs"
-                        @change="validateAyahs"
-                        class="w-10 text-center font-bold text-[var(--main-color)] bg-transparent border-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <button type="button" @click="increaseStartAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
-                        +
-                    </button>
-                    <span class="text-[var(--sub-color)] opacity-40">-</span>
-                    <!-- End Ayah Stepper -->
-                    <button type="button" @click="decreaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
-                        -
-                    </button>
-                    <input 
-                        v-model.number="endAyah" 
-                        type="number" 
-                        min="1" 
-                        :max="currentMaxAyahs"
-                        @change="validateAyahs"
-                        class="w-10 text-center font-bold text-[var(--main-color)] bg-transparent border-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <button type="button" @click="increaseEndAyah" class="w-6 h-6 flex items-center justify-center bg-[var(--panel-color)] border border-[var(--border-color)] rounded-full text-[var(--main-color)] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
-                        +
-                    </button>
-                    <span class="text-[10px] opacity-40 font-mono text-[var(--sub-color)] ml-2">/ {{ currentMaxAyahs }}</span>
-                </div>
+            <div class="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-1.5 border border-[var(--border-color)]">
+                <span class="text-[var(--sub-color)] text-[10px] uppercase tracking-[0.2em] hidden sm:inline">{{ t('ayats') }}</span>
+                <button type="button" @click="decreaseStartAyah" aria-label="Start ayah down" class="w-9 h-9 shrink-0 flex items-center justify-center border border-[var(--border-color)] text-lg text-[var(--main-color)] hover:border-[var(--caret-color)] hover:text-[var(--caret-color)] transition-colors">−</button>
+                <input
+                    v-model.number="startAyah"
+                    type="number" inputmode="numeric" min="1" :max="currentMaxAyahs"
+                    @change="validateAyahs"
+                    aria-label="Start ayah"
+                    class="w-10 text-center font-bold text-[var(--main-color)] bg-transparent border-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button type="button" @click="increaseStartAyah" aria-label="Start ayah up" class="w-9 h-9 shrink-0 flex items-center justify-center border border-[var(--border-color)] text-lg text-[var(--main-color)] hover:border-[var(--caret-color)] hover:text-[var(--caret-color)] transition-colors">+</button>
+                <span class="text-[var(--sub-color)] opacity-40 px-1">–</span>
+                <button type="button" @click="decreaseEndAyah" aria-label="End ayah down" class="w-9 h-9 shrink-0 flex items-center justify-center border border-[var(--border-color)] text-lg text-[var(--main-color)] hover:border-[var(--caret-color)] hover:text-[var(--caret-color)] transition-colors">−</button>
+                <input
+                    v-model.number="endAyah"
+                    type="number" inputmode="numeric" min="1" :max="currentMaxAyahs"
+                    @change="validateAyahs"
+                    aria-label="End ayah"
+                    class="w-10 text-center font-bold text-[var(--main-color)] bg-transparent border-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button type="button" @click="increaseEndAyah" aria-label="End ayah up" class="w-9 h-9 shrink-0 flex items-center justify-center border border-[var(--border-color)] text-lg text-[var(--main-color)] hover:border-[var(--caret-color)] hover:text-[var(--caret-color)] transition-colors">+</button>
+                <span class="text-[10px] opacity-40 text-[var(--sub-color)] hidden sm:inline">/ {{ currentMaxAyahs }}</span>
             </div>
-            <div v-if="warningMessage" class="text-[var(--error-color)] font-bold mb-2 text-center">
-                {{ warningMessage }}
-            </div>
-            <div v-else-if="rangeError" class="text-[var(--error-color)] font-bold mb-2 text-center">
-                {{ rangeError }}
-            </div>
-            <button type="submit" :disabled="!!warningMessage || !!rangeError" class="bg-[var(--caret-color)] text-[var(--bg-color)] px-6 py-2 font-cinzel font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">
+
+            <button type="submit" :disabled="!!warningMessage || !!rangeError" class="flex-1 sm:flex-none min-h-[40px] bg-[var(--caret-color)] text-[var(--bg-color)] px-6 font-cinzel font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">
                 {{ t('start_testing') }}
             </button>
-            <button type="button" @click="fetchTestText(false)" class="text-[var(--sub-color)] border border-[var(--border-color)] px-6 py-2 font-cinzel text-xs hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors uppercase tracking-[0.12em]">
+            <button type="button" @click="fetchTestText(false)" class="min-h-[40px] text-[var(--sub-color)] border border-[var(--border-color)] px-5 font-cinzel text-xs hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors uppercase tracking-[0.12em]">
                 {{ t('random') }}
             </button>
 
-            <!-- Punctuation Toggle -->
             <button v-if="showTashkilFeature"
                     type="button"
                     @click="setPunctuation(!usePunctuation); resetTest()"
-                    class="border border-[var(--border-color)] px-4 py-2 text-xs font-mono uppercase tracking-[0.12em] transition-colors"
+                    class="min-h-[40px] border border-[var(--border-color)] px-4 text-xs font-mono uppercase tracking-[0.12em] transition-colors"
                     :class="usePunctuation ? 'text-[var(--caret-color)] border-[var(--caret-color)]' : 'text-[var(--sub-color)] hover:text-[var(--main-color)]'">
                 {{ t(usePunctuation ? 'tashkeel_on' : 'tashkeel_off') }}
             </button>
 
-            <!-- Character Count Badge -->
             <div v-if="logicCharacterCount > 0"
-                 class="border px-4 py-2 text-xs font-mono uppercase tracking-[0.12em] animate-fade-in"
+                 class="min-h-[40px] flex items-center border px-4 text-xs font-mono uppercase tracking-[0.12em] animate-fade-in"
                  :class="logicCharacterCount >= (contestConfig?.min_char_count || 100)
                     ? 'border-[var(--caret-color)] text-[var(--caret-color)]'
                     : 'border-[var(--border-color)] text-[var(--sub-color)]'">
                 {{ logicCharacterCount }} {{ t('chars') }}
             </div>
 
+            <div v-if="warningMessage || rangeError" class="w-full text-[var(--error-color)] text-xs text-center sm:text-left">
+                {{ warningMessage || rangeError }}
+            </div>
         </form>
 
         <!-- Live Stats (during test) -->
-        <div v-if="!showResults" class="w-full max-w-4xl mb-3 flex flex-wrap gap-8 lg:gap-12 items-end font-mono text-[var(--main-color)] select-none">
-            <div class="flex flex-col">
-                <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">{{ t('wpm') }}</span>
-                <span class="text-2xl md:text-3xl tabular-nums">{{ wpm }}</span>
+        <div v-if="!showResults" class="w-full max-w-4xl mb-3 flex items-center gap-4">
+            <!-- Mobile: one compact line -->
+            <div class="sm:hidden flex items-center gap-3 font-mono text-sm tabular-nums text-[var(--main-color)] select-none">
+                <span>{{ wpm }}<span class="text-[var(--sub-color)] text-[10px] ml-0.5">wpm</span></span>
+                <span class="text-[var(--sub-color)]">·</span>
+                <span>{{ accuracy }}%</span>
+                <span class="text-[var(--sub-color)]">·</span>
+                <span>{{ timer }}s</span>
+                <span class="text-[var(--sub-color)]">·</span>
+                <span>{{ userInput.length }}<span class="text-[var(--sub-color)]">/{{ logicCharacterCount }}</span></span>
             </div>
-            <div class="flex flex-col">
-                <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">{{ t('accuracy') }}</span>
-                <span class="text-2xl md:text-3xl tabular-nums">{{ accuracy }}%</span>
-            </div>
-            <div class="flex flex-col">
-                <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">{{ t('time') }}</span>
-                <span class="text-2xl md:text-3xl tabular-nums">{{ timer }}s</span>
-            </div>
-            <div class="flex flex-col">
-                <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">Progress</span>
-                <span class="text-2xl md:text-3xl tabular-nums">{{ userInput.length }}<span class="text-[var(--sub-color)]">/{{ logicCharacterCount }}</span></span>
+            <!-- Desktop: labelled blocks -->
+            <div class="hidden sm:flex gap-8 lg:gap-12 items-end font-mono text-[var(--main-color)] select-none">
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">{{ t('wpm') }}</span>
+                    <span class="text-2xl md:text-3xl tabular-nums">{{ wpm }}</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">{{ t('accuracy') }}</span>
+                    <span class="text-2xl md:text-3xl tabular-nums">{{ accuracy }}%</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">{{ t('time') }}</span>
+                    <span class="text-2xl md:text-3xl tabular-nums">{{ timer }}s</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-[var(--sub-color)] uppercase tracking-[0.2em] mb-1">Progress</span>
+                    <span class="text-2xl md:text-3xl tabular-nums">{{ userInput.length }}<span class="text-[var(--sub-color)]">/{{ logicCharacterCount }}</span></span>
+                </div>
             </div>
 
-             <!-- Error Sound Toggle -->
-             <button type="button"
-                    @click="toggleErrorSound"
-                    :title="t('error_sound_tooltip')"
-                    class="ml-auto self-center border border-[var(--border-color)] px-4 py-2 text-xs font-mono uppercase tracking-[0.12em] transition-colors"
-                    :class="errorSoundEnabled ? 'text-[var(--caret-color)] border-[var(--caret-color)]' : 'text-[var(--sub-color)] hover:text-[var(--main-color)]'">
+            <button type="button"
+                   @click="toggleErrorSound"
+                   :title="t('error_sound_tooltip')"
+                   :aria-label="t('sound_label')"
+                   class="ml-auto self-center min-h-[36px] border border-[var(--border-color)] px-3 text-[11px] font-mono uppercase tracking-[0.12em] transition-colors"
+                   :class="errorSoundEnabled ? 'text-[var(--caret-color)] border-[var(--caret-color)]' : 'text-[var(--sub-color)] hover:text-[var(--main-color)]'">
                 {{ t('sound_label') }} {{ errorSoundEnabled ? 'on' : 'off' }}
             </button>
+        </div>
 
-            <!-- Audio Player
-            <QuranAudioPlayer 
-                v-if="!showResults"
-                :surah-number="quranText.surah_number"
-                :start-ayah="quranText.start_ayah"
-                :end-ayah="quranText.end_ayah"
-                :is-test-started="isTyping"
-            /> -->
-
+        <!-- Sürah header cartouche -->
+        <div v-if="!showResults && quranText.surah_name_arabic" class="w-full max-w-4xl mb-2 flex justify-center sm:justify-start animate-fade-in">
+            <span class="cartouche">
+                <span class="name" dir="rtl">{{ quranText.surah_name_arabic }}</span>
+                <span class="font-mono">{{ quranText.surah_number }}:{{ quranText.start_ayah }}–{{ quranText.end_ayah }}</span>
+            </span>
         </div>
 
         <!-- Typing Area — the jadwal -->
         <div v-if="currentDisplayText && !showResults"
              @click="focusInput"
              ref="containerRef"
-             class="jadwal relative w-full max-w-4xl transition-opacity duration-500 min-h-[220px] flex items-center"
+             class="jadwal relative w-full max-w-4xl -mx-6 sm:mx-0 transition-opacity duration-500 min-h-[200px] sm:min-h-[220px] flex items-center"
              :class="{ 'opacity-100': isFocused, 'opacity-40': !isFocused }">
 
             <!-- The frame draws itself once -->
@@ -841,20 +835,14 @@ defineOptions({ layout: AppLayout });
                 </div>
             </div>
 
-            <div v-if="isLoading" class="absolute inset-0 bg-[var(--bg-color)]/90 flex items-center justify-center z-30">
-                <div class="flex flex-col items-center gap-3">
-                    <div class="w-12 h-12 border-4 border-[var(--caret-color)] border-t-transparent rounded-full animate-spin"></div>
-                    <p class="text-xs font-cinzel text-[var(--caret-color)] uppercase tracking-widest">{{ t('loading') }}</p>
-                </div>
+            <div v-if="isLoading" role="status" :aria-label="t('loading')" class="absolute inset-0 bg-[var(--panel-color)] flex flex-col items-center justify-center gap-4 z-30 jadwal-skeleton px-8" dir="rtl">
+                <div class="h-3 w-11/12 bg-[var(--rule-color)] opacity-30"></div>
+                <div class="h-3 w-9/12 bg-[var(--rule-color)] opacity-30"></div>
+                <div class="h-3 w-10/12 bg-[var(--rule-color)] opacity-30"></div>
             </div>
 
-            <div class="text-3xl md:text-4xl lg:text-5xl select-none text-right w-full transition-all duration-300" 
-                 :style="{ 
-                     fontFamily: 'Noto Naskh Arabic, serif', 
-                 }" 
-                 :class="[
-                     usePunctuation ? 'py-4 leading-[4.5rem] md:leading-[5.5rem] lg:leading-[6.5rem]' : 'py-2 leading-[3.5rem] md:leading-[4rem] lg:leading-[4.5rem]'
-                 ]"
+            <div class="mushaf-text select-none w-full transition-all duration-300"
+                 :class="{ 'has-tashkeel': usePunctuation }"
                  dir="rtl">
                 <p class="relative z-0 whitespace-pre-wrap break-words transition-all duration-300">
                     <span v-for="(cluster, idx) in sourceClusters" :key="idx" 
@@ -900,41 +888,38 @@ defineOptions({ layout: AppLayout });
                         :has-error="firstErrorIndex !== -1"
                         :next-key="sourceCharacters[userInput.length]" />
 
-        <!-- Results View -->
-        <div v-if="showResults" class="w-full max-w-6xl flex flex-col items-center justify-center py-12 md:py-16 lg:py-20 animate-fade-in font-cinzel">
-            <div class="flex flex-col md:flex-row gap-8 md:gap-20 mb-16 items-center">
-                <div class="flex flex-col items-center group">
-                    <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('wpm') }}</span>
-                    <span class="text-6xl md:text-7xl lg:text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ wpm }}</span>
+        <!-- Results — an ijāza-style record -->
+        <div v-if="showResults" class="w-full max-w-2xl mx-auto py-8 sm:py-12 animate-fade-in">
+            <div class="jadwal relative flex flex-col items-center text-center gap-6 sm:gap-8 py-8 sm:py-12">
+                <p v-if="quranText.surah_name_arabic" class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)]">
+                    {{ quranText.surah_number }}:{{ quranText.start_ayah }}–{{ quranText.end_ayah }}
+                </p>
+
+                <div class="grid grid-cols-3 gap-4 sm:gap-10 w-full px-4">
+                    <div class="flex flex-col gap-1">
+                        <span class="text-4xl sm:text-6xl font-cinzel font-semibold text-[var(--caret-color)] tabular-nums">{{ wpm }}</span>
+                        <span class="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--sub-color)]">{{ t('wpm') }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-4xl sm:text-6xl font-cinzel font-semibold text-[var(--caret-color)] tabular-nums">{{ accuracy }}%</span>
+                        <span class="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--sub-color)]">{{ t('accuracy') }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-4xl sm:text-6xl font-cinzel font-semibold text-[var(--error-color)] tabular-nums">{{ totalErrors }}</span>
+                        <span class="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--sub-color)]">{{ t('errors') }}</span>
+                    </div>
                 </div>
-                <div class="flex flex-col items-center group">
-                    <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--caret-color)] transition-colors">{{ t('accuracy') }}</span>
-                    <span class="text-6xl md:text-8xl text-[var(--caret-color)] font-bold drop-shadow-sm">{{ accuracy }}%</span>
-                </div>
-                <div class="flex flex-col items-center group">
-                    <span class="text-xs text-[var(--sub-color)] font-mono uppercase tracking-[0.3em] mb-4 group-hover:text-[var(--error-color)] transition-colors">Errors</span>
-                    <span class="text-6xl md:text-8xl text-[var(--error-color)] font-bold drop-shadow-sm">{{ totalErrors }}</span>
-                </div>
-            </div>
-            
-            <div class="flex flex-col items-center gap-10">
-                <p class="text-2xl text-[var(--main-color)] opacity-60 font-medium">
+
+                <p class="text-lg sm:text-xl text-[var(--main-color)]">
                     {{ accuracy === 100 ? t('perfect') : (accuracy > 90 ? t('excellent') : t('keep_practicing')) }}
                 </p>
-                
-                <div class="flex items-center gap-8">
-                    <button @click="resetTest" class="group flex flex-col items-center gap-4 transition-all">
-                        <div class="p-6 rounded-2xl bg-[var(--panel-color)] border border-[var(--border-color)] group-hover:bg-[var(--caret-color)] group-hover:text-[var(--bg-color)] transition-all transform group-hover:rotate-12 group-hover:scale-110 shadow-xl shadow-black/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
-                        </div>
-                        <span class="text-xs font-mono text-[var(--sub-color)] uppercase tracking-widest">{{ t('restart_hint') }}</span>
-                    </button>
 
-                    <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" class="group flex flex-col items-center gap-4 transition-all">
-                        <div class="p-6 rounded-2xl bg-[var(--panel-color)] border border-[var(--border-color)] group-hover:bg-emerald-600 group-hover:text-white transition-all transform group-hover:-rotate-12 group-hover:scale-110 shadow-xl shadow-black/20">
-                            <span class="text-4xl">❤️</span>
-                        </div>
-                        <span class="text-xs font-mono text-[var(--sub-color)] uppercase tracking-widest">{{ t('donate') }}</span>
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full px-6 sm:w-auto sm:px-0">
+                    <button @click="resetTest" class="w-full sm:w-auto min-h-[44px] px-8 bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold hover:opacity-90 transition-opacity">
+                        {{ t('restart_hint') }}
+                    </button>
+                    <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank" class="w-full sm:w-auto min-h-[44px] flex items-center justify-center px-8 border border-[var(--border-color)] font-cinzel text-xs uppercase tracking-[0.12em] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors">
+                        {{ t('donate') }}
                     </a>
                 </div>
             </div>
@@ -942,16 +927,10 @@ defineOptions({ layout: AppLayout });
 
         <GuestTestModal :show="showGuestModal" @close="showGuestModal = false" />
 
-        <!-- Footer Context Info -->
-        <div v-if="!showResults && quranText.surah_name_arabic" class="mt-auto py-6 md:py-12 text-[var(--sub-color)] font-mono text-xs flex flex-col md:flex-row gap-4 md:gap-8 items-center bg-[var(--panel-color)] px-8 rounded-2xl md:rounded-full border border-white/5 backdrop-blur-md opacity-60 hover:opacity-100 transition-opacity text-center md:text-left">
-            <div class="flex items-center gap-3">
-                <kbd class="bg-[var(--main-color)] text-[var(--bg-color)] px-2 py-0.5 rounded font-bold">TAB</kbd>
-                <span>{{ t('restart') }}</span>
-            </div>
-            <div class="w-1 h-1 bg-[var(--sub-color)] rounded-full"></div>
-            <div class="text-[var(--caret-color)] font-bold">
-                {{ quranText.surah_name_arabic }} ({{ quranText.surah_number }}:{{ quranText.start_ayah }}-{{ quranText.end_ayah }})
-            </div>
+        <!-- Restart hint -->
+        <div v-if="!showResults && currentDisplayText" class="mt-auto pt-8 pb-4 text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-3">
+            <kbd class="border border-[var(--border-color)] px-1.5 py-0.5">Tab</kbd>
+            <span>{{ t('restart') }}</span>
         </div>
     </div>
 </template>
@@ -966,55 +945,14 @@ defineOptions({ layout: AppLayout });
     50% { border-bottom-color: transparent; }
 }
 
-.animate-spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
+/* .ayah-ornament roundel lives in resources/css/app.css */
 .ayah-ornament {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
-    color: var(--caret-color);
-    opacity: 0.8;
-    margin: 0 0.5rem;
-    position: relative;
+    margin: 0 0.3rem;
     user-select: none;
-    transition: all 0.3s ease;
-}
-
-.ornament-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.ornament-char {
-    font-size: 1.2em;
-    line-height: 1;
-}
-
-.ornament-num {
-    position: absolute;
-    font-family: 'Noto Naskh Arabic', serif;
-    font-size: 0.35em;
-    font-weight: bold;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--caret-color);
-}
-
-.ayah-ornament:hover {
-    opacity: 1;
-    text-shadow: 0 0 10px var(--caret-color);
 }
 
 .caret-blink-anim {

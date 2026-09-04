@@ -118,19 +118,19 @@ const disableTwoFactorAuthentication = () => {
         </template>
 
         <template #content>
-            <h3 v-if="twoFactorEnabled && ! confirming" class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3 v-if="twoFactorEnabled && ! confirming" class="font-cinzel text-base font-semibold text-[var(--main-color)]">
                 {{ t('auth.two_factor_enabled') }}
             </h3>
 
-            <h3 v-else-if="twoFactorEnabled && confirming" class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3 v-else-if="twoFactorEnabled && confirming" class="font-cinzel text-base font-semibold text-[var(--main-color)]">
                 {{ t('auth.two_factor_finish') }}
             </h3>
 
-            <h3 v-else class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h3 v-else class="font-cinzel text-base font-semibold text-[var(--main-color)]">
                 {{ t('auth.two_factor_disabled') }}
             </h3>
 
-            <div class="mt-3 max-w-xl text-sm text-gray-600 dark:text-gray-400">
+            <div class="mt-3 max-w-xl text-sm text-[var(--sub-color)]">
                 <p>
                     {{ t('auth.two_factor_message') }}
                 </p>
@@ -138,7 +138,7 @@ const disableTwoFactorAuthentication = () => {
 
             <div v-if="twoFactorEnabled">
                 <div v-if="qrCode">
-                    <div class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-400">
+                    <div class="mt-4 max-w-xl text-sm text-[var(--sub-color)]">
                         <p v-if="confirming" class="font-semibold">
                             {{ t('auth.two_factor_qr') }}
                         </p>
@@ -150,7 +150,7 @@ const disableTwoFactorAuthentication = () => {
 
                     <div class="mt-4 p-2 inline-block bg-white" v-html="qrCode" />
 
-                    <div v-if="setupKey" class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-400">
+                    <div v-if="setupKey" class="mt-4 max-w-xl text-sm text-[var(--sub-color)]">
                         <p class="font-semibold">
                             {{ t('auth.setup_key') }}: <span v-html="setupKey"></span>
                         </p>
@@ -176,13 +176,13 @@ const disableTwoFactorAuthentication = () => {
                 </div>
 
                 <div v-if="recoveryCodes.length > 0 && ! confirming">
-                    <div class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-400">
+                    <div class="mt-4 max-w-xl text-sm text-[var(--sub-color)]">
                         <p class="font-semibold">
                             {{ t('auth.two_factor_recovery_message') }}
                         </p>
                     </div>
 
-                    <div class="grid gap-1 max-w-xl mt-4 px-4 py-4 font-mono text-sm bg-gray-100 dark:bg-gray-900 dark:text-gray-100 rounded-lg">
+                    <div class="grid gap-1 max-w-xl mt-4 px-4 py-4 font-mono text-sm bg-[var(--bg-color)] border border-[var(--border-color)] text-[var(--main-color)]">
                         <div v-for="code in recoveryCodes" :key="code">
                             {{ code }}
                         </div>

@@ -90,8 +90,116 @@ button:focus-visible,
 .jadwal {
     outline: 3px double var(--rule-color);
     outline-offset: -1px;
-    padding: 1.75rem clamp(1rem, 4vw, 3rem);
+    padding: 1.25rem clamp(0.9rem, 5vw, 3rem);
     background-color: var(--panel-color);
+}
+
+@media (min-width: 640px) {
+    .jadwal {
+        padding: 1.75rem clamp(1rem, 4vw, 3rem);
+    }
+}
+
+/* Gold corner marks on the frame */
+.jadwal::before,
+.jadwal::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--rule-color);
+    pointer-events: none;
+}
+
+.jadwal::before {
+    top: 5px;
+    inset-inline-start: 5px;
+    border-inline-end: 0;
+    border-block-end: 0;
+}
+
+.jadwal::after {
+    bottom: 5px;
+    inset-inline-end: 5px;
+    border-inline-start: 0;
+    border-block-start: 0;
+}
+
+/* The Quranic passage itself — one responsive type ramp, tuned for Naskh */
+.mushaf-text {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: clamp(1.55rem, 6vw, 3rem);
+    line-height: 2.15;
+    text-align: right;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    word-spacing: 0.05em;
+}
+
+.mushaf-text.has-tashkeel {
+    line-height: 2.5;
+}
+
+/* Ayah roundel — a small gold medallion carrying the verse number,
+   echoing the double rule of the jadwal */
+.ornament-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.55em;
+    height: 1.55em;
+    margin: 0 0.15em;
+    border-radius: 50%;
+    border: 1px solid var(--rule-color);
+    box-shadow: inset 0 0 0 2px var(--bg-color), inset 0 0 0 3px var(--rule-color);
+    background-color: var(--panel-color);
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.ornament-char {
+    display: none;
+}
+
+.ornament-num {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 0.5em;
+    font-weight: 700;
+    color: var(--caret-color);
+}
+
+/* Sürah header cartouche above the frame */
+.cartouche {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 1.25rem;
+    border: 1px solid var(--rule-color);
+    border-inline-width: 3px;
+    background-color: var(--panel-color);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sub-color);
+}
+
+.cartouche .name {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 1.15rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--main-color);
+}
+
+/* Loading state — the frame breathes instead of a spinner */
+.jadwal-skeleton {
+    animation: jadwal-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes jadwal-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.85; }
 }
 
 .jadwal-draw {
@@ -136,6 +244,7 @@ button:focus-visible,
 @media (prefers-reduced-motion: reduce) {
 
     .animate-fade-in,
+    .jadwal-skeleton,
     .jadwal-draw rect {
         animation: none;
     }

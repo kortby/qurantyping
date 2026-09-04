@@ -63,70 +63,62 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="relative min-w-[200px]" ref="dropdownRef">
+    <div class="relative w-full sm:w-auto sm:min-w-[220px]" ref="dropdownRef">
         <!-- Trigger -->
-        <div @click="toggleDropdown" 
-             class="flex items-center gap-3 bg-[var(--panel-color)] px-4 py-2 rounded-xl backdrop-blur-md border border-[var(--border-color)] cursor-pointer hover:border-[var(--caret-color)]/40 transition-all group">
-            <span v-if="label" class="text-[var(--caret-color)] opacity-60 font-cinzel text-xs uppercase tracking-widest">{{ label }}</span>
-            <div class="flex-1 flex items-center justify-between gap-4">
-                <span v-if="selectedOption" class="text-[var(--main-color)] font-bold text-sm">
+        <button type="button" @click="toggleDropdown"
+             class="w-full min-h-[40px] flex items-center gap-2 px-3 border border-[var(--border-color)] cursor-pointer hover:border-[var(--caret-color)] transition-colors">
+            <span v-if="label" class="text-[var(--sub-color)] text-[10px] uppercase tracking-[0.2em] hidden sm:inline">{{ label }}</span>
+            <span class="flex-1 flex items-center justify-between gap-3 text-left">
+                <span v-if="selectedOption" class="text-[var(--main-color)] text-sm truncate">
                     {{ selectedOption.surah_number }}. {{ selectedOption.surah_name_arabic }}
                 </span>
-                <span v-else class="text-[var(--sub-color)] opacity-60 italic text-sm">{{ placeholder }}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" 
-                     class="w-4 h-4 text-[var(--caret-color)] transition-transform duration-300"
+                <span v-else class="text-[var(--sub-color)] text-sm">{{ placeholder }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-4 h-4 shrink-0 text-[var(--sub-color)] transition-transform duration-200"
                      :class="{ 'rotate-180': isOpen }"
-                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="m6 9 6 6 6-6"/>
                 </svg>
-            </div>
-        </div>
+            </span>
+        </button>
 
         <!-- Dropdown Menu -->
         <transition name="dropdown">
-            <div v-if="isOpen" 
-                 class="absolute top-full left-0 right-0 mt-3 bg-[var(--bg-color)] backdrop-blur-2xl border border-[var(--border-color)] rounded-2xl shadow-3xl z-[100] max-h-[400px] flex flex-col overflow-hidden">
-                
+            <div v-if="isOpen"
+                 class="absolute top-full left-0 right-0 mt-1 bg-[var(--panel-color)] border border-[var(--border-color)] z-[100] max-h-[60vh] sm:max-h-[400px] flex flex-col overflow-hidden shadow-lg">
+
                 <!-- Search Input -->
-                <div class="p-4 border-b border-[var(--border-color)] bg-[var(--panel-color)]/30">
-                    <div class="relative">
-                        <input v-model="searchQuery" 
-                               type="text" 
-                               :placeholder="placeholder" 
-                               class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2 text-sm text-[var(--main-color)] focus:ring-1 focus:ring-[var(--caret-color)] focus:border-[var(--caret-color)] outline-none placeholder-[var(--sub-color)]/30 transition-all duration-200"
-                               @click.stop
-                               autofocus />
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 opacity-40">🔍</span>
-                    </div>
+                <div class="p-3 border-b border-[var(--border-color)]">
+                    <input v-model="searchQuery"
+                           type="text"
+                           :placeholder="placeholder"
+                           class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] px-3 py-2 text-sm text-[var(--main-color)] focus:border-[var(--caret-color)] focus:ring-0 outline-none placeholder-[var(--sub-color)]/50"
+                           @click.stop
+                           autofocus />
                 </div>
 
                 <!-- Options List -->
-                <div class="overflow-y-auto flex-1 custom-scrollbar bg-[var(--panel-color)]/10">
-                    <div v-for="option in filteredOptions" 
+                <div class="overflow-y-auto flex-1">
+                    <button type="button" v-for="option in filteredOptions"
                          :key="option.surah_number"
                          @click="selectOption(option)"
-                         class="px-5 py-4 hover:bg-[var(--caret-color)]/[0.08] cursor-pointer transition-all flex items-center justify-between group border-b border-[var(--border-color)]/30 last:border-0"
+                         class="w-full px-4 py-3 hover:bg-[var(--caret-color)]/[0.08] cursor-pointer transition-colors flex items-center justify-between gap-3 text-left border-b border-[var(--border-color)] last:border-0"
                          :class="{ 'bg-[var(--caret-color)]/[0.12]': modelValue == option.surah_number }">
-                        
-                        <div class="flex items-center gap-4 text-left">
-                            <span class="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--bg-color)] border border-[var(--border-color)] text-[10px] font-cinzel text-[var(--caret-color)] group-hover:bg-[var(--caret-color)] group-hover:text-[var(--bg-color)] transition-all">
+
+                        <span class="flex items-center gap-3">
+                            <span class="w-7 h-7 shrink-0 flex items-center justify-center border border-[var(--border-color)] text-[10px] font-mono text-[var(--caret-color)]">
                                 {{ option.surah_number }}
                             </span>
-                            <div class="flex flex-col">
-                                <span class="text-xs uppercase tracking-widest opacity-40 font-cinzel text-[var(--main-color)]">{{ option.surah_name_english }}</span>
-                                <span class="text-sm font-bold text-[var(--main-color)]">{{ option.surah_name_arabic }}</span>
-                            </div>
-                        </div>
+                            <span class="flex flex-col">
+                                <span class="text-[10px] uppercase tracking-[0.15em] text-[var(--sub-color)]">{{ option.surah_name_english }}</span>
+                                <span class="text-sm text-[var(--main-color)]">{{ option.surah_name_arabic }}</span>
+                            </span>
+                        </span>
 
-                        <div class="flex items-center gap-4">
-                            <span class="text-[9px] font-mono opacity-40 uppercase tracking-tighter text-[var(--sub-color)]">{{ option.total_ayahs }} ayat</span>
-                            <div v-if="modelValue == option.surah_number" class="text-[var(--caret-color)]">
-                                ✨
-                            </div>
-                        </div>
-                    </div>
+                        <span class="text-[9px] font-mono text-[var(--sub-color)] uppercase tracking-tight shrink-0">{{ option.total_ayahs }} ayat</span>
+                    </button>
 
-                    <div v-if="filteredOptions.length === 0" class="py-12 text-center text-[var(--sub-color)] opacity-60 font-cinzel uppercase text-xs tracking-widest">
+                    <div v-if="filteredOptions.length === 0" class="py-10 text-center text-[var(--sub-color)] text-xs uppercase tracking-[0.15em]">
                         No matches found
                     </div>
                 </div>
