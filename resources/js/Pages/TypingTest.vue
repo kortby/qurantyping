@@ -367,24 +367,24 @@ watch([selectedSurah, startAyah, endAyah], () => {
     rangeError.value = '';
 });
 
-// Automatically pick a random 3-ayah range when a new surah is manually selected
-watch(selectedSurah, (newSurah, oldSurah) => {
-    // Skip during initial load to preserve URL params
-    if (isLoading.value || !surahs.value.length) return;
-    
-    if (newSurah && newSurah !== oldSurah) {
-        const surah = surahs.value.find(s => s.surah_number == newSurah);
-        if (surah) {
-            const total = surah.total_ayahs;
-            // Generate a random start ayah that allows for a 3-ayah range
-            const maxStart = Math.max(1, total - 2);
-            const randomStart = Math.floor(Math.random() * maxStart) + 1;
-            
-            startAyah.value = randomStart;
-            endAyah.value = Math.min(total, randomStart + 2);
-        }
-    }
-});
+// Pick a random 3-ayah range only when the user actively chooses a surah from
+// the dropdown. Wiring this to the select's event (instead of watching
+// selectedSurah) keeps it from firing on URL-param loads or when fetchTestText
+// syncs selectedSurah back from the server response — both of which would
+// otherwise clobber a "retake" range.
+const handleSurahSelected = (newSurah) => {
+    if (!newSurah || !surahs.value.length) return;
+
+    const surah = surahs.value.find(s => s.surah_number == newSurah);
+    if (!surah) return;
+
+    const total = surah.total_ayahs;
+    const maxStart = Math.max(1, total - 2);
+    const randomStart = Math.floor(Math.random() * maxStart) + 1;
+
+    startAyah.value = randomStart;
+    endAyah.value = Math.min(total, randomStart + 2);
+};
 
 const fetchSurahs = async () => {
     try {
@@ -681,6 +681,7 @@ defineOptions({ layout: AppLayout });
                 :options="surahs"
                 :label="t('surah')"
                 :placeholder="t('select_surah') || 'Select Surah'"
+                @update:model-value="handleSurahSelected"
             />
             <div class="flex items-center gap-3 px-4 py-2 border border-[var(--border-color)]">
                 <span class="text-[var(--sub-color)] text-[10px] uppercase tracking-[0.2em]">{{ t('ayats') }}</span>
