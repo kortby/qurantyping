@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ContestController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\HifzController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPageController;
@@ -100,6 +101,11 @@ Route::middleware([
     Route::post('/user/settings/error-sound', [UserSettingController::class, 'updateErrorSound'])->name('user.settings.error-sound');
     Route::post('/user/settings/daily-goal', [UserSettingController::class, 'updateDailyGoal'])->name('user.settings.daily-goal');
     Route::post('/user/settings/auto-advance', [UserSettingController::class, 'updateAutoAdvance'])->name('user.settings.auto-advance');
+    Route::post('/user/settings/hifz-daily-new', [UserSettingController::class, 'updateHifzDailyNew'])->name('user.settings.hifz-daily-new');
+
+    Route::get('/hifz', [HifzController::class, 'index'])->name('hifz.index');
+    Route::get('/hifz/session', [HifzController::class, 'session'])->name('hifz.session');
+    Route::post('/hifz/grade', [HifzController::class, 'grade'])->name('hifz.grade');
 });
 
 // Admin users management (super admins only).

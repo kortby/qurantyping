@@ -142,9 +142,12 @@ class QuranNavigator
     }
 
     /**
+     * A passage that opens at the given ayah, running up to WINDOW ayahs but
+     * never past the end of its surah.
+     *
      * @return array{surah_number:int, start_ayah:int, end_ayah:int}
      */
-    private function window(int $surah, int $startAyah): array
+    public function window(int $surah, int $startAyah): array
     {
         $maxAyah = (int) QuranText::where('surah_number', $surah)->max('ayah_number');
 

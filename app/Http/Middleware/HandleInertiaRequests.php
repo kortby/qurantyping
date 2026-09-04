@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\HifzService;
 use App\Services\QuranNavigator;
 use App\Services\StreakService;
 use Illuminate\Http\Request;
@@ -54,6 +55,9 @@ class HandleInertiaRequests extends Middleware
                     : null,
                 'resume' => fn () => $request->user()
                     ? app(QuranNavigator::class)->resumePoint($request->user())
+                    : null,
+                'hifz_due' => fn () => $request->user()
+                    ? app(HifzService::class)->dueCount($request->user())
                     : null,
             ],
             'flash' => [

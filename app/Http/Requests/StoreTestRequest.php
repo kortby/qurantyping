@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTestRequest extends FormRequest
@@ -19,7 +20,7 @@ class StoreTestRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -36,6 +37,8 @@ class StoreTestRequest extends FormRequest
             'start_ayah' => 'required|integer|min:1',
             'end_ayah' => 'required|integer|min:1|gte:start_ayah',
             'total_errors' => 'required|integer|min:0',
+            'hifz_level' => 'sometimes|nullable|integer|min:1|max:3',
+            'peeks' => 'sometimes|integer|min:0',
         ];
     }
 }

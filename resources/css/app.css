@@ -100,6 +100,15 @@ button:focus-visible,
     }
 }
 
+/* Hifz mode — hide unread text without disturbing layout or the caret */
+.hz-faint {
+    opacity: 0.08;
+}
+
+.hz-blind {
+    visibility: hidden;
+}
+
 /* Gold corner marks on the frame */
 .jadwal::before,
 .jadwal::after {
