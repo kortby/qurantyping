@@ -6,7 +6,9 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import { useSettings } from '../../../useSettings';
 
+const { t } = useSettings();
 const page = usePage();
 
 const form = useForm({
@@ -20,16 +22,13 @@ const submit = () => {
 
 <template>
     <FormSection @submitted="submit">
-        <template #title>Daily practice goal</template>
+        <template #title>{{ t('streak.daily_goal_title') }}</template>
 
-        <template #description>
-            The number of correctly typed characters that counts as a full day of
-            practice. Your streak survives one missed day per week.
-        </template>
+        <template #description>{{ t('streak.daily_goal_desc') }}</template>
 
         <template #form>
             <div class="col-span-6 sm:col-span-3">
-                <InputLabel for="daily_goal_chars" value="Characters per day" />
+                <InputLabel for="daily_goal_chars" :value="t('streak.chars_per_day')" />
                 <TextInput
                     id="daily_goal_chars"
                     v-model.number="form.daily_goal_chars"
@@ -45,9 +44,9 @@ const submit = () => {
         </template>
 
         <template #actions>
-            <ActionMessage :on="form.recentlySuccessful">Saved.</ActionMessage>
+            <ActionMessage :on="form.recentlySuccessful">{{ t('streak.saved') }}</ActionMessage>
             <PrimaryButton :class="{ 'opacity-50': form.processing }" :disabled="form.processing">
-                Save
+                {{ t('streak.save') }}
             </PrimaryButton>
         </template>
     </FormSection>

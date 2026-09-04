@@ -530,7 +530,7 @@ const suggestedGrade = computed(() => {
     return 3;
 });
 
-const gradeLabels = ['Again', 'Hard', 'Good', 'Easy'];
+const gradeLabels = () => [t('hifz.again'), t('hifz.hard'), t('hifz.good'), t('hifz.easy')];
 
 const loadHifzSession = async (mode) => {
     hifzMode.value = true;
@@ -545,7 +545,7 @@ const loadHifzSession = async (mode) => {
         endAyah.value = data.end_ayah;
         await fetchTestText();
     } catch (e) {
-        hifzMessage.value = e.response?.data?.message || 'Could not load a hifz passage.';
+        hifzMessage.value = e.response?.data?.message || t('hifz.load_failed');
         isLoading.value = false;
     }
 };
@@ -784,7 +784,7 @@ defineOptions({ layout: AppLayout });
         <LunarCountdown v-if="contestConfig?.enabled" :config="contestConfig" />
 
         <!-- Passage selectors -->
-        <form @submit.prevent="fetchTestText()" class="w-full max-w-4xl mb-4 flex flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 font-mono text-sm">
+        <form @submit.prevent="fetchTestText()" class="w-full max-w-6xl mb-4 flex flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 font-mono text-sm">
             <PassageSelect
                 class="w-full sm:w-auto"
                 :surah="selectedSurah"
@@ -833,7 +833,7 @@ defineOptions({ layout: AppLayout });
                 @click="resumePractice"
                 class="min-h-[40px] border border-[var(--lapis-color)] text-[var(--lapis-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
             >
-                Continue · {{ page.props.auth.resume.label }}
+                {{ t('passage.continue') }} · {{ page.props.auth.resume.label }}
             </button>
 
             <button
@@ -844,7 +844,7 @@ defineOptions({ layout: AppLayout });
                 class="min-h-[40px] border px-4 text-xs font-mono uppercase tracking-[0.12em] transition-colors"
                 :class="autoAdvance ? 'text-[var(--caret-color)] border-[var(--caret-color)]' : 'text-[var(--sub-color)] border-[var(--border-color)] hover:text-[var(--main-color)]'"
             >
-                Auto-advance {{ autoAdvance ? 'on' : 'off' }}
+                {{ autoAdvance ? t('passage.auto_advance_on') : t('passage.auto_advance_off') }}
             </button>
 
             <button v-if="showTashkilFeature"
@@ -869,7 +869,7 @@ defineOptions({ layout: AppLayout });
         </form>
 
         <!-- Live Stats (during test) -->
-        <div v-if="!showResults" class="w-full max-w-4xl mb-3 flex items-center gap-4">
+        <div v-if="!showResults" class="w-full max-w-6xl mb-3 flex items-center gap-4">
             <!-- Mobile: one compact line -->
             <div class="sm:hidden flex items-center gap-3 font-mono text-sm tabular-nums text-[var(--main-color)] select-none">
                 <span>{{ wpm }}<span class="text-[var(--sub-color)] text-[10px] ml-0.5">wpm</span></span>
@@ -911,7 +911,7 @@ defineOptions({ layout: AppLayout });
         </div>
 
         <!-- Sürah header cartouche -->
-        <div v-if="!showResults && quranText.surah_name_arabic" class="w-full max-w-4xl mb-2 flex flex-wrap gap-3 justify-center sm:justify-between items-center animate-fade-in">
+        <div v-if="!showResults && quranText.surah_name_arabic" class="w-full max-w-6xl mb-2 flex flex-wrap gap-3 justify-center sm:justify-between items-center animate-fade-in">
             <span class="cartouche">
                 <span class="name" dir="rtl">{{ quranText.surah_name_arabic }}</span>
                 <span class="font-mono">{{ quranText.surah_number }}:{{ quranText.start_ayah }}–{{ quranText.end_ayah }}</span>
@@ -920,7 +920,7 @@ defineOptions({ layout: AppLayout });
             <div v-if="hifzMode" class="flex items-center gap-2 font-mono text-[11px]">
                 <div class="flex border border-[var(--border-color)] divide-x divide-[var(--border-color)]">
                     <button
-                        v-for="(lbl, i) in ['Guided', 'Faint', 'Blind']" :key="i"
+                        v-for="(lbl, i) in [t('hifz.level_guided'), t('hifz.level_faint'), t('hifz.level_blind')]" :key="i"
                         type="button"
                         @click="revealLevel = i + 1"
                         class="px-2.5 py-1 uppercase tracking-[0.1em] transition-colors"
@@ -932,20 +932,20 @@ defineOptions({ layout: AppLayout });
                     @pointerdown.prevent="startPeek" @pointerup="endPeek" @pointerleave="endPeek"
                     class="px-3 py-1 border uppercase tracking-[0.1em] select-none transition-colors"
                     :class="peeking ? 'border-[var(--caret-color)] text-[var(--caret-color)]' : 'border-[var(--border-color)] text-[var(--sub-color)]'"
-                >Peek</button>
+                >{{ t('hifz.peek') }}</button>
                 <span class="text-[var(--sub-color)]">{{ peeks }}</span>
             </div>
         </div>
 
-        <p v-if="hifzMessage" class="w-full max-w-4xl mb-4 text-sm font-mono text-[var(--sub-color)]">
-            {{ hifzMessage }} · <Link href="/hifz" class="text-[var(--lapis-color)]">back to Hifz</Link>
+        <p v-if="hifzMessage" class="w-full max-w-6xl mb-4 text-sm font-mono text-[var(--sub-color)]">
+            {{ hifzMessage }} · <Link href="/hifz" class="text-[var(--lapis-color)]">{{ t('hifz.back') }}</Link>
         </p>
 
         <!-- Typing Area — the jadwal -->
         <div v-if="currentDisplayText && !showResults"
              @click="focusInput"
              ref="containerRef"
-             class="jadwal relative w-full max-w-4xl -mx-6 sm:mx-0 transition-opacity duration-500 min-h-[200px] sm:min-h-[220px] flex items-center"
+             class="jadwal relative w-full max-w-6xl -mx-6 sm:mx-0 transition-opacity duration-500 min-h-[200px] sm:min-h-[220px] flex items-center"
              :class="{ 'opacity-100': isFocused, 'opacity-40': !isFocused }">
 
             <!-- The frame draws itself once -->
@@ -1073,12 +1073,12 @@ defineOptions({ layout: AppLayout });
                 <!-- Hifz grading -->
                 <div v-if="hifzMode" class="w-full flex flex-col items-center gap-3">
                     <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--sub-color)]">
-                        How well did you know it?
-                        <span v-if="peeks"> · {{ peeks }} peek{{ peeks === 1 ? '' : 's' }}</span>
+                        {{ t('hifz.how_well') }}
+                        <span v-if="peeks"> · {{ t('hifz.peeks').replace('{n}', peeks) }}</span>
                     </p>
                     <div class="flex gap-2 w-full max-w-md px-6 sm:px-0">
                         <button
-                            v-for="(lbl, g) in gradeLabels" :key="g"
+                            v-for="(lbl, g) in gradeLabels()" :key="g"
                             @click="submitGrade(g)"
                             class="flex-1 min-h-[44px] font-cinzel text-xs uppercase tracking-[0.1em] border transition-colors"
                             :class="g === suggestedGrade
@@ -1087,7 +1087,7 @@ defineOptions({ layout: AppLayout });
                         >{{ lbl }}</button>
                     </div>
                     <Link href="/hifz" class="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--sub-color)] hover:text-[var(--main-color)] transition-colors">
-                        end session
+                        {{ t('hifz.end_session') }}
                     </Link>
                 </div>
 
@@ -1097,7 +1097,7 @@ defineOptions({ layout: AppLayout });
                         @click="nextPassage"
                         class="w-full sm:w-auto min-h-[44px] px-8 bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold hover:opacity-90 transition-opacity"
                     >
-                        Next passage →
+                        {{ t('passage.next_passage') }} →
                     </button>
                     <button
                         @click="resetTest"
