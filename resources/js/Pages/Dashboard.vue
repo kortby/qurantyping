@@ -37,6 +37,7 @@ const props = defineProps({
     chartData: Array,
     bestTest: Object,
     certificatesCount: { type: Number, default: 0 },
+    badgeCount: { type: Number, default: 0 },
     quranProgress: { type: Object, default: null },
 });
 
@@ -193,6 +194,13 @@ const formatDuration = (seconds) => {
                                 class="inline-flex items-center min-h-[36px] border border-[var(--caret-color)] text-[var(--caret-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
                             >
                                 {{ t('certificates.count').replace('{n}', certificatesCount) }}
+                            </Link>
+                            <Link
+                                v-if="badgeCount"
+                                href="/badges"
+                                class="inline-flex items-center min-h-[36px] border border-[var(--border-color)] text-[var(--sub-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors"
+                            >
+                                {{ t('badges.count').replace('{n}', badgeCount) }}
                             </Link>
                         </div>
                     </div>
