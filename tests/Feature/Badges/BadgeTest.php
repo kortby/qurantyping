@@ -104,6 +104,25 @@ it('returns newly earned badges in the /test/complete response', function () {
     expect($second['new_badges'])->toBe([]);
 });
 
+it('backfills badges for existing users', function () {
+    // A user with history but no badges yet (simulate a pre-feature account).
+    $legacy = User::factory()->create(['longest_streak' => 40]);
+    Test::factory()->count(12)->for($legacy)->create(['wpm' => 70]);
+    $legacy->badges()->detach();
+
+    expect($legacy->badges()->count())->toBe(0);
+
+    $this->artisan('badges:backfill')->assertSuccessful();
+
+    $slugs = $legacy->fresh()->badges()->pluck('slug');
+    expect($slugs)->toContain('first-test', 'tests-10', 'wpm-60', 'streak-30');
+
+    // Second run awards nothing more.
+    $before = $legacy->fresh()->badges()->count();
+    $this->artisan('badges:backfill')->assertSuccessful();
+    expect($legacy->fresh()->badges()->count())->toBe($before);
+});
+
 it('guards the badges page and shows earned state', function () {
     $this->get('/badges')->assertRedirect('/login');
 
