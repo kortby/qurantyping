@@ -4,7 +4,7 @@ return [
     /*
      * Minimum keystrokes recorded for a character before it can be judged weak.
      */
-    'min_attempts' => (int) env('DRILLS_MIN_ATTEMPTS', 25),
+    'min_attempts' => (int) env('DRILLS_MIN_ATTEMPTS', 15),
 
     /*
      * Miss rate (0–1) at or above which a character counts as weak.
