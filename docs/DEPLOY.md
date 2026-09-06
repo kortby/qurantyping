@@ -152,7 +152,7 @@ npm ci && npm run build                              # bundles laravel-echo + pu
 php artisan config:clear
 php artisan migrate --force
 php artisan db:seed --class=QuranDivisionsSeeder     # one-time, idempotent (UPDATE only)
-php artisan db:seed --class=BadgeSeeder              # idempotent — 21-badge catalogue
+php artisan db:seed --class=BadgeSeeder              # idempotent — badge catalogue (47 rows)
 php artisan badges:backfill                          # one-off — award existing users what they've earned
 php artisan quran:import-punctuation                 # only if TASHKIL_FEATURE=true (~4 min)
 
@@ -178,6 +178,7 @@ supervisorctl restart qurantyping-worker
 | `create_races_tables` + `add_race_id_to_tests_table` | live typing races (#8) |
 | `add_config_columns_to_races_table` | private-room settings; makes race passage columns nullable |
 | `add_slug_to_badges_table` | badges — slug key for the award engine |
+| `add_tashkeel_to_tests_table` | badges — flag whether a test was done with diacritics |
 
 (If the streaks/hifz/certificates migrations were never deployed they run here too.)
 
