@@ -152,6 +152,8 @@ npm ci && npm run build                              # bundles laravel-echo + pu
 php artisan config:clear
 php artisan migrate --force
 php artisan db:seed --class=QuranDivisionsSeeder     # one-time, idempotent (UPDATE only)
+php artisan db:seed --class=BadgeSeeder              # idempotent — 21-badge catalogue
+php artisan badges:backfill                          # one-off — award existing users what they've earned
 php artisan quran:import-punctuation                 # only if TASHKIL_FEATURE=true (~4 min)
 
 php artisan config:cache
@@ -175,8 +177,12 @@ supervisorctl restart qurantyping-worker
 | `add_reciter_to_users_table` | recitation reciter preference (#7) |
 | `create_races_tables` + `add_race_id_to_tests_table` | live typing races (#8) |
 | `add_config_columns_to_races_table` | private-room settings; makes race passage columns nullable |
+| `add_slug_to_badges_table` | badges — slug key for the award engine |
 
 (If the streaks/hifz/certificates migrations were never deployed they run here too.)
+
+The Qur'an map (`/map`) is code-only (no migration); its `rememberForever` cache keys
+are refreshed by the `php artisan cache:clear` already in the sequence above.
 
 ---
 
