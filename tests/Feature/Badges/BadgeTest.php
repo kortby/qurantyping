@@ -104,6 +104,44 @@ it('returns newly earned badges in the /test/complete response', function () {
     expect($second['new_badges'])->toBe([]);
 });
 
+it('awards consistency, variety and juz-coverage badges', function () {
+    $u = $this->user;
+
+    // 30 active days, 8 of them hitting the 500-char default goal.
+    for ($i = 1; $i <= 30; $i++) {
+        DB::table('daily_activity')->insert([
+            'user_id' => $u->id, 'date' => now()->subDays($i)->toDateString(),
+            'tests_count' => 1, 'chars' => $i <= 8 ? 900 : 100, 'seconds' => 60,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+    }
+
+    // 10 zero-error runs + one 500+ char test + a hifz test.
+    Test::factory()->count(10)->for($u)->create(['char_count' => 120, 'incorrect_chars' => 0]);
+    Test::factory()->for($u)->create(['char_count' => 620]);
+    Test::factory()->for($u)->create(['hifz_level' => 2]);
+
+    // Certified surahs spanning 4 juz (30, 1, 3, 4 — via seeded quran_texts).
+    QuranText::insert(collect([[1, 1], [2, 3], [3, 4]])->map(fn ($p): array => [
+        'surah_number' => $p[0], 'ayah_number' => 1, 'juz' => $p[1], 'hizb_quarter' => 1, 'page' => 1,
+        'text_arabic_simple' => 'x', 'surah_arabic_ponctuation' => 'x',
+        'surah_name_arabic' => 's', 'surah_name_english' => 's', 'surah_name_translation' => 's',
+        'created_at' => now(), 'updated_at' => now(),
+    ])->all());
+    foreach ([[108, 30], [1, 1], [2, 3], [3, 4]] as [$s]) {
+        Certificate::create([
+            'user_id' => $u->id, 'surah_number' => $s, 'surah_name_english' => 's', 'surah_name_arabic' => 's',
+            'ayah_count' => 3, 'accuracy' => 99, 'issued_at' => now(),
+        ]);
+    }
+
+    app(BadgeService::class)->evaluate($u->fresh());
+    $slugs = $u->fresh()->badges()->pluck('slug');
+
+    expect($slugs)->toContain('days-30', 'goal-7', 'perfectionist', 'marathon', 'first-hifz')
+        ->and($slugs)->not->toContain('days-100', 'goal-30');
+});
+
 it('backfills badges for existing users', function () {
     // A user with history but no badges yet (simulate a pre-feature account).
     $legacy = User::factory()->create(['longest_streak' => 40]);
