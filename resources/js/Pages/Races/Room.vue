@@ -235,7 +235,7 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
 
     <AppLayout>
         <div class="py-10 sm:py-12 animate-fade-in min-h-[80vh]">
-            <div class="max-w-3xl mx-auto px-4 sm:px-6">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6">
                 <header class="mb-6 flex items-center justify-between gap-4">
                     <div>
                         <h1 class="text-xl font-cinzel font-semibold text-[var(--caret-color)]">{{ t('races.title') }}</h1>
@@ -318,7 +318,7 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
                     v-if="showSurface"
                     ref="surfaceEl"
                     @click="focusInput"
-                    class="jadwal relative w-full mb-4 min-h-[180px] flex items-center transition-opacity duration-300"
+                    class="jadwal relative w-full mb-4 min-h-[140px] flex items-center transition-opacity duration-300"
                     :class="isFocused ? 'opacity-100' : 'opacity-50'"
                 >
                     <svg class="jadwal-draw" preserveAspectRatio="none" aria-hidden="true">
@@ -349,7 +349,7 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
                         :class="{ 'animate-pulse': !isTyping && isFocused }"
                     ></div>
 
-                    <p class="mushaf-text select-none w-full relative z-0 whitespace-pre-wrap break-words" dir="rtl">
+                    <p class="mushaf-text race-passage select-none w-full relative z-0 whitespace-pre-wrap break-words" dir="rtl">
                         <span
                             v-for="(c, i) in score.charStates.value"
                             :key="i"
@@ -404,3 +404,12 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Shorter, wider passage than the home page — race snippets are only a few ayahs. */
+.race-passage {
+    font-size: clamp(1.15rem, 2.6vw, 1.75rem);
+    line-height: 1.9;
+    word-spacing: 0.04em;
+}
+</style>
