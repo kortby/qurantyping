@@ -22,7 +22,7 @@ class WeakLetterService
         foreach ($rows as $row) {
             $char = (string) ($row['c'] ?? '');
 
-            if ($char === '') {
+            if (trim($char) === '') {
                 continue;
             }
 

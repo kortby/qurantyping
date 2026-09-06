@@ -77,6 +77,18 @@ it('clamps misses to attempts', function () {
     expect($ba->misses)->toBe(8);
 });
 
+it('never lets a whitespace or blank char_stats row block the result', function () {
+    actingAs($this->user)->postJson('/test/complete', postTest([
+        'char_stats' => [
+            ['c' => ' ', 'attempts' => 12, 'misses' => 0],
+            ['c' => '', 'attempts' => 3, 'misses' => 1],
+            ['c' => 'ب', 'attempts' => 10, 'misses' => 2],
+        ],
+    ]))->assertCreated();
+
+    expect(UserLetterStat::where('user_id', $this->user->id)->pluck('character')->all())->toBe(['ب']);
+});
+
 it('does not record letter stats for guests', function () {
     $this->postJson('/test/complete', postTest([
         'char_stats' => [['c' => 'ب', 'attempts' => 10, 'misses' => 3]],

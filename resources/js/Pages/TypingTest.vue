@@ -136,6 +136,10 @@ const updateCaret = () => {
 watch([userInput, isFocused], updateCaret);
 window.addEventListener('resize', updateCaret);
 
+// Arabic letters + diacritic marks — what weak-letter drills track. Excludes
+// spaces, ayah numerals and the ۝ separator.
+const DRILLABLE_CHAR = /[\u0621-\u064A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/;
+
 const normalizeForComparison = (text) => {
     if (!text) return '';
     let result = text.normalize('NFC')
@@ -611,14 +615,17 @@ const handleInput = (event) => {
                 const expectedChar = sourceCharacters.value[index];
                 const miss = normalizeForComparison(typedChar) !== normalizeForComparison(expectedChar);
 
-                const stat = charStats.value.get(expectedChar) ?? { attempts: 0, misses: 0 };
-                stat.attempts++;
                 if (miss) {
-                    stat.misses++;
                     totalErrors.value++;
                     playErrorSound();
                 }
-                charStats.value.set(expectedChar, stat);
+
+                if (DRILLABLE_CHAR.test(expectedChar)) {
+                    const stat = charStats.value.get(expectedChar) ?? { attempts: 0, misses: 0 };
+                    stat.attempts++;
+                    if (miss) stat.misses++;
+                    charStats.value.set(expectedChar, stat);
+                }
             }
         }
     }
