@@ -15,6 +15,7 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\GhostController;
 use App\Http\Controllers\HifzController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\QuranMapController;
 use App\Http\Controllers\RaceController;
 use App\Http\Controllers\SitemapController;
@@ -126,6 +127,8 @@ Route::middleware([
 
     Route::get('/drills', DrillController::class)->name('drills.index');
     Route::get('/test/drill', [TestController::class, 'drillText'])->name('test.drill');
+
+    Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends', [FriendController::class, 'store'])->name('friends.store');
