@@ -60,6 +60,9 @@ class HandleInertiaRequests extends Middleware
                 'hifz_due' => fn () => $request->user()
                     ? app(HifzService::class)->dueCount($request->user())
                     : null,
+                'friend_requests' => fn () => $request->user()
+                    ? $request->user()->incomingFriendRequests()->count()
+                    : 0,
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

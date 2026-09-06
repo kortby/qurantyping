@@ -114,6 +114,9 @@ if (typeof window !== 'undefined') {
                             </Link>
                             <Link href="/drills" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.drills') }}</Link>
                             <Link href="/races" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.races') }}</Link>
+                            <Link href="/friends" class="hover:text-[var(--main-color)] transition-colors">
+                                {{ t('navigation.friends') }}<span v-if="$page.props.auth.friend_requests" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.friend_requests }}</span>
+                            </Link>
                             <Link href="/map" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.map') }}</Link>
                             <Link href="/badges" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.badges') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity">{{ t('navigation.admin') }}</Link>
@@ -229,6 +232,9 @@ if (typeof window !== 'undefined') {
                             </Link>
                             <Link href="/drills" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.drills') }}</Link>
                             <Link href="/races" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.races') }}</Link>
+                            <Link href="/friends" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
+                                {{ t('navigation.friends') }}<span v-if="$page.props.auth.friend_requests" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.friend_requests }}</span>
+                            </Link>
                             <Link href="/map" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.map') }}</Link>
                             <Link href="/badges" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.badges') }}</Link>
                             <Link href="/user/profile" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
