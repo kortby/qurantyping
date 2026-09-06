@@ -14,26 +14,34 @@ const props = defineProps({
     scope: { type: String, default: 'global' },
     canFilterFriends: { type: Boolean, default: false },
     friendIds: { type: Array, default: () => [] },
+    requestedIds: { type: Array, default: () => [] },
+    incomingIds: { type: Array, default: () => [] },
 });
 
-const busy = ref(false);
+const busy = ref(null);
 
 const setScope = (scope) => {
     if (scope === props.scope) return;
     router.get('/leaderboard', { scope }, { preserveState: true, preserveScroll: true });
 };
 
-const canAdd = (scorer) => props.canFilterFriends
-    && scorer.user_id !== page.props.auth?.user?.id
-    && !props.friendIds.includes(scorer.user_id);
+// none | requested | incoming | friend | self  (null = not signed in / no widget)
+const friendState = (scorer) => {
+    if (!props.canFilterFriends) return null;
+    if (scorer.user_id === page.props.auth?.user?.id) return 'self';
+    if (props.friendIds.includes(scorer.user_id)) return 'friend';
+    if (props.requestedIds.includes(scorer.user_id)) return 'requested';
+    if (props.incomingIds.includes(scorer.user_id)) return 'incoming';
+    return 'none';
+};
 
-const addFriend = (scorer) => {
+// Both "add" and "accept" post here — store() accepts a reverse-pending request.
+const sendRequest = (scorer) => {
     if (busy.value) return;
-    busy.value = true;
+    busy.value = scorer.user_id;
     router.post('/friends', { friend_id: scorer.user_id }, {
         preserveScroll: true,
-        preserveState: true,
-        onFinish: () => (busy.value = false),
+        onFinish: () => (busy.value = null),
     });
 };
 </script>
@@ -107,10 +115,32 @@ const addFriend = (scorer) => {
                                             <span class="text-lg font-cinzel font-bold text-[var(--main-color)] group-hover:text-[var(--caret-color)] transition-colors">
                                                 {{ scorer.name }}
                                             </span>
-                                            <button v-if="canAdd(scorer)" type="button" :disabled="busy" @click="addFriend(scorer)"
-                                                    class="text-[9px] font-mono uppercase tracking-[0.2em] text-[var(--caret-color)] border border-[var(--caret-color)]/40 px-2 py-0.5 hover:bg-[var(--caret-color)]/10 disabled:opacity-40 transition-colors">
-                                                {{ t('friends.add') }}
-                                            </button>
+                                            <template v-if="friendState(scorer)">
+                                                <button v-if="friendState(scorer) === 'none' || friendState(scorer) === 'incoming'"
+                                                        type="button" :disabled="busy === scorer.user_id" @click="sendRequest(scorer)"
+                                                        :title="friendState(scorer) === 'incoming' ? t('friends.accept_request') : t('friends.add')"
+                                                        class="group/fr inline-flex items-center h-5 border transition-colors disabled:opacity-40"
+                                                        :class="friendState(scorer) === 'incoming'
+                                                            ? 'border-[var(--caret-color)] bg-[var(--caret-color)] text-[var(--bg-color)] hover:opacity-90'
+                                                            : 'border-[var(--caret-color)]/40 text-[var(--caret-color)] hover:bg-[var(--caret-color)]/10'">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                         class="w-3 h-3 mx-1 shrink-0">
+                                                        <path v-if="friendState(scorer) === 'incoming'" d="M20 6 9 17l-5-5" />
+                                                        <path v-else d="M12 5v14M5 12h14" />
+                                                    </svg>
+                                                    <span class="max-w-0 overflow-hidden whitespace-nowrap text-[9px] font-mono uppercase tracking-[0.2em] transition-all duration-200 group-hover/fr:max-w-[96px] group-hover/fr:mr-1.5">
+                                                        {{ friendState(scorer) === 'incoming' ? t('friends.accept_request') : t('friends.add') }}
+                                                    </span>
+                                                </button>
+                                                <span v-else :title="friendState(scorer) === 'friend' ? t('friends.connected') : t('friends.pending')"
+                                                      class="inline-flex items-center justify-center w-5 h-5"
+                                                      :class="friendState(scorer) === 'friend' ? 'text-[var(--caret-color)]' : 'text-[var(--sub-color)] opacity-60'">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3">
+                                                        <path v-if="friendState(scorer) === 'friend'" d="M20 6 9 17l-5-5" />
+                                                        <path v-else d="M12 6v6l4 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z" />
+                                                    </svg>
+                                                </span>
+                                            </template>
                                             <div v-if="scorer.badges && scorer.badges.length > 0" class="flex items-center gap-1">
                                                 <BadgeSeal v-for="badge in scorer.badges" :key="badge.id"
                                                            :icon="badge.icon" :tier="badge.tier" :earned="true" :size="24"

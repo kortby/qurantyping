@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Friendship;
 use App\Models\Test;
 use App\Models\User;
 use App\Services\ContestService;
@@ -64,12 +65,32 @@ class LeaderboardController extends Controller
             return $scorer;
         });
 
+        $friendIds = [];
+        $requestedIds = [];
+        $incomingIds = [];
+
+        if ($user = $request->user()) {
+            $friendIds = $user->friendIds()->values();
+
+            $pending = Friendship::query()
+                ->where('status', 'pending')
+                ->where(function ($query) use ($user): void {
+                    $query->where('user_id', $user->id)->orWhere('friend_id', $user->id);
+                })
+                ->get(['user_id', 'friend_id']);
+
+            $requestedIds = $pending->where('user_id', $user->id)->pluck('friend_id')->values();
+            $incomingIds = $pending->where('friend_id', $user->id)->pluck('user_id')->values();
+        }
+
         return Inertia::render('Leaderboard', [
             'topScorers' => $topScorers,
             'contest_config' => app(ContestService::class)->getConfig(),
             'scope' => $scope,
             'canFilterFriends' => (bool) $request->user(),
-            'friendIds' => $request->user() ? $request->user()->friendIds()->values() : [],
+            'friendIds' => $friendIds,
+            'requestedIds' => $requestedIds,
+            'incomingIds' => $incomingIds,
         ]);
     }
 }
