@@ -2,12 +2,13 @@ import { computed, ref, unref } from 'vue';
 
 /**
  * Minimal typing-scoring logic for the race room. A trimmed cousin of the engine
- * in Pages/TypingTest.vue: no tashkeel mode, no hifz, no clusters UI — just the
- * pure comparison + live WPM/accuracy/progress.
+ * in Pages/TypingTest.vue: no tashkeel mode, no hifz — just the pure comparison
+ * plus live WPM/accuracy/progress and a token list for rendering.
  */
 
 const TASHKEEL = /[ؐ-ؚـً-ٰٟۖ-ۭ۝]/g;
 const AYAH_SEPARATOR = / ?۝[٠-٩]+ ?/g;
+const BREAK_SENTINEL = '␞';
 
 export function normalize(text) {
     if (!text) return '';
@@ -20,14 +21,27 @@ export function normalize(text) {
         .trim();
 }
 
-/** Collapse the "۝<digits>" ayah markers to a single space, matching the display text. */
-export function toLogicText(displayText) {
-    return (displayText || '').normalize('NFC').replace(AYAH_SEPARATOR, ' ').replace(/\s+/g, ' ').trim();
+/**
+ * The passage as tokens, one per typed-against logic character. `brk: true`
+ * marks the single space that stands in for an "۝<digits>" ayah divider, so the
+ * UI can draw a roundel there instead of a blank.
+ */
+export function logicTokens(displayText) {
+    const marked = (displayText || '')
+        .normalize('NFC')
+        .replace(AYAH_SEPARATOR, BREAK_SENTINEL)
+        .replace(/[ \t\n]+/g, ' ')
+        .replace(/^[\s␞]+|\s+$/g, '');
+
+    return [...marked].map((ch) =>
+        ch === BREAK_SENTINEL ? { ch: ' ', brk: true } : { ch, brk: false },
+    );
 }
 
 export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
-    const sourceText = computed(() => toLogicText(unref(sourceTextRef)));
-    const sourceChars = computed(() => sourceText.value.split(''));
+    const tokens = computed(() => logicTokens(unref(sourceTextRef)));
+    const sourceChars = computed(() => tokens.value.map((t) => t.ch));
+    const sourceText = computed(() => sourceChars.value.join(''));
 
     const typed = computed(() => (unref(userInputRef) || '').split(''));
 
@@ -50,9 +64,7 @@ export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
         return -1;
     });
 
-    const progress = computed(() => {
-        if (sourceChars.value.length === 0) return 0;
-        // Count the leading run of correct characters.
+    const correctRun = computed(() => {
         const src = sourceChars.value;
         const inp = typed.value;
         let run = 0;
@@ -60,8 +72,12 @@ export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
             if (normalize(inp[i]) === normalize(src[i])) run++;
             else break;
         }
-        return Math.min(1, run / src.length);
+        return run;
     });
+
+    const progress = computed(() =>
+        sourceChars.value.length === 0 ? 0 : Math.min(1, correctRun.value / sourceChars.value.length),
+    );
 
     const elapsedMs = computed(() => {
         const start = unref(startedAtRef);
@@ -82,7 +98,34 @@ export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
         () => typed.value.length >= sourceChars.value.length && firstErrorIndex.value === -1,
     );
 
-    return { sourceText, sourceChars, correctCount, firstErrorIndex, progress, wpm, accuracy, isComplete, elapsedMs };
+    /** Per-token render status for the passage display. */
+    const charStates = computed(() => {
+        const inp = typed.value;
+        return tokens.value.map((tok, i) => {
+            let status = 'untyped';
+            if (i < inp.length) {
+                status = normalize(inp[i]) === normalize(tok.ch) ? 'correct' : 'incorrect';
+            } else if (i === inp.length) {
+                status = 'active';
+            }
+            return { ...tok, status };
+        });
+    });
+
+    return {
+        tokens,
+        sourceText,
+        sourceChars,
+        charStates,
+        correctCount,
+        correctRun,
+        firstErrorIndex,
+        progress,
+        wpm,
+        accuracy,
+        isComplete,
+        elapsedMs,
+    };
 }
 
 export function useRaceInput() {
