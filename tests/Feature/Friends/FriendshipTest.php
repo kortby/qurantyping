@@ -132,6 +132,31 @@ it('scopes the leaderboard to friends plus self', function () {
         });
 });
 
+it('exposes friend, requested and incoming ids to the leaderboard', function () {
+    seedFriendAyahs();
+    $qt = QuranText::first();
+
+    $me = User::factory()->create();
+    $friend = User::factory()->create();
+    $iAsked = User::factory()->create();
+    $theyAsked = User::factory()->create();
+
+    Friendship::factory()->accepted()->create(['user_id' => $me->id, 'friend_id' => $friend->id]);
+    Friendship::factory()->create(['user_id' => $me->id, 'friend_id' => $iAsked->id]);
+    Friendship::factory()->create(['user_id' => $theyAsked->id, 'friend_id' => $me->id]);
+
+    foreach ([$friend, $iAsked, $theyAsked] as $u) {
+        Test::factory()->for($u)->create(['quran_text_id' => $qt->id]);
+    }
+
+    actingAs($me)->get('/leaderboard')
+        ->assertInertia(fn ($page) => $page
+            ->where('friendIds', fn ($ids) => collect($ids)->contains($friend->id))
+            ->where('requestedIds', fn ($ids) => collect($ids)->contains($iAsked->id))
+            ->where('incomingIds', fn ($ids) => collect($ids)->contains($theyAsked->id))
+        );
+});
+
 it('falls back to the global leaderboard for a guest asking for the friends scope', function () {
     seedFriendAyahs();
     $qt = QuranText::first();
