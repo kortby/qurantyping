@@ -67,5 +67,11 @@ return [
         ['slug' => 'podium', 'name' => 'On the podium', 'description' => 'Finish in the top 3 of a race.', 'icon' => 'trophy', 'tier' => 'bronze'],
         ['slug' => 'race-10', 'name' => 'Racer', 'description' => 'Finish 10 races.', 'icon' => 'trophy', 'tier' => 'silver'],
         ['slug' => 'rivals-5', 'name' => 'Well matched', 'description' => 'Race against 5 different people.', 'icon' => 'trophy', 'tier' => 'silver'],
+
+        // --- Tashkeel (diacritics mode) ---
+        ['slug' => 'first-tashkeel', 'name' => 'Marked up', 'description' => 'Complete a test with tashkeel on.', 'icon' => 'book', 'tier' => 'bronze'],
+        ['slug' => 'tashkeel-25', 'name' => 'Diacritic diligence', 'description' => 'Complete 25 tests with tashkeel.', 'icon' => 'book', 'tier' => 'silver'],
+        ['slug' => 'tashkeel-100', 'name' => 'Master of marks', 'description' => 'Complete 100 tests with tashkeel.', 'icon' => 'book', 'tier' => 'gold'],
+        ['slug' => 'tashkeel-perfect', 'name' => 'Flawless with marks', 'description' => 'Finish a 50+ character tashkeel test with zero errors.', 'icon' => 'bolt', 'tier' => 'silver'],
     ],
 ];

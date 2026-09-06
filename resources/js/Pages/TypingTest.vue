@@ -687,6 +687,7 @@ const finishTest = async () => {
             start_ayah: quranText.value.start_ayah,
             end_ayah: quranText.value.end_ayah,
             total_errors: totalErrors.value,
+            tashkeel: !!usePunctuation.value,
         };
 
         if (hifzMode.value) {

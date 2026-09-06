@@ -39,6 +39,7 @@ class StoreTestRequest extends FormRequest
             'total_errors' => 'required|integer|min:0',
             'hifz_level' => 'sometimes|nullable|integer|min:1|max:3',
             'peeks' => 'sometimes|integer|min:0',
+            'tashkeel' => 'sometimes|boolean',
             // Auxiliary weak-letter telemetry: never let a malformed row block the result.
             'char_stats' => 'sometimes|array|max:200',
             'char_stats.*.c' => 'nullable|string|max:8',
