@@ -252,7 +252,7 @@ if (typeof window !== 'undefined') {
         <transition name="fade">
             <div v-if="mobileMenuOpen" class="fixed inset-0 z-40 lg:hidden">
                 <div class="absolute inset-0 bg-[var(--bg-color)]"></div>
-                <div class="relative h-full flex flex-col p-6 pt-24">
+                <div class="relative h-full flex flex-col p-6 pt-24 overflow-y-auto">
                     <nav class="flex flex-col gap-4 font-cinzel text-lg text-center">
                         <Link href="/" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('leaderboard') }}</Link>
