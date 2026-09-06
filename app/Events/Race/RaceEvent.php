@@ -32,7 +32,6 @@ abstract class RaceEvent implements ShouldBroadcastNow
             'status' => $this->race->status,
             'starts_at' => $this->race->starts_at?->toIso8601String(),
             'char_target' => $this->race->char_target,
-            'tashkeel' => (bool) $this->race->tashkeel,
             'capacity' => $this->race->seatLimit(),
             'scope_surah' => $this->race->scope_surah,
             'participants' => $this->race->participants()

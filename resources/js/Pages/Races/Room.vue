@@ -19,7 +19,6 @@ const { t } = useSettings();
 // Live room settings (host edits these; everyone sees them via snapshots).
 const cfg = reactive({
     char_target: props.race.char_target ?? 250,
-    tashkeel: !!props.race.tashkeel,
     capacity: props.race.capacity ?? 5,
     scope_surah: props.race.scope_surah ?? '',
 });
@@ -119,7 +118,6 @@ function applySnapshot(e) {
     // Keep non-host lobby views in sync with the host's settings.
     if (!props.race.is_host && status.value === 'lobby') {
         if (e.char_target != null) cfg.char_target = e.char_target;
-        if (e.tashkeel != null) cfg.tashkeel = e.tashkeel;
         if (e.capacity != null) cfg.capacity = e.capacity;
         if (e.scope_surah !== undefined) cfg.scope_surah = e.scope_surah ?? '';
     }
@@ -191,7 +189,6 @@ function startRoom() {
     starting.value = true;
     router.post(`/races/${props.race.key}/start`, {
         char_target: cfg.char_target,
-        tashkeel: cfg.tashkeel,
         capacity: cfg.capacity,
         scope_surah: cfg.scope_surah === '' ? null : cfg.scope_surah,
     }, {
@@ -357,11 +354,6 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
                             </select>
                         </label>
 
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input v-model="cfg.tashkeel" type="checkbox" class="accent-[var(--caret-color)]" />
-                            <span class="text-[11px] text-[var(--sub-color)]">{{ t('races.with_tashkeel') }}</span>
-                        </label>
-
                         <button
                             type="button"
                             :disabled="starting"
@@ -376,7 +368,6 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
                     <div v-else class="mt-5 pt-4 border-t border-[var(--border-color)] text-[11px] text-[var(--sub-color)] space-y-1">
                         <p>{{ t('races.char_target') }}: <span class="text-[var(--main-color)]">{{ cfg.char_target }}</span></p>
                         <p>{{ t('races.max_players') }}: <span class="text-[var(--main-color)]">{{ cfg.capacity }}</span></p>
-                        <p v-if="cfg.tashkeel">{{ t('races.with_tashkeel') }}</p>
                         <p class="pt-1">{{ t('races.waiting_for_host') }}</p>
                     </div>
                 </div>

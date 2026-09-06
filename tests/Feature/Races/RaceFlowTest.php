@@ -123,7 +123,6 @@ it('applies the host settings when starting a private room', function () {
     actingAs($host)->post("/races/{$race->code}/start", [
         'char_target' => 150,
         'capacity' => 8,
-        'tashkeel' => true,
         'scope_surah' => 113,
     ])->assertRedirect();
 
@@ -132,7 +131,6 @@ it('applies the host settings when starting a private room', function () {
     expect($race->status)->toBe('countdown')
         ->and($race->char_target)->toBe(150)
         ->and($race->capacity)->toBe(8)
-        ->and($race->tashkeel)->toBeTrue()
         ->and($race->surah_number)->toBe(113)
         ->and($race->text)->not->toBeNull()
         ->and($race->quran_text_id)->not->toBeNull();
