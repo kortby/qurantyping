@@ -149,6 +149,12 @@ class TestController extends Controller
         $combinedTextSimple = trim($combinedTextSimple);
         $combinedTextPunctuated = trim($combinedTextPunctuated);
 
+        // The punctuated column may not be populated (needs `quran:import-punctuation`).
+        // Without it the "text" is just the ۝ ayah markers — fall back to the simple text.
+        if (! preg_match('/[\x{0621}-\x{064A}]/u', $combinedTextPunctuated)) {
+            $combinedTextPunctuated = $combinedTextSimple;
+        }
+
         // Enforce minimum word count for all selections (use simple text for word count)
         $wordCount = count(preg_split('/\s+/', trim($combinedTextSimple)));
         if ($wordCount < 10) {
