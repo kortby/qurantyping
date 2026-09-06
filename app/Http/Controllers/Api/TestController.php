@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTestRequest;
+use App\Models\DailyChallengeRun;
 use App\Models\QuranText;
 use App\Models\Result;
 use App\Models\Test;
 use App\Notifications\GhostRaced;
+use App\Services\DailyChallengeService;
 use App\Services\QuranNavigator;
 use App\Services\WeakLetterService;
 use Illuminate\Http\JsonResponse;
@@ -185,7 +187,7 @@ class TestController extends Controller
     public function store(StoreTestRequest $request): JsonResponse
     {
         // The request is already validated by StoreTestRequest
-        $validatedData = $request->safe()->except(['char_stats', 'trace', 'ghost_of', 'ghost_beat']);
+        $validatedData = $request->safe()->except(['char_stats', 'trace', 'ghost_of', 'ghost_beat', 'daily']);
 
         // Associate with the logged-in user, or leave as null for guests
         $validatedData['user_id'] = auth()->id();
@@ -217,6 +219,10 @@ class TestController extends Controller
             }
         }
 
+        if ($test->user_id && $request->boolean('daily')) {
+            $this->recordDailyRun($test);
+        }
+
         $newBadges = ($test->newBadges ?? collect())->map(fn ($b): array => [
             'name' => $b->name,
             'icon' => $b->icon,
@@ -227,6 +233,36 @@ class TestController extends Controller
             'new_badges' => $newBadges,
             'challenge_url' => $challengeUrl,
         ]), 201);
+    }
+
+    /**
+     * Record a run against today's daily challenge, keeping the best per day.
+     * Server-validates that the passage really is today's before crediting it.
+     */
+    private function recordDailyRun(Test $test): void
+    {
+        $daily = app(DailyChallengeService::class)->today();
+
+        $matches = (int) $test->quranText->surah_number === $daily['surah_number']
+            && (int) $test->start_ayah === $daily['start_ayah']
+            && (int) $test->end_ayah === $daily['end_ayah'];
+
+        if (! $matches) {
+            return;
+        }
+
+        $existing = DailyChallengeRun::where('user_id', $test->user_id)
+            ->where('challenge_date', $daily['date'])
+            ->first();
+
+        if ($existing && $existing->wpm >= $test->wpm) {
+            return;
+        }
+
+        DailyChallengeRun::updateOrCreate(
+            ['user_id' => $test->user_id, 'challenge_date' => $daily['date']],
+            ['test_id' => $test->id, 'wpm' => $test->wpm, 'accuracy' => $test->accuracy],
+        );
     }
 
     /**

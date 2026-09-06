@@ -140,6 +140,21 @@ const stopGhost = () => {
 };
 
 const ghostSourceId = ref(null);
+const dailyMode = ref(false);
+
+const loadDaily = async () => {
+    try {
+        const { data } = await axios.get('/api/daily');
+        selectedSurah.value = data.surah_number;
+        startAyah.value = data.start_ayah;
+        endAyah.value = data.end_ayah;
+        await fetchTestText(true);
+        dailyMode.value = true;
+    } catch (error) {
+        dailyMode.value = false;
+        await fetchTestText(false);
+    }
+};
 
 const loadGhost = async (idOrPb) => {
     try {
@@ -837,6 +852,10 @@ const finishTest = async () => {
             testData.ghost_beat = !!ghostOutcome.value?.beat;
         }
 
+        if (dailyMode.value) {
+            testData.daily = true;
+        }
+
         if (!page.props.auth?.user) {
             localStorage.setItem('cached_typing_test', JSON.stringify(testData));
             setTimeout(() => {
@@ -937,6 +956,8 @@ onMounted(async () => {
         await fetchTestText(true);
     } else if (urlParams.has('ghost')) {
         await loadGhost(urlParams.get('ghost'));
+    } else if (urlParams.get('daily') === '1') {
+        await loadDaily();
     } else {
         // No params? Start with a fresh random selection of 3 ayas
         await fetchTestText(false);
