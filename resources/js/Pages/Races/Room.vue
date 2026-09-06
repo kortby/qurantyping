@@ -463,7 +463,7 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
                                 'text-[var(--sub-color)]': c.status === 'untyped' || c.status === 'active',
                             }"
                         >
-                            <span v-if="c.brk" class="ornament-wrap"><span class="ornament-char">۝</span></span>
+                            <span v-if="c.brk" class="ornament-wrap"><span class="ornament-num">{{ c.num }}</span></span>
                             <template v-else>{{ c.ch }}</template>
                         </span>
                     </p>

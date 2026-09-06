@@ -11,8 +11,9 @@ import { computed, ref, unref } from 'vue';
 const ALL_MARKS = /[ؐ-ؚـً-ٰٟۖ-ۭ۝]/g;
 // Decorative-only: stripped even in tashkeel mode (Quranic annotation signs, tatweel, ۝).
 const DECORATIVE_MARKS = /[ؐ-ؚـۖ-ۭ۝]/g;
-const AYAH_SEPARATOR = / ?۝[٠-٩]+ ?/g;
-const BREAK_SENTINEL = '␞';
+const AYAH_SEPARATOR = / ?۝([٠-٩]+) ?/g;
+const NUM_OPEN = '␞';
+const NUM_CLOSE = '␟';
 
 export function normalize(text, keepHarakat = false) {
     if (!text) return '';
@@ -37,13 +38,25 @@ export function normalize(text, keepHarakat = false) {
 export function logicTokens(displayText) {
     const marked = (displayText || '')
         .normalize('NFC')
-        .replace(AYAH_SEPARATOR, BREAK_SENTINEL)
+        .replace(AYAH_SEPARATOR, (_m, digits) => `${NUM_OPEN}${digits}${NUM_CLOSE}`)
         .replace(/[ \t\n]+/g, ' ')
         .replace(/^[\s␞]+|\s+$/g, '');
 
-    return [...marked].map((ch) =>
-        ch === BREAK_SENTINEL ? { ch: ' ', brk: true } : { ch, brk: false },
-    );
+    const tokens = [];
+    for (let i = 0; i < marked.length; i++) {
+        if (marked[i] === NUM_OPEN) {
+            let num = '';
+            i++;
+            while (i < marked.length && marked[i] !== NUM_CLOSE) {
+                num += marked[i];
+                i++;
+            }
+            tokens.push({ ch: ' ', brk: true, num });
+        } else {
+            tokens.push({ ch: marked[i], brk: false, num: '' });
+        }
+    }
+    return tokens;
 }
 
 export function useTypingScore(sourceTextRef, userInputRef, startedAtRef, tashkeelRef = false) {
