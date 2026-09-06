@@ -7,12 +7,16 @@ use App\Http\Requests\StoreTestRequest;
 use App\Models\QuranText;
 use App\Models\Test;
 use App\Services\QuranNavigator;
+use App\Services\WeakLetterService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
-    public function __construct(private readonly QuranNavigator $navigator) {}
+    public function __construct(
+        private readonly QuranNavigator $navigator,
+        private readonly WeakLetterService $weakLetters,
+    ) {}
 
     /**
      * Surah, juz' and page indexes for the passage selector.
@@ -87,7 +91,42 @@ class TestController extends Controller
             $endAyah = $validated['end_ayah'];
         }
 
-        // Query the database for the requested range of Ayahs
+        return $this->buildPassageResponse((int) $surahNumber, (int) $startAyah, (int) $endAyah);
+    }
+
+    /**
+     * A real Quran passage chosen for being dense in the user's weakest characters.
+     */
+    public function drillText(): JsonResponse
+    {
+        $weak = $this->weakLetters->weakChars(auth()->id());
+        $location = $this->weakLetters->drillPassage($weak);
+
+        if (! $location) {
+            // Not enough signal yet: fall back to a random passage.
+            $randomAyah = QuranText::inRandomOrder()->first();
+            $surahNumber = $randomAyah->surah_number;
+            $maxAyahInSurah = QuranText::where('surah_number', $surahNumber)->max('ayah_number');
+            $startAyah = rand(1, max(1, $maxAyahInSurah - 2));
+            $location = [
+                'surah_number' => $surahNumber,
+                'start_ayah' => $startAyah,
+                'end_ayah' => min($maxAyahInSurah, $startAyah + 2),
+            ];
+        }
+
+        return $this->buildPassageResponse(
+            $location['surah_number'],
+            $location['start_ayah'],
+            $location['end_ayah'],
+        );
+    }
+
+    /**
+     * Assemble the combined-text JSON payload for a range of ayahs.
+     */
+    private function buildPassageResponse(int $surahNumber, int $startAyah, int $endAyah): JsonResponse
+    {
         $ayahs = QuranText::where('surah_number', $surahNumber)
             ->whereBetween('ayah_number', [$startAyah, $endAyah])
             ->orderBy('ayah_number', 'asc')
@@ -137,12 +176,14 @@ class TestController extends Controller
     public function store(StoreTestRequest $request): JsonResponse
     {
         // The request is already validated by StoreTestRequest
-        $validatedData = $request->validated();
+        $validatedData = $request->safe()->except('char_stats');
 
         // Associate with the logged-in user, or leave as null for guests
         $validatedData['user_id'] = auth()->id();
 
         $test = Test::create($validatedData);
+
+        $this->weakLetters->record($test->user_id, $request->safe()->collect('char_stats'));
 
         return response()->json($test, 201); // 201 Created status
     }

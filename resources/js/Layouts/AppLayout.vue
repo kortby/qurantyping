@@ -112,6 +112,7 @@ if (typeof window !== 'undefined') {
                             <Link href="/hifz" class="hover:text-[var(--main-color)] transition-colors">
                                 {{ t('navigation.hifz') }}<span v-if="$page.props.auth.hifz_due" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.hifz_due }}</span>
                             </Link>
+                            <Link href="/drills" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.drills') }}</Link>
                             <Link href="/user/profile" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.profile') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity">{{ t('navigation.admin') }}</Link>
                         </template>
@@ -224,6 +225,7 @@ if (typeof window !== 'undefined') {
                             <Link href="/hifz" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
                                 {{ t('navigation.hifz') }}<span v-if="$page.props.auth.hifz_due" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.hifz_due }}</span>
                             </Link>
+                            <Link href="/drills" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.drills') }}</Link>
                             <Link href="/user/profile" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.admin') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/feedback" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.feedback') }}</Link>
