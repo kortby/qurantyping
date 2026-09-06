@@ -107,7 +107,20 @@ it('shows a user detail page with practice progress', function () {
     $this->actingAs($this->admin)->get("/admin/users/{$target->id}")
         ->assertOk()
         ->assertSee('Al-Kawthar')
-        ->assertSee('97.5');
+        ->assertSee('97.5')
+        ->assertInertia(fn ($page) => $page
+            ->component('Admin/Users/Show')
+            ->has('account.reciter')
+            ->has('account.two_factor')
+            ->has('stats.total_chars')
+            ->has('stats.hours_practiced')
+            ->has('quran.ayah_count')
+            ->has('races.finished')
+            ->has('weakLetters')
+            ->has('activity')
+            ->has('feedback')
+            ->has('badgeTotal')
+        );
 });
 
 it('updates a user name and email', function () {
