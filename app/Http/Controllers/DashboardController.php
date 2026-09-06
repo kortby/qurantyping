@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Certificate;
 use App\Models\Test;
+use App\Services\QuranMapService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,6 +13,7 @@ class DashboardController extends Controller
     public function __invoke(Request $request)
     {
         return Inertia::render('Dashboard', [
+            'quranProgress' => fn (): array => app(QuranMapService::class)->overview($request->user())['totals'],
             'results' => fn () => Test::where('user_id', $request->user()->id)
                 ->with([
                     'quranText' => function ($query) {

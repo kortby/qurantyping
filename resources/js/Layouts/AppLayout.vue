@@ -114,6 +114,7 @@ if (typeof window !== 'undefined') {
                             </Link>
                             <Link href="/drills" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.drills') }}</Link>
                             <Link href="/races" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.races') }}</Link>
+                            <Link href="/map" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.map') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity">{{ t('navigation.admin') }}</Link>
                         </template>
                     </nav>
@@ -227,6 +228,7 @@ if (typeof window !== 'undefined') {
                             </Link>
                             <Link href="/drills" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.drills') }}</Link>
                             <Link href="/races" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.races') }}</Link>
+                            <Link href="/map" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.map') }}</Link>
                             <Link href="/user/profile" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.admin') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/feedback" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.feedback') }}</Link>

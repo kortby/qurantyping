@@ -142,6 +142,30 @@ class QuranNavigator
     }
 
     /**
+     * Every surah with its names, ayah count, and the juz its first ayah sits in.
+     *
+     * @return list<array{number:int, name_en:string, name_ar:string, ayah_count:int, juz:int}>
+     */
+    public function surahIndex(): array
+    {
+        return Cache::rememberForever('quran.surah_index', function (): array {
+            return QuranText::query()
+                ->selectRaw('surah_number, MAX(surah_name_english) as name_en, MAX(surah_name_arabic) as name_ar, COUNT(*) as ayah_count, MIN(juz) as juz')
+                ->groupBy('surah_number')
+                ->orderBy('surah_number')
+                ->get()
+                ->map(fn ($row): array => [
+                    'number' => (int) $row->surah_number,
+                    'name_en' => (string) $row->name_en,
+                    'name_ar' => (string) $row->name_ar,
+                    'ayah_count' => (int) $row->ayah_count,
+                    'juz' => (int) $row->juz,
+                ])
+                ->all();
+        });
+    }
+
+    /**
      * A passage that opens at the given ayah, running up to WINDOW ayahs but
      * never past the end of its surah.
      *
