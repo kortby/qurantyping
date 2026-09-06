@@ -509,10 +509,10 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
 </template>
 
 <style scoped>
-/* Shorter, wider passage than the home page — race snippets are only a few ayahs. */
+/* A touch smaller than the home page's ramp, but still large and readable. */
 .race-passage {
-    font-size: clamp(1.15rem, 2.6vw, 1.75rem);
-    line-height: 1.9;
-    word-spacing: 0.04em;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    line-height: 2;
+    word-spacing: 0.05em;
 }
 </style>
