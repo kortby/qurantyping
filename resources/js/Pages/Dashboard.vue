@@ -214,7 +214,7 @@ const formatDuration = (seconds) => {
                 <Link v-if="quranProgress" href="/map" class="block mb-6 border border-[var(--border-color)] p-4 hover:border-[var(--caret-color)] transition-colors">
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="text-[9px] text-[var(--sub-color)] uppercase tracking-[0.2em] font-mono">{{ t('map.title') }}</h3>
-                        <span class="font-mono text-[10px] text-[var(--sub-color)] tabular-nums">{{ quranProgress.practiced }} / {{ quranProgress.ayah_count }} ayahs</span>
+                        <span class="font-mono text-[10px] text-[var(--sub-color)] tabular-nums">{{ quranProgress.practiced }} / {{ quranProgress.ayah_count }} {{ t('map.ayahs') }}</span>
                     </div>
                     <div class="h-2 flex overflow-hidden">
                         <div class="bg-[var(--lapis-color)]" :style="{ width: quranProgress.memorised_pct + '%' }"></div>

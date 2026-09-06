@@ -122,7 +122,7 @@ const ayahCls = {
                         <span><span class="text-[var(--sub-color)]">■</span> {{ t('map.practiced') }} {{ totals.practiced }} ({{ totals.practiced_pct }}%)</span>
                         <span><span class="text-[var(--caret-color)]">■</span> {{ t('map.mastered') }} {{ totals.mastered }} ({{ totals.mastered_pct }}%)</span>
                         <span><span class="text-[var(--lapis-color)]">■</span> {{ t('map.memorised') }} {{ totals.memorised }} ({{ totals.memorised_pct }}%)</span>
-                        <span class="text-[var(--main-color)]">{{ totals.ayah_count }} ayahs</span>
+                        <span class="text-[var(--main-color)]">{{ totals.ayah_count }} {{ t('map.ayahs') }}</span>
                     </div>
                 </section>
 
@@ -163,7 +163,7 @@ const ayahCls = {
                         <option value="most">{{ t('map.sort_most') }}</option>
                         <option value="least">{{ t('map.sort_least') }}</option>
                     </select>
-                    <button v-if="activeJuz" type="button" @click="activeJuz = null" class="text-[var(--lapis-color)]">juz {{ activeJuz }} ✕</button>
+                    <button v-if="activeJuz" type="button" @click="activeJuz = null" class="text-[var(--lapis-color)]">{{ t('map.juz_label') }} {{ activeJuz }} ✕</button>
                 </div>
 
                 <!-- Surah grid -->
