@@ -2,23 +2,31 @@ import { computed, ref, unref } from 'vue';
 
 /**
  * Minimal typing-scoring logic for the race room. A trimmed cousin of the engine
- * in Pages/TypingTest.vue: no tashkeel mode, no hifz — just the pure comparison
- * plus live WPM/accuracy/progress and a token list for rendering.
+ * in Pages/TypingTest.vue — pure comparison plus live WPM/accuracy/progress and a
+ * token list for rendering. Supports an optional tashkeel mode where harakat must
+ * be typed.
  */
 
-const TASHKEEL = /[ؐ-ؚـً-ٰٟۖ-ۭ۝]/g;
+// Everything strippable when tashkeel is OFF (harakat, dagger alif, annotation signs…).
+const ALL_MARKS = /[ؐ-ؚـً-ٰٟۖ-ۭ۝]/g;
+// Decorative-only: stripped even in tashkeel mode (Quranic annotation signs, tatweel, ۝).
+const DECORATIVE_MARKS = /[ؐ-ؚـۖ-ۭ۝]/g;
 const AYAH_SEPARATOR = / ?۝[٠-٩]+ ?/g;
 const BREAK_SENTINEL = '␞';
 
-export function normalize(text) {
+export function normalize(text, keepHarakat = false) {
     if (!text) return '';
-    return text
+    let out = text
         .normalize('NFC')
-        .replace(/[أإآٱ]/g, 'ا')
+        // Alif wasla (ٱ) and dagger alif (ٰ) fold to a plain alif — no key on
+        // standard Arabic layouts.
+        .replace(/[أإآٱٰ]/g, 'ا')
         .replace(/[ۀة]/g, 'ه')
-        .replace(/[ىي]/g, 'ي')
-        .replace(TASHKEEL, '')
-        .trim();
+        .replace(/[ىي]/g, 'ي');
+
+    out = out.replace(keepHarakat ? DECORATIVE_MARKS : ALL_MARKS, '');
+
+    return out.trim();
 }
 
 /**
@@ -38,7 +46,10 @@ export function logicTokens(displayText) {
     );
 }
 
-export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
+export function useTypingScore(sourceTextRef, userInputRef, startedAtRef, tashkeelRef = false) {
+    const keepHarakat = () => !!unref(tashkeelRef);
+    const norm = (s) => normalize(s, keepHarakat());
+
     const tokens = computed(() => logicTokens(unref(sourceTextRef)));
     const sourceChars = computed(() => tokens.value.map((t) => t.ch));
     const sourceText = computed(() => sourceChars.value.join(''));
@@ -50,7 +61,7 @@ export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
         const src = sourceChars.value;
         const inp = typed.value;
         for (let i = 0; i < inp.length && i < src.length; i++) {
-            if (normalize(inp[i]) === normalize(src[i])) n++;
+            if (norm(inp[i]) === norm(src[i])) n++;
         }
         return n;
     });
@@ -59,7 +70,7 @@ export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
         const src = sourceChars.value;
         const inp = typed.value;
         for (let i = 0; i < inp.length; i++) {
-            if (normalize(inp[i]) !== normalize(src[i])) return i;
+            if (norm(inp[i]) !== norm(src[i])) return i;
         }
         return -1;
     });
@@ -69,7 +80,7 @@ export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
         const inp = typed.value;
         let run = 0;
         for (let i = 0; i < inp.length && i < src.length; i++) {
-            if (normalize(inp[i]) === normalize(src[i])) run++;
+            if (norm(inp[i]) === norm(src[i])) run++;
             else break;
         }
         return run;
@@ -104,7 +115,7 @@ export function useTypingScore(sourceTextRef, userInputRef, startedAtRef) {
         return tokens.value.map((tok, i) => {
             let status = 'untyped';
             if (i < inp.length) {
-                status = normalize(inp[i]) === normalize(tok.ch) ? 'correct' : 'incorrect';
+                status = norm(inp[i]) === norm(tok.ch) ? 'correct' : 'incorrect';
             } else if (i === inp.length) {
                 status = 'active';
             }

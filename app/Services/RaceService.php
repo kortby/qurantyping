@@ -311,6 +311,7 @@ class RaceService
 
         $race->update([
             'char_target' => max(self::MIN_CHARS, min(self::MAX_CHARS, (int) ($params['char_target'] ?? self::DEFAULT_CHARS))),
+            'tashkeel' => (bool) ($params['tashkeel'] ?? false),
             'capacity' => max(self::MIN_CAPACITY, min(self::MAX_CAPACITY, (int) ($params['capacity'] ?? Race::CAPACITY))),
             'scope_surah' => $surah,
         ]);
@@ -330,6 +331,7 @@ class RaceService
 
         [$surah, $start, $end, $quranTextId, $text] = $this->buildPassage(
             (int) ($race->char_target ?: self::DEFAULT_CHARS),
+            (bool) $race->tashkeel,
             $race->scope_surah,
         );
 
@@ -353,11 +355,12 @@ class RaceService
                 'status' => 'lobby',
                 'host_user_id' => $user->id,
                 'char_target' => self::DEFAULT_CHARS,
+                'tashkeel' => false,
                 'capacity' => Race::CAPACITY,
             ]);
         }
 
-        [$surah, $start, $end, $quranTextId, $text] = $this->buildPassage(self::DEFAULT_CHARS, null);
+        [$surah, $start, $end, $quranTextId, $text] = $this->buildPassage(self::DEFAULT_CHARS, false, null);
 
         return Race::create([
             'code' => null,
@@ -370,6 +373,7 @@ class RaceService
             'end_ayah' => $end,
             'text' => $text,
             'char_target' => mb_strlen($text),
+            'tashkeel' => false,
             'capacity' => Race::CAPACITY,
         ]);
     }
@@ -389,9 +393,9 @@ class RaceService
      *
      * @return array{0:int,1:int,2:int,3:int,4:string} [surah, start, end, quranTextId, text]
      */
-    private function buildPassage(int $charTarget, ?int $scopeSurah): array
+    private function buildPassage(int $charTarget, bool $tashkeel, ?int $scopeSurah): array
     {
-        $column = 'text_arabic_simple';
+        $column = $tashkeel ? 'surah_arabic_ponctuation' : 'text_arabic_simple';
         $charTarget = max(self::MIN_CHARS, min(self::MAX_CHARS, $charTarget));
 
         for ($attempt = 0; $attempt < 8; $attempt++) {

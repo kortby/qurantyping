@@ -97,6 +97,7 @@ class RaceController extends Controller
                 'start_ayah' => $race->start_ayah,
                 'end_ayah' => $race->end_ayah,
                 'char_target' => $race->char_target,
+                'tashkeel' => (bool) $race->tashkeel,
                 'capacity' => $race->seatLimit(),
                 'scope_surah' => $race->scope_surah,
                 'text' => $revealText ? $race->text : null,
@@ -142,6 +143,7 @@ class RaceController extends Controller
 
         $validated = $request->validate([
             'char_target' => ['sometimes', 'integer', 'min:'.RaceService::MIN_CHARS, 'max:'.RaceService::MAX_CHARS],
+            'tashkeel' => ['sometimes', 'boolean'],
             'capacity' => ['sometimes', 'integer', 'min:'.RaceService::MIN_CAPACITY, 'max:'.RaceService::MAX_CAPACITY],
             'scope_surah' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:114'],
         ]);
