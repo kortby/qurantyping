@@ -20,6 +20,17 @@ const props = defineProps({
 
 const busy = ref(null);
 
+// Show a handful of a scorer's best badges, gold first, then a "+N" chip.
+const TIER_RANK = { gold: 0, silver: 1, bronze: 2 };
+const BADGE_CAP = 4;
+
+const byTier = (badges) => [...(badges || [])].sort(
+    (a, b) => (TIER_RANK[a.tier] ?? 3) - (TIER_RANK[b.tier] ?? 3),
+);
+const visibleBadges = (badges) => byTier(badges).slice(0, BADGE_CAP);
+const extraBadges = (badges) => Math.max(0, (badges?.length || 0) - BADGE_CAP);
+const extraBadgeTitle = (badges) => byTier(badges).slice(BADGE_CAP).map((b) => b.name).join(', ');
+
 const setScope = (scope) => {
     if (scope === props.scope) return;
     router.get('/leaderboard', { scope }, { preserveState: true, preserveScroll: true });
@@ -141,14 +152,19 @@ const sendRequest = (scorer) => {
                                                     </svg>
                                                 </span>
                                             </template>
-                                            <div v-if="scorer.badges && scorer.badges.length > 0" class="flex items-center gap-1">
-                                                <BadgeSeal v-for="badge in scorer.badges" :key="badge.id"
-                                                           :icon="badge.icon" :tier="badge.tier" :earned="true" :size="24"
-                                                           :title="badge.name + (badge.description ? ' - ' + badge.description : '')"
-                                                           class="cursor-help hover:scale-110 transition-transform" />
-                                            </div>
                                         </div>
-                                        <span class="text-[9px] uppercase tracking-widest opacity-40">{{ t('devoted_reader') }}</span>
+                                        <div v-if="scorer.badges && scorer.badges.length > 0" class="flex items-center gap-1 mt-1.5">
+                                            <BadgeSeal v-for="badge in visibleBadges(scorer.badges)" :key="badge.id"
+                                                       :icon="badge.icon" :tier="badge.tier" :earned="true" :size="22"
+                                                       :title="badge.name + (badge.description ? ' - ' + badge.description : '')"
+                                                       class="cursor-help hover:scale-110 transition-transform" />
+                                            <span v-if="extraBadges(scorer.badges)"
+                                                  :title="extraBadgeTitle(scorer.badges)"
+                                                  class="inline-flex items-center justify-center h-[22px] px-1.5 rounded-full border border-[var(--border-color)] text-[10px] font-mono text-[var(--sub-color)] cursor-help">
+                                                +{{ extraBadges(scorer.badges) }}
+                                            </span>
+                                        </div>
+                                        <span v-else class="text-[9px] uppercase tracking-widest opacity-40">{{ t('devoted_reader') }}</span>
                                     </div>
                                 </td>
                                 <td class="px-3 sm:px-6 py-4 text-center">
