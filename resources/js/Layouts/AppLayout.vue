@@ -95,8 +95,8 @@ if (typeof window !== 'undefined') {
         </div>
         <header class="sticky top-0 z-50 w-full bg-[var(--bg-color)] border-b border-[var(--rule-color)]">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-12">
-                    <Link href="/" class="flex items-baseline gap-2.5 group">
+                <div class="flex items-center gap-6 xl:gap-10 min-w-0">
+                    <Link href="/" class="flex items-baseline gap-2.5 group shrink-0">
                         <span class="text-2xl md:text-[1.7rem] font-cinzel font-semibold text-[var(--main-color)] group-hover:text-[var(--caret-color)] transition-colors whitespace-nowrap">
                             {{ t('title') }}
                         </span>
@@ -104,7 +104,7 @@ if (typeof window !== 'undefined') {
                     </Link>
 
                     <!-- Nav Links Desktop -->
-                    <nav class="hidden lg:flex items-center gap-8 text-sm text-[var(--sub-color)]">
+                    <nav class="hidden lg:flex flex-wrap items-center gap-x-5 xl:gap-x-7 gap-y-1 text-sm text-[var(--sub-color)] [&>a]:whitespace-nowrap">
                         <Link href="/" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('leaderboard') }}</Link>
                         <template v-if="$page.props.auth.user">
@@ -113,16 +113,15 @@ if (typeof window !== 'undefined') {
                                 {{ t('navigation.hifz') }}<span v-if="$page.props.auth.hifz_due" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.hifz_due }}</span>
                             </Link>
                             <Link href="/drills" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.drills') }}</Link>
-                            <Link href="/user/profile" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.profile') }}</Link>
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity">{{ t('navigation.admin') }}</Link>
                         </template>
                     </nav>
                 </div>
 
-                <div class="flex items-center gap-4 md:gap-8">
+                <div class="flex items-center gap-3 md:gap-4 xl:gap-6 shrink-0">
                     <!-- Donate Button Desktop -->
                     <a href="https://buy.stripe.com/dRmdRa1546e60jI2jZenS01" target="_blank"
-                       class="hidden xl:inline-flex items-center border border-[var(--caret-color)] text-[var(--caret-color)] px-5 py-2 text-xs font-cinzel font-semibold uppercase tracking-[0.12em] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
+                       class="hidden xl:inline-flex items-center whitespace-nowrap border border-[var(--caret-color)] text-[var(--caret-color)] px-4 py-2 text-xs font-cinzel font-semibold uppercase tracking-[0.12em] hover:bg-[var(--caret-color)] hover:text-[var(--bg-color)] transition-colors">
                         {{ t('donate') }}
                     </a>
 
