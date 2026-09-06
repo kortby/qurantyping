@@ -191,7 +191,13 @@ class TestController extends Controller
 
         $this->weakLetters->record($test->user_id, $request->safe()->collect('char_stats'));
 
-        return response()->json($test, 201); // 201 Created status
+        $newBadges = ($test->newBadges ?? collect())->map(fn ($b): array => [
+            'name' => $b->name,
+            'icon' => $b->icon,
+            'description' => $b->description,
+        ])->values();
+
+        return response()->json(array_merge($test->toArray(), ['new_badges' => $newBadges]), 201);
     }
 
     /**

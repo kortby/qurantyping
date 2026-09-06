@@ -7,10 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 
 class Test extends Model
 {
     use HasFactory;
+
+    /**
+     * Badges awarded by the TestObserver when this test was created. Transient —
+     * not persisted, read by TestController::store for the results-screen toast.
+     *
+     * @var Collection<int, Badge>|null
+     */
+    public $newBadges = null;
 
     protected $fillable = [
         'user_id',

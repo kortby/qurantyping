@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ContestController;
 use App\Http\Controllers\DashboardController;
@@ -114,6 +115,7 @@ Route::middleware([
     Route::post('/hifz/grade', [HifzController::class, 'grade'])->name('hifz.grade');
 
     Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+    Route::get('/badges', [BadgeController::class, 'index'])->name('badges.index');
 
     Route::get('/map', [QuranMapController::class, 'index'])->name('map.index');
     Route::get('/map/{surah}', [QuranMapController::class, 'surah'])->whereNumber('surah')->name('map.surah');

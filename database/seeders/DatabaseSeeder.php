@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // QuranTextSeeder::class,
             QuranDivisionsSeeder::class,
+            BadgeSeeder::class,
         ]);
     }
 }

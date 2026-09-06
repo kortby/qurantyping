@@ -40,6 +40,7 @@ class DashboardController extends Controller
                 ->orderByDesc('accuracy')
                 ->first(),
             'certificatesCount' => fn () => Certificate::where('user_id', $request->user()->id)->count(),
+            'badgeCount' => fn () => $request->user()->badges()->count(),
         ]);
     }
 }

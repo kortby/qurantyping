@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Test;
+use App\Services\BadgeService;
 use App\Services\CertificateService;
 use App\Services\ContestService;
 use App\Services\QuranNavigator;
@@ -15,6 +16,7 @@ class TestObserver
         private StreakService $streaks,
         private QuranNavigator $navigator,
         private CertificateService $certificates,
+        private BadgeService $badges,
     ) {}
 
     public function creating(Test $test): void
@@ -29,5 +31,6 @@ class TestObserver
         $this->streaks->recordTest($test);
         $this->navigator->rememberProgress($test);
         $this->certificates->recordTest($test);
+        $test->newBadges = $this->badges->evaluate($test->user);
     }
 }

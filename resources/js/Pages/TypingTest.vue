@@ -9,6 +9,7 @@ import PassageSelect from '@/Components/PassageSelect.vue';
 import QuranAudioPlayer from '@/Components/QuranAudioPlayer.vue';
 import GuestTestModal from '@/Components/GuestTestModal.vue';
 import LunarCountdown from '@/Components/LunarCountdown.vue';
+import BadgeSeal from '@/Components/BadgeSeal.vue';
 import { useSettings } from '../useSettings';
 
 const activeKey = ref(null);
@@ -510,6 +511,7 @@ const revealLevel = ref(2);           // 1 guided · 2 faint · 3 blind
 const peeking = ref(false);
 const peeks = ref(0);
 const lastTestId = ref(null);
+const newBadges = ref([]);
 const hifzMessage = ref('');
 
 const effectiveLevel = computed(() => (peeking.value ? 1 : revealLevel.value));
@@ -709,6 +711,10 @@ const finishTest = async () => {
 
         const { data } = await axios.post('/test/complete', testData);
         lastTestId.value = data?.id ?? null;
+        newBadges.value = data?.new_badges ?? [];
+        if (newBadges.value.length) {
+            confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 }, colors: ['#eab308', '#d1d0c5', '#4b7bec'] });
+        }
     } catch (error) {
         console.error("Failed to save test result:", error);
     }
@@ -720,6 +726,7 @@ const resetTest = () => {
     timer.value = 0;
     totalErrors.value = 0;
     charStats.value = new Map();
+    newBadges.value = [];
     testFinished.value = false;
     showResults.value = false;
     setTimeout(() => {
@@ -1114,6 +1121,20 @@ defineOptions({ layout: AppLayout });
                 <p class="text-lg sm:text-xl text-[var(--main-color)]">
                     {{ accuracy === 100 ? t('perfect') : (accuracy > 90 ? t('excellent') : t('keep_practicing')) }}
                 </p>
+
+                <!-- New badges -->
+                <div v-if="newBadges.length" class="w-full max-w-md px-4">
+                    <p class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--caret-color)] mb-3">{{ t('badges.new_badge') }}</p>
+                    <div class="flex flex-col gap-2">
+                        <div v-for="b in newBadges" :key="b.name" class="flex items-center gap-3 border border-[var(--caret-color)]/40 px-3 py-2 text-left">
+                            <BadgeSeal :icon="b.icon" tier="gold" :earned="true" :size="40" />
+                            <span>
+                                <span class="block font-cinzel text-sm text-[var(--main-color)]">{{ b.name }}</span>
+                                <span class="block text-[11px] text-[var(--sub-color)]">{{ b.description }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Hifz grading -->
                 <div v-if="hifzMode" class="w-full flex flex-col items-center gap-3">
