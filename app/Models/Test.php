@@ -39,10 +39,12 @@ class Test extends Model
         'is_contest_entry',
         'hifz_level',
         'peeks',
+        'tashkeel',
     ];
 
     protected $casts = [
         'is_contest_entry' => 'boolean',
+        'tashkeel' => 'boolean',
     ];
 
     public function scopeContestEntries($query)

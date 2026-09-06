@@ -128,11 +128,11 @@ it('awards consistency, variety and juz-coverage badges', function () {
         'surah_name_arabic' => 's', 'surah_name_english' => 's', 'surah_name_translation' => 's',
         'created_at' => now(), 'updated_at' => now(),
     ])->all());
-    foreach ([[108, 30], [1, 1], [2, 3], [3, 4]] as [$s]) {
-        Certificate::create([
-            'user_id' => $u->id, 'surah_number' => $s, 'surah_name_english' => 's', 'surah_name_arabic' => 's',
-            'ayah_count' => 3, 'accuracy' => 99, 'issued_at' => now(),
-        ]);
+    foreach ([108, 1, 2, 3] as $s) {
+        Certificate::updateOrCreate(
+            ['user_id' => $u->id, 'surah_number' => $s],
+            ['surah_name_english' => 's', 'surah_name_arabic' => 's', 'ayah_count' => 3, 'accuracy' => 99, 'issued_at' => now()],
+        );
     }
 
     app(BadgeService::class)->evaluate($u->fresh());
@@ -140,6 +140,32 @@ it('awards consistency, variety and juz-coverage badges', function () {
 
     expect($slugs)->toContain('days-30', 'goal-7', 'perfectionist', 'marathon', 'first-hifz')
         ->and($slugs)->not->toContain('days-100', 'goal-30');
+});
+
+it('awards tashkeel badges from the tests.tashkeel flag', function () {
+    $u = $this->user;
+
+    Test::factory()->count(3)->for($u)->create(['tashkeel' => false]);
+    Test::factory()->for($u)->create(['tashkeel' => true, 'char_count' => 120, 'incorrect_chars' => 0]);
+
+    app(BadgeService::class)->evaluate($u->fresh());
+    $slugs = $u->fresh()->badges()->pluck('slug');
+
+    expect($slugs)->toContain('first-tashkeel', 'tashkeel-perfect')
+        ->and($slugs)->not->toContain('tashkeel-25');
+});
+
+it('records the tashkeel flag on /test/complete', function () {
+    $id = QuranText::first()->id;
+
+    actingAs($this->user)->postJson('/test/complete', [
+        'quran_text_id' => $id, 'wpm' => 30, 'raw_wpm' => 30, 'accuracy' => 95.0,
+        'char_count' => 60, 'correct_chars' => 57, 'incorrect_chars' => 3,
+        'mode' => 'quote', 'duration' => 20, 'start_ayah' => 1, 'end_ayah' => 1,
+        'total_errors' => 3, 'tashkeel' => true,
+    ])->assertCreated();
+
+    expect(Test::where('user_id', $this->user->id)->value('tashkeel'))->toBeTrue();
 });
 
 it('backfills badges for existing users', function () {

@@ -75,6 +75,15 @@ class BadgeService
             'race-10' => fn (User $u): bool => RaceParticipant::where('user_id', $u->id)->whereNotNull('finished_at')->count() >= 10,
             'rivals-5' => fn (User $u): bool => $this->distinctRivals($u) >= 5,
             'contest-entry' => fn (User $u): bool => Test::where('user_id', $u->id)->where('is_contest_entry', true)->exists(),
+
+            'first-tashkeel' => fn (User $u): bool => $this->tashkeelCount($u) >= 1,
+            'tashkeel-25' => fn (User $u): bool => $this->tashkeelCount($u) >= 25,
+            'tashkeel-100' => fn (User $u): bool => $this->tashkeelCount($u) >= 100,
+            'tashkeel-perfect' => fn (User $u): bool => Test::where('user_id', $u->id)
+                ->where('tashkeel', true)
+                ->where('char_count', '>=', 50)
+                ->where('incorrect_chars', 0)
+                ->exists(),
         ];
     }
 
@@ -184,6 +193,11 @@ class BadgeService
             ->where('c.user_id', $u->id)
             ->distinct()
             ->count('qt.juz');
+    }
+
+    private function tashkeelCount(User $u): int
+    {
+        return Test::where('user_id', $u->id)->where('tashkeel', true)->count();
     }
 
     private function distinctRivals(User $u): int

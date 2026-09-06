@@ -208,6 +208,7 @@ class RaceService
             'start_ayah' => $race->start_ayah,
             'end_ayah' => $race->end_ayah,
             'total_errors' => max(0, $chars - $correctChars),
+            'tashkeel' => (bool) $race->tashkeel,
         ]);
 
         $participant->update([
