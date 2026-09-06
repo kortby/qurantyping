@@ -13,6 +13,7 @@ import NotificationBell from '@/Components/NotificationBell.vue';
 const { currentLang, currentTheme, setLang, setTheme, t } = useSettings();
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
+const practiceMenuOpen = ref(false);
 
 const languages = [
     { code: 'en', label: 'EN' },
@@ -37,6 +38,9 @@ if (typeof window !== 'undefined') {
     window.addEventListener('click', (e) => {
         if (!e.target.closest('.user-menu-container')) {
             userMenuOpen.value = false;
+        }
+        if (!e.target.closest('.practice-menu-container')) {
+            practiceMenuOpen.value = false;
         }
     });
 
@@ -105,24 +109,43 @@ if (typeof window !== 'undefined') {
                     </Link>
 
                     <!-- Nav Links Desktop -->
-                    <nav class="hidden lg:flex flex-wrap items-center gap-x-5 xl:gap-x-7 gap-y-1 text-sm text-[var(--sub-color)] [&>a]:whitespace-nowrap">
+                    <nav class="hidden lg:flex items-center gap-x-5 xl:gap-x-7 text-sm text-[var(--sub-color)] [&>a]:whitespace-nowrap">
                         <Link href="/" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('leaderboard') }}</Link>
                         <template v-if="$page.props.auth.user">
                             <Link href="/today" class="hover:text-[var(--main-color)] transition-colors">
                                 {{ t('navigation.today') }}<span v-if="!$page.props.auth.daily_done" class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-[var(--caret-color)] align-middle"></span>
                             </Link>
-                            <Link href="/dashboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/hifz" class="hover:text-[var(--main-color)] transition-colors">
                                 {{ t('navigation.hifz') }}<span v-if="$page.props.auth.hifz_due" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.hifz_due }}</span>
                             </Link>
-                            <Link href="/drills" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.drills') }}</Link>
-                            <Link href="/races" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.races') }}</Link>
                             <Link href="/friends" class="hover:text-[var(--main-color)] transition-colors">
                                 {{ t('navigation.friends') }}<span v-if="$page.props.auth.friend_requests" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.friend_requests }}</span>
                             </Link>
-                            <Link href="/map" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.map') }}</Link>
-                            <Link href="/badges" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.badges') }}</Link>
+
+                            <!-- Practice group -->
+                            <div class="relative practice-menu-container">
+                                <button @click="practiceMenuOpen = !practiceMenuOpen"
+                                    class="flex items-center gap-1 hover:text-[var(--main-color)] transition-colors">
+                                    {{ t('navigation.practice') }}
+                                    <span class="text-[9px] transition-transform duration-200" :class="{ 'rotate-180': practiceMenuOpen }">▾</span>
+                                </button>
+                                <transition name="dropdown">
+                                    <div v-if="practiceMenuOpen"
+                                        class="absolute mt-2 w-44 bg-[var(--panel-color)] border border-[var(--border-color)] py-1 z-[60]"
+                                        :class="currentLang === 'ar' ? 'right-0' : 'left-0'">
+                                        <Link href="/drills" @click="practiceMenuOpen = false"
+                                            class="block px-4 py-2.5 hover:bg-[var(--caret-color)]/10 hover:text-[var(--main-color)] transition-colors">{{ t('navigation.drills') }}</Link>
+                                        <Link href="/races" @click="practiceMenuOpen = false"
+                                            class="block px-4 py-2.5 hover:bg-[var(--caret-color)]/10 hover:text-[var(--main-color)] transition-colors">{{ t('navigation.races') }}</Link>
+                                        <Link href="/map" @click="practiceMenuOpen = false"
+                                            class="block px-4 py-2.5 hover:bg-[var(--caret-color)]/10 hover:text-[var(--main-color)] transition-colors">{{ t('navigation.map') }}</Link>
+                                        <Link href="/badges" @click="practiceMenuOpen = false"
+                                            class="block px-4 py-2.5 hover:bg-[var(--caret-color)]/10 hover:text-[var(--main-color)] transition-colors">{{ t('navigation.badges') }}</Link>
+                                    </div>
+                                </transition>
+                            </div>
+
                             <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity">{{ t('navigation.admin') }}</Link>
                         </template>
                     </nav>
@@ -230,27 +253,30 @@ if (typeof window !== 'undefined') {
             <div v-if="mobileMenuOpen" class="fixed inset-0 z-40 lg:hidden">
                 <div class="absolute inset-0 bg-[var(--bg-color)]"></div>
                 <div class="relative h-full flex flex-col p-6 pt-24">
-                    <nav class="flex flex-col gap-5 font-cinzel text-xl text-center">
+                    <nav class="flex flex-col gap-4 font-cinzel text-lg text-center">
                         <Link href="/" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('leaderboard') }}</Link>
                         <template v-if="$page.props.auth.user">
                             <Link href="/today" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
                                 {{ t('navigation.today') }}<span v-if="!$page.props.auth.daily_done" class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-[var(--caret-color)] align-middle"></span>
                             </Link>
-                            <Link href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/hifz" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
                                 {{ t('navigation.hifz') }}<span v-if="$page.props.auth.hifz_due" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.hifz_due }}</span>
                             </Link>
-                            <Link href="/drills" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.drills') }}</Link>
-                            <Link href="/races" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.races') }}</Link>
                             <Link href="/friends" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
                                 {{ t('navigation.friends') }}<span v-if="$page.props.auth.friend_requests" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.friend_requests }}</span>
                             </Link>
-                            <Link href="/map" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.map') }}</Link>
-                            <Link href="/badges" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.badges') }}</Link>
-                            <Link href="/user/profile" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
-                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.admin') }}</Link>
-                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/feedback" @click="mobileMenuOpen = false" class="text-[var(--lapis-color)] transition-colors">{{ t('navigation.feedback') }}</Link>
+                            <Link href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
+
+                            <span class="mx-auto w-8 border-t border-[var(--border-color)] my-1"></span>
+
+                            <Link href="/drills" @click="mobileMenuOpen = false" class="text-base text-[var(--sub-color)] hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.drills') }}</Link>
+                            <Link href="/races" @click="mobileMenuOpen = false" class="text-base text-[var(--sub-color)] hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.races') }}</Link>
+                            <Link href="/map" @click="mobileMenuOpen = false" class="text-base text-[var(--sub-color)] hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.map') }}</Link>
+                            <Link href="/badges" @click="mobileMenuOpen = false" class="text-base text-[var(--sub-color)] hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.badges') }}</Link>
+                            <Link href="/user/profile" @click="mobileMenuOpen = false" class="text-base text-[var(--sub-color)] hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.profile') }}</Link>
+                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="mobileMenuOpen = false" class="text-base text-[var(--lapis-color)] transition-colors">{{ t('navigation.admin') }}</Link>
+                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/feedback" @click="mobileMenuOpen = false" class="text-base text-[var(--lapis-color)] transition-colors">{{ t('navigation.feedback') }}</Link>
                             <StreakBadge class="justify-center pt-1" />
                         </template>
                     </nav>
