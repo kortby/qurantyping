@@ -10,9 +10,19 @@ const props = defineProps({
     race: { type: Object, required: true },
     participants: { type: Array, default: () => [] },
     me: { type: Number, required: true },
+    limits: { type: Object, default: () => ({ min_chars: 100, max_chars: 1000, min_capacity: 2, max_capacity: 8 }) },
+    surahs: { type: Array, default: () => [] },
 });
 
 const { t } = useSettings();
+
+// Live room settings (host edits these; everyone sees them via snapshots).
+const cfg = reactive({
+    char_target: props.race.char_target ?? 250,
+    tashkeel: !!props.race.tashkeel,
+    capacity: props.race.capacity ?? 5,
+    scope_surah: props.race.scope_surah ?? '',
+});
 
 const status = ref(props.race.status);
 const text = ref(props.race.text || '');
@@ -106,6 +116,13 @@ function applySnapshot(e) {
     if (e.status) status.value = e.status;
     if (e.starts_at) startsAtMs.value = Date.parse(e.starts_at);
     if (Array.isArray(e.participants)) standings.value = e.participants;
+    // Keep non-host lobby views in sync with the host's settings.
+    if (!props.race.is_host && status.value === 'lobby') {
+        if (e.char_target != null) cfg.char_target = e.char_target;
+        if (e.tashkeel != null) cfg.tashkeel = e.tashkeel;
+        if (e.capacity != null) cfg.capacity = e.capacity;
+        if (e.scope_surah !== undefined) cfg.scope_surah = e.scope_surah ?? '';
+    }
 }
 
 function focusInput() {
@@ -169,8 +186,18 @@ async function submitFinish() {
     }
 }
 
+const starting = ref(false);
 function startRoom() {
-    router.post(`/races/${props.race.key}/start`, {}, { preserveScroll: true });
+    starting.value = true;
+    router.post(`/races/${props.race.key}/start`, {
+        char_target: cfg.char_target,
+        tashkeel: cfg.tashkeel,
+        capacity: cfg.capacity,
+        scope_surah: cfg.scope_surah === '' ? null : cfg.scope_surah,
+    }, {
+        preserveScroll: true,
+        onFinish: () => (starting.value = false),
+    });
 }
 
 onMounted(() => {
@@ -289,14 +316,69 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
                         @focus="$event.target.select()"
                         class="mt-3 w-full bg-[var(--bg-color)] border border-[var(--border-color)] px-3 py-2 text-[11px] text-[var(--sub-color)] focus:border-[var(--caret-color)] focus:outline-none"
                     />
-                    <button
-                        v-if="race.is_host"
-                        type="button"
-                        @click="startRoom"
-                        class="mt-4 w-full bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold py-2.5"
-                    >
-                        {{ t('races.start_now') }}
-                    </button>
+
+                    <!-- Host: settings -->
+                    <div v-if="race.is_host" class="mt-5 pt-4 border-t border-[var(--border-color)] space-y-4">
+                        <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--sub-color)]">{{ t('races.settings') }}</p>
+
+                        <label class="block">
+                            <span class="block text-[11px] text-[var(--sub-color)] mb-1">{{ t('races.char_target') }}</span>
+                            <input
+                                v-model.number="cfg.char_target"
+                                type="number"
+                                :min="limits.min_chars"
+                                :max="limits.max_chars"
+                                step="10"
+                                class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] px-3 py-2 text-sm focus:border-[var(--caret-color)] focus:outline-none"
+                            />
+                        </label>
+
+                        <label class="block">
+                            <span class="block text-[11px] text-[var(--sub-color)] mb-1">{{ t('races.max_players') }}</span>
+                            <input
+                                v-model.number="cfg.capacity"
+                                type="number"
+                                :min="limits.min_capacity"
+                                :max="limits.max_capacity"
+                                class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] px-3 py-2 text-sm focus:border-[var(--caret-color)] focus:outline-none"
+                            />
+                        </label>
+
+                        <label class="block">
+                            <span class="block text-[11px] text-[var(--sub-color)] mb-1">{{ t('races.passage_scope') }}</span>
+                            <select
+                                v-model="cfg.scope_surah"
+                                class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] px-3 py-2 text-sm focus:border-[var(--caret-color)] focus:outline-none"
+                            >
+                                <option value="">{{ t('races.scope_any') }}</option>
+                                <option v-for="s in surahs" :key="s.surah_number" :value="s.surah_number">
+                                    {{ s.surah_number }}. {{ s.surah_name_english }}
+                                </option>
+                            </select>
+                        </label>
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input v-model="cfg.tashkeel" type="checkbox" class="accent-[var(--caret-color)]" />
+                            <span class="text-[11px] text-[var(--sub-color)]">{{ t('races.with_tashkeel') }}</span>
+                        </label>
+
+                        <button
+                            type="button"
+                            :disabled="starting"
+                            @click="startRoom"
+                            class="w-full bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold py-2.5 disabled:opacity-50"
+                        >
+                            {{ t('races.start_now') }}
+                        </button>
+                    </div>
+
+                    <!-- Guest: read-only summary -->
+                    <div v-else class="mt-5 pt-4 border-t border-[var(--border-color)] text-[11px] text-[var(--sub-color)] space-y-1">
+                        <p>{{ t('races.char_target') }}: <span class="text-[var(--main-color)]">{{ cfg.char_target }}</span></p>
+                        <p>{{ t('races.max_players') }}: <span class="text-[var(--main-color)]">{{ cfg.capacity }}</span></p>
+                        <p v-if="cfg.tashkeel">{{ t('races.with_tashkeel') }}</p>
+                        <p class="pt-1">{{ t('races.waiting_for_host') }}</p>
+                    </div>
                 </div>
 
                 <!-- Waiting -->

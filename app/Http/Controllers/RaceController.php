@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Race\FinishRaceRequest;
+use App\Models\QuranText;
 use App\Models\Race;
 use App\Services\RaceService;
 use Illuminate\Http\JsonResponse;
@@ -80,6 +81,10 @@ class RaceController extends Controller
         $race->load('participants.user:id,name');
         $revealText = $race->status !== 'lobby' || $race->host_user_id === $request->user()->id;
 
+        $isHostLobby = $race->status === 'lobby'
+            && $race->visibility === 'private'
+            && $race->host_user_id === $request->user()->id;
+
         return Inertia::render('Races/Room', [
             'race' => [
                 'key' => $race->channelKey(),
@@ -92,9 +97,25 @@ class RaceController extends Controller
                 'start_ayah' => $race->start_ayah,
                 'end_ayah' => $race->end_ayah,
                 'char_target' => $race->char_target,
+                'tashkeel' => (bool) $race->tashkeel,
+                'capacity' => $race->seatLimit(),
+                'scope_surah' => $race->scope_surah,
                 'text' => $revealText ? $race->text : null,
                 'min_to_start' => Race::MIN_TO_START,
             ],
+            'limits' => [
+                'min_chars' => RaceService::MIN_CHARS,
+                'max_chars' => RaceService::MAX_CHARS,
+                'min_capacity' => RaceService::MIN_CAPACITY,
+                'max_capacity' => RaceService::MAX_CAPACITY,
+            ],
+            'surahs' => $isHostLobby
+                ? fn () => QuranText::query()
+                    ->select('surah_number', 'surah_name_english')
+                    ->distinct()
+                    ->orderBy('surah_number')
+                    ->get()
+                : [],
             'participants' => $race->participants
                 ->sortBy(fn ($p) => [$p->position ?? 99, $p->joined_at->timestamp])
                 ->values()
@@ -120,7 +141,14 @@ class RaceController extends Controller
         abort_if($race->visibility !== 'private', 403);
         abort_if($race->participants()->count() < 1, 422);
 
-        $this->races->beginCountdown($race);
+        $validated = $request->validate([
+            'char_target' => ['sometimes', 'integer', 'min:'.RaceService::MIN_CHARS, 'max:'.RaceService::MAX_CHARS],
+            'tashkeel' => ['sometimes', 'boolean'],
+            'capacity' => ['sometimes', 'integer', 'min:'.RaceService::MIN_CAPACITY, 'max:'.RaceService::MAX_CAPACITY],
+            'scope_surah' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:114'],
+        ]);
+
+        $this->races->startPrivate($race, $validated);
 
         return back();
     }

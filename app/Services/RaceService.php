@@ -23,6 +23,16 @@ class RaceService
 {
     public const MAX_PLAUSIBLE_WPM = 250;
 
+    public const MIN_CHARS = 100;
+
+    public const MAX_CHARS = 1000;
+
+    public const DEFAULT_CHARS = 250;
+
+    public const MIN_CAPACITY = 2;
+
+    public const MAX_CAPACITY = 8;
+
     /**
      * Presence-channel authorisation: a member payload, or false.
      *
@@ -63,7 +73,7 @@ class RaceService
                 ->orderBy('created_at')
                 ->lockForUpdate()
                 ->get()
-                ->first(fn (Race $r): bool => $r->participants()->count() < Race::CAPACITY);
+                ->first(fn (Race $r): bool => $r->participants()->count() < $r->seatLimit());
 
             if (! $race) {
                 $race = $this->createRace($user, 'public');
@@ -280,22 +290,91 @@ class RaceService
         return $touched;
     }
 
+    /**
+     * Update a private room's settings while it is still in the lobby.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    public function configure(Race $race, array $params): void
+    {
+        if ($race->status !== 'lobby' || $race->visibility !== 'private') {
+            return;
+        }
+
+        $surah = isset($params['scope_surah']) && $params['scope_surah'] !== null
+            ? (int) $params['scope_surah']
+            : null;
+
+        if ($surah !== null && ! QuranText::where('surah_number', $surah)->exists()) {
+            $surah = null;
+        }
+
+        $race->update([
+            'char_target' => max(self::MIN_CHARS, min(self::MAX_CHARS, (int) ($params['char_target'] ?? self::DEFAULT_CHARS))),
+            'tashkeel' => (bool) ($params['tashkeel'] ?? false),
+            'capacity' => max(self::MIN_CAPACITY, min(self::MAX_CAPACITY, (int) ($params['capacity'] ?? Race::CAPACITY))),
+            'scope_surah' => $surah,
+        ]);
+
+        broadcast(new RaceLobbyUpdated($race->fresh()));
+    }
+
+    /**
+     * Apply the host's settings, build the passage, and kick off the countdown.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    public function startPrivate(Race $race, array $params): void
+    {
+        $this->configure($race, $params);
+        $race->refresh();
+
+        [$surah, $start, $end, $quranTextId, $text] = $this->buildPassage(
+            (int) ($race->char_target ?: self::DEFAULT_CHARS),
+            (bool) $race->tashkeel,
+            $race->scope_surah,
+        );
+
+        $race->update([
+            'quran_text_id' => $quranTextId,
+            'surah_number' => $surah,
+            'start_ayah' => $start,
+            'end_ayah' => $end,
+            'text' => $text,
+        ]);
+
+        $this->beginCountdown($race->fresh());
+    }
+
     private function createRace(User $user, string $visibility): Race
     {
-        [$surah, $start, $end, $ayahs] = $this->randomPassage();
-        $text = $this->assembleText($ayahs);
+        if ($visibility === 'private') {
+            return Race::create([
+                'code' => $this->uniqueCode(),
+                'visibility' => 'private',
+                'status' => 'lobby',
+                'host_user_id' => $user->id,
+                'char_target' => self::DEFAULT_CHARS,
+                'tashkeel' => false,
+                'capacity' => Race::CAPACITY,
+            ]);
+        }
+
+        [$surah, $start, $end, $quranTextId, $text] = $this->buildPassage(self::DEFAULT_CHARS, false, null);
 
         return Race::create([
-            'code' => $visibility === 'private' ? $this->uniqueCode() : null,
-            'visibility' => $visibility,
+            'code' => null,
+            'visibility' => 'public',
             'status' => 'lobby',
             'host_user_id' => $user->id,
-            'quran_text_id' => $ayahs->first()->id,
+            'quran_text_id' => $quranTextId,
             'surah_number' => $surah,
             'start_ayah' => $start,
             'end_ayah' => $end,
             'text' => $text,
             'char_target' => mb_strlen($text),
+            'tashkeel' => false,
+            'capacity' => Race::CAPACITY,
         ]);
     }
 
@@ -309,43 +388,80 @@ class RaceService
     }
 
     /**
-     * A random run of consecutive ayahs with at least ~10 words.
+     * Pick a random run of consecutive ayahs long enough to reach the character
+     * target, staying within one surah (and within `scopeSurah` when given).
      *
-     * @return array{0:int,1:int,2:int,3:Collection<int,QuranText>}
+     * @return array{0:int,1:int,2:int,3:int,4:string} [surah, start, end, quranTextId, text]
      */
-    private function randomPassage(): array
+    private function buildPassage(int $charTarget, bool $tashkeel, ?int $scopeSurah): array
     {
-        for ($attempt = 0; $attempt < 6; $attempt++) {
-            $seed = QuranText::query()->inRandomOrder()->first();
-            $maxAyah = (int) QuranText::where('surah_number', $seed->surah_number)->max('ayah_number');
-            $start = random_int(1, max(1, $maxAyah - 2));
-            $end = min($maxAyah, $start + 3);
+        $column = $tashkeel ? 'surah_arabic_ponctuation' : 'text_arabic_simple';
+        $charTarget = max(self::MIN_CHARS, min(self::MAX_CHARS, $charTarget));
 
-            $ayahs = QuranText::where('surah_number', $seed->surah_number)
-                ->whereBetween('ayah_number', [$start, $end])
+        for ($attempt = 0; $attempt < 8; $attempt++) {
+            $surahNumber = $scopeSurah
+                ?? (int) QuranText::query()->inRandomOrder()->value('surah_number');
+
+            $surahAyahs = QuranText::where('surah_number', $surahNumber)
                 ->orderBy('ayah_number')
-                ->get();
+                ->get(['id', 'ayah_number', 'text_arabic_simple', 'surah_arabic_ponctuation']);
 
-            $words = count(preg_split('/\s+/', trim($ayahs->pluck('text_arabic_simple')->implode(' '))));
+            if ($surahAyahs->isEmpty()) {
+                continue;
+            }
 
-            if ($ayahs->isNotEmpty() && $words >= 10) {
-                return [(int) $seed->surah_number, $start, (int) $ayahs->last()->ayah_number, $ayahs];
+            $startIdx = random_int(0, max(0, $surahAyahs->count() - 1));
+            $picked = collect();
+            $length = 0;
+
+            for ($i = $startIdx; $i < $surahAyahs->count() && $i < $startIdx + 15; $i++) {
+                $picked->push($surahAyahs[$i]);
+                $length += mb_strlen(trim((string) ($surahAyahs[$i]->{$column} ?: $surahAyahs[$i]->text_arabic_simple)));
+                if ($length >= $charTarget) {
+                    break;
+                }
+            }
+
+            // Not enough room after the random start? Slide the window back.
+            if ($length < $charTarget && $startIdx > 0) {
+                $picked = collect();
+                $length = 0;
+                for ($i = $surahAyahs->count() - 1; $i >= 0; $i--) {
+                    $picked->prepend($surahAyahs[$i]);
+                    $length += mb_strlen(trim((string) ($surahAyahs[$i]->{$column} ?: $surahAyahs[$i]->text_arabic_simple)));
+                    if ($length >= $charTarget) {
+                        break;
+                    }
+                }
+            }
+
+            if ($picked->isNotEmpty()) {
+                $text = $this->assembleText($picked, $column);
+
+                return [
+                    $surahNumber,
+                    (int) $picked->first()->ayah_number,
+                    (int) $picked->last()->ayah_number,
+                    (int) $picked->first()->id,
+                    $text,
+                ];
             }
         }
 
-        // Fallback: Al-Fatiha 1–4.
-        $ayahs = QuranText::where('surah_number', 1)->whereBetween('ayah_number', [1, 4])->orderBy('ayah_number')->get();
+        // Fallback: Al-Fatiha, whole surah.
+        $ayahs = QuranText::where('surah_number', 1)->orderBy('ayah_number')
+            ->get(['id', 'ayah_number', 'text_arabic_simple', 'surah_arabic_ponctuation']);
 
-        return [1, 1, 4, $ayahs];
+        return [1, 1, (int) $ayahs->last()->ayah_number, (int) $ayahs->first()->id, $this->assembleText($ayahs, $column)];
     }
 
     /**
      * @param  Collection<int, QuranText>  $ayahs
      */
-    private function assembleText(Collection $ayahs): string
+    private function assembleText(Collection $ayahs, string $column = 'text_arabic_simple'): string
     {
         return trim($ayahs->map(
-            fn (QuranText $a): string => trim($a->text_arabic_simple).' ۝'.$this->arabicDigits((int) $a->ayah_number).' '
+            fn (QuranText $a): string => trim((string) ($a->{$column} ?: $a->text_arabic_simple)).' ۝'.$this->arabicDigits((int) $a->ayah_number).' '
         )->implode(''));
     }
 

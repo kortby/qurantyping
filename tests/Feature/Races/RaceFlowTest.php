@@ -113,6 +113,41 @@ it('records a finish, writes a Test, and orders positions by finish order', func
     Event::assertDispatched(RaceFinished::class);
 });
 
+it('applies the host settings when starting a private room', function () {
+    $host = User::factory()->create();
+    $race = app(RaceService::class)->createPrivate($host);
+
+    expect($race->text)->toBeNull()
+        ->and($race->quran_text_id)->toBeNull();
+
+    actingAs($host)->post("/races/{$race->code}/start", [
+        'char_target' => 150,
+        'capacity' => 8,
+        'tashkeel' => true,
+        'scope_surah' => 113,
+    ])->assertRedirect();
+
+    $race->refresh();
+
+    expect($race->status)->toBe('countdown')
+        ->and($race->char_target)->toBe(150)
+        ->and($race->capacity)->toBe(8)
+        ->and($race->tashkeel)->toBeTrue()
+        ->and($race->surah_number)->toBe(113)
+        ->and($race->text)->not->toBeNull()
+        ->and($race->quran_text_id)->not->toBeNull();
+});
+
+it('rejects an out-of-range char target', function () {
+    $host = User::factory()->create();
+    $race = app(RaceService::class)->createPrivate($host);
+
+    actingAs($host)->post("/races/{$race->code}/start", ['char_target' => 20])
+        ->assertSessionHasErrors('char_target');
+
+    expect($race->fresh()->status)->toBe('lobby');
+});
+
 it('relays a progress tick to the room while racing', function () {
     Event::fake([RaceProgress::class]);
 

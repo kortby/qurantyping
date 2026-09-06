@@ -30,6 +30,9 @@ class Race extends Model
         'end_ayah',
         'text',
         'char_target',
+        'tashkeel',
+        'capacity',
+        'scope_surah',
         'starts_at',
         'finished_at',
     ];
@@ -40,7 +43,13 @@ class Race extends Model
         return [
             'starts_at' => 'datetime',
             'finished_at' => 'datetime',
+            'tashkeel' => 'boolean',
         ];
+    }
+
+    public function seatLimit(): int
+    {
+        return (int) ($this->capacity ?: self::CAPACITY);
     }
 
     /** @return HasMany<RaceParticipant, $this> */
@@ -72,6 +81,6 @@ class Race extends Model
     public function isJoinable(): bool
     {
         return in_array($this->status, ['lobby', 'countdown'], true)
-            && $this->participants()->count() < self::CAPACITY;
+            && $this->participants()->count() < $this->seatLimit();
     }
 }
