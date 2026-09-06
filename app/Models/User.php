@@ -40,6 +40,7 @@ class User extends Authenticatable
         'daily_goal_chars',
         'auto_advance',
         'hifz_daily_new',
+        'reciter',
     ];
 
     /**

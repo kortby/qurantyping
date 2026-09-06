@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class UserSettingController extends Controller
 {
@@ -43,6 +44,19 @@ class UserSettingController extends Controller
 
         $request->user()->forceFill([
             'auto_advance' => $request->boolean('enabled'),
+        ])->save();
+
+        return back();
+    }
+
+    public function updateReciter(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'reciter' => ['required', 'string', Rule::in(array_keys(config('reciters.list')))],
+        ]);
+
+        $request->user()->forceFill([
+            'reciter' => $request->string('reciter')->toString(),
         ])->save();
 
         return back();

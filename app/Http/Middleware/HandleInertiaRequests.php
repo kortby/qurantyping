@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $request->user()->email,
                     'error_sound' => $request->user()->error_sound,
                     'auto_advance' => $request->user()->auto_advance,
+                    'reciter' => $request->user()->reciter ?? config('reciters.default'),
                     'is_super_admin' => $request->user()->isSuperAdmin(),
                 ] : null,
                 'impersonating' => $request->session()->has('impersonator_id'),
@@ -82,6 +83,7 @@ class HandleInertiaRequests extends Middleware
                 'tashkil' => config('app.tashkil_feature', false),
                 'app_version' => config('app.version', '1.0.0'),
             ],
+            'reciters' => config('reciters.list'),
         ]);
     }
 }
