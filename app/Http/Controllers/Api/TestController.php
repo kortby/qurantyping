@@ -7,6 +7,7 @@ use App\Http\Requests\StoreTestRequest;
 use App\Models\QuranText;
 use App\Models\Result;
 use App\Models\Test;
+use App\Notifications\GhostRaced;
 use App\Services\QuranNavigator;
 use App\Services\WeakLetterService;
 use Illuminate\Http\JsonResponse;
@@ -184,7 +185,7 @@ class TestController extends Controller
     public function store(StoreTestRequest $request): JsonResponse
     {
         // The request is already validated by StoreTestRequest
-        $validatedData = $request->safe()->except(['char_stats', 'trace']);
+        $validatedData = $request->safe()->except(['char_stats', 'trace', 'ghost_of', 'ghost_beat']);
 
         // Associate with the logged-in user, or leave as null for guests
         $validatedData['user_id'] = auth()->id();
@@ -202,6 +203,18 @@ class TestController extends Controller
             ]);
 
             $challengeUrl = URL::signedRoute('challenge.show', ['test' => $test->id]);
+        }
+
+        if ($test->user_id && ($ghostOfId = $request->integer('ghost_of'))) {
+            $ghost = Test::find($ghostOfId);
+
+            if ($ghost && $ghost->user_id && $ghost->user_id !== $test->user_id) {
+                $ghost->user->notify(new GhostRaced(
+                    $test->user,
+                    $request->boolean('ghost_beat'),
+                    $test->id,
+                ));
+            }
         }
 
         $newBadges = ($test->newBadges ?? collect())->map(fn ($b): array => [

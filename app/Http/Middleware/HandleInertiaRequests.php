@@ -63,6 +63,19 @@ class HandleInertiaRequests extends Middleware
                 'friend_requests' => fn () => $request->user()
                     ? $request->user()->incomingFriendRequests()->count()
                     : 0,
+                'notifications' => fn () => $request->user()
+                    ? $request->user()->notifications()->latest()->limit(10)->get()->map(fn ($n): array => [
+                        'id' => $n->id,
+                        'type' => $n->data['type'] ?? null,
+                        'actor_name' => $n->data['actor_name'] ?? null,
+                        'url' => $n->data['url'] ?? '/',
+                        'read' => $n->read_at !== null,
+                        'created_at' => $n->created_at->toIso8601String(),
+                    ])->all()
+                    : [],
+                'unread_count' => fn () => $request->user()
+                    ? $request->user()->unreadNotifications()->count()
+                    : 0,
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

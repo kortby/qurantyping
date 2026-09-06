@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\FriendRequestAccepted;
+use App\Notifications\FriendRequestReceived;
 use Database\Factories\FriendshipFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -70,6 +72,7 @@ class Friendship extends Model
 
             if ($existing->friend_id === $from->id) {
                 $existing->update(['status' => 'accepted', 'accepted_at' => now()]);
+                $existing->requester?->notify(new FriendRequestAccepted($from));
 
                 return 'accepted';
             }
@@ -78,6 +81,7 @@ class Friendship extends Model
         }
 
         static::create(['user_id' => $from->id, 'friend_id' => $toId]);
+        User::find($toId)?->notify(new FriendRequestReceived($from));
 
         return 'sent';
     }

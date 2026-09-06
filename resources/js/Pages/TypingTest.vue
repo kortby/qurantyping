@@ -139,6 +139,8 @@ const stopGhost = () => {
     }
 };
 
+const ghostSourceId = ref(null);
+
 const loadGhost = async (idOrPb) => {
     try {
         const { data } = await axios.get('/ghost/' + encodeURIComponent(idOrPb));
@@ -150,6 +152,7 @@ const loadGhost = async (idOrPb) => {
         ghostTrace.value = Array.isArray(data.trace) ? data.trace : [];
         ghostMeta.value = data.opponent;
         ghostActive.value = ghostTrace.value.length >= 2;
+        ghostSourceId.value = /^\d+$/.test(String(idOrPb)) ? parseInt(idOrPb) : null;
     } catch (error) {
         ghostActive.value = false;
         await fetchTestText(false);
@@ -827,6 +830,11 @@ const finishTest = async () => {
 
         if (page.props.auth?.user && trace.value.length >= 3) {
             testData.trace = trace.value;
+        }
+
+        if (ghostSourceId.value && ghostMeta.value && !ghostMeta.value.is_self) {
+            testData.ghost_of = ghostSourceId.value;
+            testData.ghost_beat = !!ghostOutcome.value?.beat;
         }
 
         if (!page.props.auth?.user) {

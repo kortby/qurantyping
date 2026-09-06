@@ -49,6 +49,9 @@ class StoreTestRequest extends FormRequest
             'trace' => 'sometimes|array|max:600',
             'trace.*' => 'array|size:2',
             'trace.*.*' => 'integer|min:0',
+            // Ghost race context: which run was raced, and whether it was beaten.
+            'ghost_of' => 'sometimes|nullable|integer',
+            'ghost_beat' => 'sometimes|boolean',
         ];
     }
 }

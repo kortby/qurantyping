@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Friendship;
 use App\Models\Test;
 use App\Models\User;
+use App\Notifications\FriendRequestAccepted;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -152,6 +153,7 @@ class FriendController extends Controller
         );
 
         $friendship->update(['status' => 'accepted', 'accepted_at' => now()]);
+        $friendship->requester?->notify(new FriendRequestAccepted($request->user()));
 
         return back()->with('message', __('Friend request accepted.'));
     }
