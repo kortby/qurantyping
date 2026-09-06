@@ -105,6 +105,7 @@ Route::middleware([
     Route::post('/user/settings/daily-goal', [UserSettingController::class, 'updateDailyGoal'])->name('user.settings.daily-goal');
     Route::post('/user/settings/auto-advance', [UserSettingController::class, 'updateAutoAdvance'])->name('user.settings.auto-advance');
     Route::post('/user/settings/hifz-daily-new', [UserSettingController::class, 'updateHifzDailyNew'])->name('user.settings.hifz-daily-new');
+    Route::post('/user/settings/reciter', [UserSettingController::class, 'updateReciter'])->name('user.settings.reciter');
 
     Route::get('/hifz', [HifzController::class, 'index'])->name('hifz.index');
     Route::get('/hifz/session', [HifzController::class, 'session'])->name('hifz.session');

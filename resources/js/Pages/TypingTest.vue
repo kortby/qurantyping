@@ -954,6 +954,15 @@ defineOptions({ layout: AppLayout });
                 {{ t('navigation.drills') }}
             </span>
 
+            <QuranAudioPlayer
+                v-if="!hifzMode && quranText.surah_number"
+                :surah-number="quranText.surah_number"
+                :start-ayah="quranText.start_ayah"
+                :end-ayah="quranText.end_ayah"
+                :reciters="page.props.reciters || {}"
+                :reciter="page.props.auth?.user?.reciter || ''"
+            />
+
             <div v-if="hifzMode" class="flex items-center gap-2 font-mono text-[11px]">
                 <div class="flex border border-[var(--border-color)] divide-x divide-[var(--border-color)]">
                     <button

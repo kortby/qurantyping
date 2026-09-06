@@ -1,201 +1,163 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
-import axios from 'axios';
+import { ref, computed, watch, onUnmounted } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { useSettings } from '../useSettings';
 
 const props = defineProps({
     surahNumber: Number,
     startAyah: Number,
     endAyah: Number,
-    isTestStarted: Boolean,
+    reciters: { type: Object, default: () => ({}) },
+    reciter: { type: String, default: '' },
 });
 
 const { t } = useSettings();
 
-const audioUrls = ref([]);
-const currentAyahIndex = ref(0);
+const fallbackKey = computed(() => Object.keys(props.reciters)[0] ?? '');
+const selectedReciter = ref(props.reciter && props.reciters[props.reciter] ? props.reciter : fallbackKey.value);
+
+const audioEl = ref(null);
+const currentIndex = ref(0);
 const isPlaying = ref(false);
-const autoPlayWhileTyping = ref(false);
-const audioPlayer = ref(null);
-const isLoading = ref(false);
-const error = ref(null);
+const errored = ref(false);
 
-const fetchAudioUrls = async () => {
-    if (!props.surahNumber || !props.startAyah || !props.endAyah) return;
-    
-    isLoading.value = true;
-    error.value = null;
-    audioUrls.value = [];
-    currentAyahIndex.value = 0;
-    
-    try {
-        const promises = [];
-        for (let i = props.startAyah; i <= props.endAyah; i++) {
-            promises.push(axios.get(`https://quranapi.pages.dev/api/audio/${props.surahNumber}/${i}.json`));
-        }
-        
-        const results = await Promise.all(promises);
-        // Default to reciter 1 (Mishary Rashid Al Afasy)
-        audioUrls.value = results.map(res => res.data['1']?.url || res.data['1']?.originalUrl);
-        
-        if (audioUrls.value.every(url => !url)) {
-            error.value = t('audio_error') || 'Audio unavailable';
-        }
-    } catch (err) {
-        console.error("Failed to fetch audio urls:", err);
-        error.value = t('audio_error') || 'Audio unavailable';
-    } finally {
-        isLoading.value = false;
+const pad3 = (n) => String(n).padStart(3, '0');
+
+const audioUrls = computed(() => {
+    const folder = props.reciters[selectedReciter.value]?.folder;
+    if (!folder || !props.surahNumber || !props.startAyah || !props.endAyah) return [];
+
+    const urls = [];
+    for (let ayah = props.startAyah; ayah <= props.endAyah; ayah++) {
+        urls.push(`https://everyayah.com/data/${folder}/${pad3(props.surahNumber)}${pad3(ayah)}.mp3`);
     }
-};
-
-watch(() => [props.surahNumber, props.startAyah, props.endAyah], fetchAudioUrls, { immediate: true });
-
-watch(() => props.isTestStarted, (started) => {
-    if (started && autoPlayWhileTyping.value && !isPlaying.value && audioUrls.value.length > 0) {
-        startPlayback();
-    }
+    return urls;
 });
 
-const startPlayback = () => {
-    if (!audioPlayer.value || !audioUrls.value[currentAyahIndex.value]) return;
-    
-    audioPlayer.value.src = audioUrls.value[currentAyahIndex.value];
-    audioPlayer.value.play().catch(e => {
-        console.error("Playback failed:", e);
+const stop = () => {
+    if (audioEl.value) {
+        audioEl.value.pause();
+        audioEl.value.removeAttribute('src');
+    }
+    isPlaying.value = false;
+    currentIndex.value = 0;
+};
+
+const playIndex = (index) => {
+    if (!audioEl.value || !audioUrls.value[index]) return;
+    currentIndex.value = index;
+    errored.value = false;
+    audioEl.value.src = audioUrls.value[index];
+    audioEl.value.play().then(() => {
+        isPlaying.value = true;
+    }).catch(() => {
         isPlaying.value = false;
     });
-    isPlaying.value = true;
 };
 
-const togglePlay = () => {
-    if (!audioPlayer.value) return;
-    
+const toggle = () => {
+    if (!audioEl.value || audioUrls.value.length === 0) return;
+
     if (isPlaying.value) {
-        audioPlayer.value.pause();
+        audioEl.value.pause();
         isPlaying.value = false;
+    } else if (audioEl.value.src) {
+        audioEl.value.play().then(() => { isPlaying.value = true; }).catch(() => {});
     } else {
-        if (!audioPlayer.value.src && audioUrls.value.length > 0) {
-            startPlayback();
-        } else {
-            audioPlayer.value.play();
-            isPlaying.value = true;
-        }
+        playIndex(currentIndex.value);
     }
 };
 
-const handleEnded = () => {
-    if (currentAyahIndex.value < audioUrls.value.length - 1) {
-        currentAyahIndex.value++;
-        startPlayback();
+const onEnded = () => {
+    if (currentIndex.value < audioUrls.value.length - 1) {
+        playIndex(currentIndex.value + 1);
     } else {
         isPlaying.value = false;
-        currentAyahIndex.value = 0;
-        audioPlayer.value.src = '';
+        currentIndex.value = 0;
+        audioEl.value?.removeAttribute('src');
     }
 };
 
-const jumpToAyah = (index) => {
-    currentAyahIndex.value = index;
-    startPlayback();
-};
-
-const handleAudioError = () => {
-    console.error("Audio player error");
-    // If one ayah fails, try to skip to next
-    if (currentAyahIndex.value < audioUrls.value.length - 1) {
-        currentAyahIndex.value++;
-        startPlayback();
+const onError = () => {
+    if (currentIndex.value < audioUrls.value.length - 1) {
+        playIndex(currentIndex.value + 1);
     } else {
+        errored.value = true;
         isPlaying.value = false;
-        error.value = t('audio_error') || 'Audio unavailable';
     }
 };
 
-onUnmounted(() => {
-    if (audioPlayer.value) {
-        audioPlayer.value.pause();
-        audioPlayer.value.src = '';
-    }
+const changeReciter = (event) => {
+    const key = event.target.value;
+    selectedReciter.value = key;
+    stop();
+    router.post('/user/settings/reciter', { reciter: key }, {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['auth'],
+    });
+};
+
+watch(() => [props.surahNumber, props.startAyah, props.endAyah], stop);
+
+onUnmounted(stop);
+
+const statusLabel = computed(() => {
+    if (errored.value) return t('audio_error');
+    if (isPlaying.value) return t('reciting');
+    return t('listen');
 });
 </script>
 
 <template>
-    <div class="audio-player-container flex items-center gap-4 bg-[var(--panel-color)] px-4 py-2 rounded-2xl border border-[var(--border-color)] backdrop-blur-md shadow-lg transition-all hover:border-[var(--caret-color)]/30">
-        <!-- Main Play Button / Loader -->
-        <button 
-            @click="togglePlay"
-            :disabled="isLoading || !!error || audioUrls.length === 0"
-            class="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--caret-color)] text-[var(--bg-color)] transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-emerald-500/20"
-            :title="isPlaying ? 'Pause' : 'Listen'"
+    <div class="flex items-center gap-3 border border-[var(--border-color)] px-3 py-1.5 font-mono text-[11px]">
+        <button
+            type="button"
+            @click="toggle"
+            :disabled="audioUrls.length === 0 || errored"
+            :title="isPlaying ? t('reciting') : t('listen')"
+            class="w-8 h-8 flex items-center justify-center border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            :class="isPlaying ? 'border-[var(--caret-color)] text-[var(--caret-color)]' : 'border-[var(--border-color)] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)]'"
         >
-            <div v-if="isLoading" class="w-5 h-5 border-2 border-[var(--bg-color)] border-t-transparent rounded-full animate-spin"></div>
-            <template v-else-if="error">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-octagon-alert"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg>
-            </template>
-            <template v-else>
-                <svg v-if="!isPlaying" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="translate-x-0.5"><path d="M5 3l14 9-14 9V3z"/></svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-            </template>
+            <svg v-if="!isPlaying" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3l14 9-14 9V3z" /></svg>
+            <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
         </button>
 
-        <!-- Player Info & Progress -->
-        <div class="flex flex-col min-w-[120px]">
-            <div class="flex items-center justify-between gap-2 mb-1">
-                <span class="text-[10px] uppercase tracking-widest font-mono text-[var(--sub-color)] opacity-60">
-                    {{ error ? error : (isLoading ? t('loading_audio') : (isPlaying ? 'Reciting' : t('listen'))) }}
-                </span>
-                <span v-if="audioUrls.length > 0 && !error && !isLoading" class="text-[9px] font-mono text-[var(--caret-color)] bg-[var(--caret-color)]/10 px-1.5 py-0.5 rounded">
-                    Ayah {{ props.startAyah + currentAyahIndex }}
+        <div class="flex flex-col gap-1 min-w-[92px]">
+            <div class="flex items-center justify-between gap-2">
+                <span class="uppercase tracking-[0.12em] text-[var(--sub-color)]">{{ statusLabel }}</span>
+                <span v-if="audioUrls.length > 1 && !errored" class="text-[var(--caret-color)] tabular-nums">
+                    {{ startAyah + currentIndex }}
                 </span>
             </div>
-            
-            <!-- Progress Dots -->
-            <div class="flex gap-1">
-                <div v-for="(url, index) in audioUrls" :key="index"
-                    @click="jumpToAyah(index)"
-                    class="h-1 rounded-full transition-all cursor-pointer"
-                    :class="[
-                        index === currentAyahIndex ? 'w-4 bg-[var(--caret-color)]' : 'w-2 bg-[var(--border-color)] hover:bg-[var(--sub-color)]/30',
-                        index < currentAyahIndex ? 'bg-[var(--caret-color)]/40' : ''
-                    ]"
-                ></div>
+            <div v-if="audioUrls.length > 1" class="flex gap-1">
+                <button
+                    v-for="(url, index) in audioUrls"
+                    :key="url"
+                    type="button"
+                    @click="playIndex(index)"
+                    class="h-1 transition-all"
+                    :class="index === currentIndex
+                        ? 'w-4 bg-[var(--caret-color)]'
+                        : (index < currentIndex ? 'w-2 bg-[var(--caret-color)]/40' : 'w-2 bg-[var(--border-color)] hover:bg-[var(--sub-color)]')"
+                    :aria-label="`Ayah ${startAyah + index}`"
+                ></button>
             </div>
         </div>
 
-        <!-- Divider -->
-        <div class="w-[1px] h-8 bg-[var(--border-color)] mx-1"></div>
+        <span class="w-px h-6 bg-[var(--border-color)]"></span>
 
-        <!-- Listen While Typing Toggle -->
-        <button 
-            @click="autoPlayWhileTyping = !autoPlayWhileTyping"
-            class="flex items-center gap-2 group"
-            :title="t('listen_while_typing')"
-        >
-            <div class="relative w-8 h-4 bg-[var(--bg-color)] rounded-full border border-[var(--border-color)] transition-all overflow-hidden"
-                 :class="{ 'border-[var(--caret-color)]/50': autoPlayWhileTyping }">
-                <div class="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full transition-all"
-                     :class="autoPlayWhileTyping ? 'right-1 bg-[var(--caret-color)]' : 'left-1 bg-[var(--sub-color)] opacity-40'"
-                ></div>
-            </div>
-            <span class="text-[10px] font-mono uppercase tracking-tighter transition-colors"
-                  :class="autoPlayWhileTyping ? 'text-[var(--caret-color)]' : 'text-[var(--sub-color)] opacity-60 group-hover:opacity-100'">
-                {{ t('listen_while_typing') }}
-            </span>
-        </button>
+        <label class="flex items-center gap-1.5">
+            <span class="sr-only">{{ t('reciter') }}</span>
+            <select
+                :value="selectedReciter"
+                @change="changeReciter"
+                class="bg-[var(--bg-color)] border border-[var(--border-color)] px-2 py-1 text-[11px] font-mono text-[var(--main-color)] focus:border-[var(--caret-color)] focus:outline-none max-w-[150px]"
+            >
+                <option v-for="(meta, key) in reciters" :key="key" :value="key">{{ meta.name }}</option>
+            </select>
+        </label>
 
-        <!-- Hidden Audio Element -->
-        <audio 
-            ref="audioPlayer" 
-            @ended="handleEnded" 
-            @error="handleAudioError"
-            preload="auto"
-        ></audio>
+        <audio ref="audioEl" preload="none" @ended="onEnded" @error="onError"></audio>
     </div>
 </template>
-
-<style scoped>
-.audio-player-container {
-    font-family: 'Cinzel', serif;
-}
-</style>

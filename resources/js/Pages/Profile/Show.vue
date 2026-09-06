@@ -6,6 +6,7 @@ import { useSettings } from '../../useSettings';
 import DeleteUserForm from '@/Pages/Profile/Partials/DeleteUserForm.vue';
 import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOtherBrowserSessionsForm.vue';
 import PracticeGoalForm from '@/Pages/Profile/Partials/PracticeGoalForm.vue';
+import RecitationForm from '@/Pages/Profile/Partials/RecitationForm.vue';
 import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
@@ -58,6 +59,7 @@ const tabs = [
                         <div v-if="activeTab === 'profile'" key="profile" class="space-y-10">
                             <UpdateProfileInformationForm :user="$page.props.auth.user" />
                             <PracticeGoalForm />
+                            <RecitationForm />
                         </div>
 
                         <div v-else-if="activeTab === 'security'" key="security" class="space-y-10">
