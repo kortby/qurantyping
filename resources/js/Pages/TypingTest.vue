@@ -61,6 +61,78 @@ let typingTimeout = null;
 
 const showGuestModal = ref(false);
 
+// --- Ghost race: coarse [ms, leading-correct-chars] trace of the current run ---
+const trace = ref([]);
+let traceStart = 0;
+let lastSample = 0;
+
+// --- Ghost race: the opponent's recorded run replayed as a second bar ---
+const ghostActive = ref(false);
+const ghostTrace = ref([]);
+const ghostMeta = ref(null);
+const ghostProgress = ref(0);
+const ghostOutcome = ref(null);
+let ghostTick = null;
+
+const liveProgress = computed(() => {
+    const len = sourceCharacters.value.length;
+    return len ? Math.min(1, userInput.value.length / len) : 0;
+});
+
+const ghostCharsAt = (ms) => {
+    const tr = ghostTrace.value;
+    if (!tr.length) return 0;
+    if (ms <= tr[0][0]) return tr[0][1];
+    const last = tr[tr.length - 1];
+    if (ms >= last[0]) return last[1];
+    for (let i = 1; i < tr.length; i++) {
+        if (ms <= tr[i][0]) {
+            const [t0, c0] = tr[i - 1];
+            const [t1, c1] = tr[i];
+            const f = (ms - t0) / Math.max(1, t1 - t0);
+            return c0 + f * (c1 - c0);
+        }
+    }
+    return last[1];
+};
+
+const startGhost = () => {
+    if (ghostTick || !ghostActive.value) return;
+    ghostTick = setInterval(() => {
+        const elapsed = Date.now() - traceStart;
+        ghostProgress.value = ghostCharsAt(elapsed) / Math.max(1, sourceCharacters.value.length);
+        if (ghostProgress.value >= 1) {
+            ghostProgress.value = 1;
+            clearInterval(ghostTick);
+            ghostTick = null;
+        }
+    }, 100);
+};
+
+const stopGhost = () => {
+    if (ghostTick) {
+        clearInterval(ghostTick);
+        ghostTick = null;
+    }
+};
+
+const loadGhost = async (idOrPb) => {
+    try {
+        const { data } = await axios.get('/ghost/' + encodeURIComponent(idOrPb));
+        selectedSurah.value = data.surah_number;
+        startAyah.value = data.start_ayah;
+        endAyah.value = data.end_ayah;
+        if (typeof data.tashkeel === 'boolean') setPunctuation(data.tashkeel);
+        await fetchTestText(true);
+        ghostTrace.value = Array.isArray(data.trace) ? data.trace : [];
+        ghostMeta.value = data.opponent;
+        ghostActive.value = ghostTrace.value.length >= 2;
+    } catch (error) {
+        ghostActive.value = false;
+        await fetchTestText(false);
+    }
+};
+
 // Error Sound Logic
 const errorSoundEnabled = ref(page.props.auth?.user?.error_sound ?? true);
 
@@ -580,7 +652,11 @@ const handleInput = (event) => {
     }, 1000);
 
     if (!intervalId.value) startTimer();
-    
+    if (!traceStart) {
+        traceStart = Date.now();
+        startGhost();
+    }
+
     const newValue = event.target.value.normalize('NFC');
     
     // Detect non-Arabic characters (Latin) to show warning
@@ -632,6 +708,15 @@ const handleInput = (event) => {
     }
 
     userInput.value = newValue;
+
+    // Coarse ghost trace: sample leading-correct-char count ~2.5x/sec.
+    const now = Date.now();
+    if (now - lastSample >= 400) {
+        lastSample = now;
+        const n = firstErrorIndex.value === -1 ? userInput.value.length : firstErrorIndex.value;
+        trace.value.push([now - traceStart, n]);
+    }
+
     // Only finish if the length matches and there are no active errors (100% correct text)
     if (userInput.value.length >= sourceCharacters.value.length && firstErrorIndex.value === -1) {
         finishTest();
@@ -650,8 +735,22 @@ const stopTimer = () => {
 
 const finishTest = async () => {
     stopTimer();
+    stopGhost();
     testFinished.value = true;
     showResults.value = true;
+
+    // Final trace sample at the finish line, then settle the ghost verdict.
+    if (traceStart) {
+        trace.value.push([Date.now() - traceStart, sourceCharacters.value.length]);
+    }
+    if (ghostActive.value && ghostTrace.value.length) {
+        const userMs = traceStart ? (Date.now() - traceStart) : timer.value * 1000;
+        const ghostMs = ghostTrace.value[ghostTrace.value.length - 1][0];
+        ghostOutcome.value = {
+            beat: userMs <= ghostMs,
+            seconds: Math.abs(ghostMs - userMs) / 1000,
+        };
+    }
 
     // Trigger celebration ONLY if it's a new personal record
     if (wpm.value > currentPB.value) {
@@ -703,6 +802,10 @@ const finishTest = async () => {
             }));
         }
 
+        if (page.props.auth?.user && trace.value.length >= 3) {
+            testData.trace = trace.value;
+        }
+
         if (!page.props.auth?.user) {
             localStorage.setItem('cached_typing_test', JSON.stringify(testData));
             setTimeout(() => {
@@ -723,6 +826,7 @@ const finishTest = async () => {
 
 const resetTest = () => {
     stopTimer();
+    stopGhost();
     userInput.value = '';
     timer.value = 0;
     totalErrors.value = 0;
@@ -730,6 +834,11 @@ const resetTest = () => {
     newBadges.value = [];
     testFinished.value = false;
     showResults.value = false;
+    trace.value = [];
+    traceStart = 0;
+    lastSample = 0;
+    ghostProgress.value = 0;
+    ghostOutcome.value = null;
     setTimeout(() => {
         focusInput();
     }, 100);
@@ -792,6 +901,8 @@ onMounted(async () => {
         startAyah.value = parseInt(urlParams.get('start')) || 1;
         endAyah.value = parseInt(urlParams.get('end')) || 1;
         await fetchTestText(true);
+    } else if (urlParams.has('ghost')) {
+        await loadGhost(urlParams.get('ghost'));
     } else {
         // No params? Start with a fresh random selection of 3 ayas
         await fetchTestText(false);
@@ -808,6 +919,7 @@ onMounted(async () => {
 onUnmounted(() => {
     window.removeEventListener('keydown', handleGlobalKeydown);
     window.removeEventListener('keyup', handleGlobalKeyup);
+    stopGhost();
 });
 
 defineOptions({ layout: AppLayout });
@@ -1088,8 +1200,32 @@ defineOptions({ layout: AppLayout });
             </div>
         </div>
 
+        <!-- Ghost race — your live bar against the opponent's recorded pace -->
+        <div v-if="ghostActive && !showResults" class="w-full max-w-6xl mt-5 flex flex-col gap-3 font-mono">
+            <div class="flex flex-col gap-1">
+                <div class="flex justify-between text-[9px] uppercase tracking-[0.25em] text-[var(--sub-color)]">
+                    <span>{{ t('ghost.you') }}</span>
+                    <span class="tabular-nums">{{ Math.round(liveProgress * 100) }}%</span>
+                </div>
+                <div class="h-1 w-full bg-[var(--border-color)] overflow-hidden">
+                    <div class="h-full bg-[#3f9d6b] transition-[width] duration-150 ease-linear"
+                         :style="{ width: Math.min(100, liveProgress * 100) + '%' }"></div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-1">
+                <div class="flex justify-between text-[9px] uppercase tracking-[0.25em] text-[var(--sub-color)]">
+                    <span>{{ ghostMeta?.is_self ? t('ghost.your_pb') : ghostMeta?.name }}</span>
+                    <span class="tabular-nums">{{ Math.round(ghostProgress * 100) }}%</span>
+                </div>
+                <div class="h-1 w-full bg-[var(--border-color)] overflow-hidden">
+                    <div class="h-full bg-[var(--caret-color)] opacity-60 transition-[width] duration-100 ease-linear"
+                         :style="{ width: Math.min(100, ghostProgress * 100) + '%' }"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Animated Keyboard -->
-        <ArabicKeyboard v-if="currentDisplayText && !showResults" 
+        <ArabicKeyboard v-if="currentDisplayText && !showResults"
                         class="hidden lg:block"
                         :active-key="activeKey" 
                         :active-code="activeCode"
@@ -1121,6 +1257,14 @@ defineOptions({ layout: AppLayout });
 
                 <p class="text-lg sm:text-xl text-[var(--main-color)]">
                     {{ accuracy === 100 ? t('perfect') : (accuracy > 90 ? t('excellent') : t('keep_practicing')) }}
+                </p>
+
+                <!-- Ghost race verdict -->
+                <p v-if="ghostOutcome" class="font-mono text-xs uppercase tracking-[0.2em]"
+                   :class="ghostOutcome.beat ? 'text-[#3f9d6b]' : 'text-[var(--sub-color)]'">
+                    {{ (ghostOutcome.beat ? t('ghost.beat_by') : t('ghost.lost_by'))
+                        .replace('{name}', ghostMeta?.is_self ? t('ghost.your_pb') : (ghostMeta?.name || ''))
+                        .replace('{seconds}', ghostOutcome.seconds.toFixed(1)) }}
                 </p>
 
                 <!-- New badges -->

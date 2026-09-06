@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTestRequest;
 use App\Models\QuranText;
+use App\Models\Result;
 use App\Models\Test;
 use App\Services\QuranNavigator;
 use App\Services\WeakLetterService;
@@ -182,7 +183,7 @@ class TestController extends Controller
     public function store(StoreTestRequest $request): JsonResponse
     {
         // The request is already validated by StoreTestRequest
-        $validatedData = $request->safe()->except('char_stats');
+        $validatedData = $request->safe()->except(['char_stats', 'trace']);
 
         // Associate with the logged-in user, or leave as null for guests
         $validatedData['user_id'] = auth()->id();
@@ -190,6 +191,13 @@ class TestController extends Controller
         $test = Test::create($validatedData);
 
         $this->weakLetters->record($test->user_id, $request->safe()->collect('char_stats'));
+
+        if ($test->user_id && $request->filled('trace')) {
+            Result::create([
+                'test_id' => $test->id,
+                'history' => $request->validated('trace'),
+            ]);
+        }
 
         $newBadges = ($test->newBadges ?? collect())->map(fn ($b): array => [
             'name' => $b->name,

@@ -202,6 +202,13 @@ const formatDuration = (seconds) => {
                             >
                                 {{ t('badges.count').replace('{n}', badgeCount) }}
                             </Link>
+                            <Link
+                                v-if="$page.props.auth?.friend_requests"
+                                href="/friends"
+                                class="inline-flex items-center min-h-[36px] border border-[var(--caret-color)] text-[var(--caret-color)] px-4 font-cinzel text-xs uppercase tracking-[0.12em] hover:opacity-80 transition-opacity"
+                            >
+                                {{ t('friends.requests_count').replace('{n}', $page.props.auth.friend_requests) }}
+                            </Link>
                         </div>
                     </div>
                     <div class="flex gap-3">

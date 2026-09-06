@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -156,5 +157,63 @@ class User extends Authenticatable
         return $this->belongsToMany(Badge::class, 'user_badges')
             ->withPivot('awarded_at')
             ->withTimestamps();
+    }
+
+    /**
+     * Friendship rows this user initiated.
+     *
+     * @return HasMany<Friendship, $this>
+     */
+    public function friendships(): HasMany
+    {
+        return $this->hasMany(Friendship::class);
+    }
+
+    /**
+     * Pending friend requests this user has received.
+     *
+     * @return HasMany<Friendship, $this>
+     */
+    public function incomingFriendRequests(): HasMany
+    {
+        return $this->hasMany(Friendship::class, 'friend_id')->where('status', 'pending');
+    }
+
+    /**
+     * Pending friend requests this user has sent.
+     *
+     * @return HasMany<Friendship, $this>
+     */
+    public function outgoingFriendRequests(): HasMany
+    {
+        return $this->hasMany(Friendship::class, 'user_id')->where('status', 'pending');
+    }
+
+    /**
+     * The ids of every accepted friend, from requests sent or received.
+     *
+     * @return Collection<int, int>
+     */
+    public function friendIds(): Collection
+    {
+        $ids = once(fn (): array => Friendship::query()
+            ->where('status', 'accepted')
+            ->where(function ($query): void {
+                $query->where('user_id', $this->id)->orWhere('friend_id', $this->id);
+            })
+            ->get(['user_id', 'friend_id'])
+            ->map(fn (Friendship $row): int => $row->user_id === $this->id ? $row->friend_id : $row->user_id)
+            ->values()
+            ->all());
+
+        return collect($ids);
+    }
+
+    /**
+     * Determine whether this user is an accepted friend of the given user.
+     */
+    public function isFriendsWith(User $other): bool
+    {
+        return $this->friendIds()->contains($other->id);
     }
 }

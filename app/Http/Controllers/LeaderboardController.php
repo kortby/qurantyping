@@ -4,16 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Test;
 use App\Models\User;
+use App\Services\ContestService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class LeaderboardController extends Controller
 {
     public function __invoke(Request $request)
     {
+        $scope = $request->query('scope') === 'friends' && $request->user() ? 'friends' : 'global';
+
         // Subquery to rank tests per user by WPM desc
         $sub = Test::select('*', DB::raw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY wpm DESC, accuracy DESC, created_at DESC) as rn'));
+
+        if ($scope === 'friends') {
+            $friendIds = $request->user()->friendIds()->push($request->user()->id)->all();
+            $sub->whereIn('user_id', $friendIds);
+        }
 
         // Get top 20 scorers with their best test details
         $topScorers = DB::table(DB::raw("({$sub->toSql()}) as ranked_tests"))
@@ -27,7 +35,7 @@ class LeaderboardController extends Controller
                 'ranked_tests.accuracy as best_accuracy',
                 'ranked_tests.total_errors',
                 'ranked_tests.char_count',
-                DB::raw('(ranked_tests.wpm >= ' . config('contest.min_wpm') . ' AND ranked_tests.accuracy >= ' . config('contest.min_accuracy') . ' AND ranked_tests.char_count >= ' . config('contest.min_char_count') . ') as is_eligible'),
+                DB::raw('(ranked_tests.wpm >= '.config('contest.min_wpm').' AND ranked_tests.accuracy >= '.config('contest.min_accuracy').' AND ranked_tests.char_count >= '.config('contest.min_char_count').') as is_eligible'),
                 DB::raw('(SELECT count(*) FROM tests WHERE tests.user_id = ranked_tests.user_id) as total_tests')
             )
             ->orderByDesc('best_wpm')
@@ -37,14 +45,31 @@ class LeaderboardController extends Controller
         $userIds = $topScorers->pluck('user_id');
         $usersWithBadges = User::with('badges')->whereIn('id', $userIds)->get()->keyBy('id');
 
-        $topScorers->transform(function ($scorer) use ($usersWithBadges) {
-            $scorer->badges = $usersWithBadges->has($scorer->user_id) ? $usersWithBadges[$scorer->user_id]->badges : [];
+        // tier lives only in config; map it back onto the awarded badge rows.
+        $tierBySlug = collect(config('badges.list'))->pluck('tier', 'slug');
+
+        $topScorers->transform(function ($scorer) use ($usersWithBadges, $tierBySlug) {
+            $badges = $usersWithBadges->has($scorer->user_id)
+                ? $usersWithBadges[$scorer->user_id]->badges
+                : collect();
+
+            $scorer->badges = $badges->map(fn ($badge): array => [
+                'id' => $badge->id,
+                'name' => $badge->name,
+                'description' => $badge->description,
+                'icon' => $badge->icon,
+                'tier' => $tierBySlug[$badge->slug] ?? 'bronze',
+            ])->values();
+
             return $scorer;
         });
 
         return Inertia::render('Leaderboard', [
             'topScorers' => $topScorers,
-            'contest_config' => app(\App\Services\ContestService::class)->getConfig(),
+            'contest_config' => app(ContestService::class)->getConfig(),
+            'scope' => $scope,
+            'canFilterFriends' => (bool) $request->user(),
+            'friendIds' => $request->user() ? $request->user()->friendIds()->values() : [],
         ]);
     }
 }

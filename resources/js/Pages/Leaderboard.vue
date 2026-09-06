@@ -1,14 +1,41 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import BadgeSeal from '@/Components/BadgeSeal.vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { useSettings } from '../useSettings';
 
 const { t } = useSettings();
+const page = usePage();
 
-defineProps({
+const props = defineProps({
     topScorers: Array,
     contest_config: Object,
+    scope: { type: String, default: 'global' },
+    canFilterFriends: { type: Boolean, default: false },
+    friendIds: { type: Array, default: () => [] },
 });
+
+const busy = ref(false);
+
+const setScope = (scope) => {
+    if (scope === props.scope) return;
+    router.get('/leaderboard', { scope }, { preserveState: true, preserveScroll: true });
+};
+
+const canAdd = (scorer) => props.canFilterFriends
+    && scorer.user_id !== page.props.auth?.user?.id
+    && !props.friendIds.includes(scorer.user_id);
+
+const addFriend = (scorer) => {
+    if (busy.value) return;
+    busy.value = true;
+    router.post('/friends', { friend_id: scorer.user_id }, {
+        preserveScroll: true,
+        preserveState: true,
+        onFinish: () => (busy.value = false),
+    });
+};
 </script>
 
 <template>
@@ -25,6 +52,20 @@ defineProps({
                     <h1 class="text-4xl font-cinzel text-[var(--caret-color)] font-bold mb-2 tracking-widest">{{ t('leaderboard') }}</h1>
                     <p class="text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-[0.5em] opacity-80">{{ t('leaderboard_subtitle') }}</p>
                     <div class="w-16 h-1 bg-[var(--caret-color)]/20 mx-auto mt-4 rounded-full"></div>
+                </div>
+
+                <!-- Scope toggle -->
+                <div v-if="canFilterFriends" class="flex justify-center gap-1 mb-6 font-mono text-[10px] uppercase tracking-[0.25em]">
+                    <button type="button" @click="setScope('global')"
+                            :class="scope === 'global' ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'border border-[var(--border-color)] text-[var(--sub-color)] hover:text-[var(--main-color)]'"
+                            class="px-5 py-2 transition-colors">
+                        {{ t('leaderboard_scope.global') }}
+                    </button>
+                    <button type="button" @click="setScope('friends')"
+                            :class="scope === 'friends' ? 'bg-[var(--caret-color)] text-[var(--bg-color)]' : 'border border-[var(--border-color)] text-[var(--sub-color)] hover:text-[var(--main-color)]'"
+                            class="px-5 py-2 transition-colors">
+                        {{ t('leaderboard_scope.friends') }}
+                    </button>
                 </div>
 
                 <!-- Leaderboard Table -->
@@ -66,13 +107,15 @@ defineProps({
                                             <span class="text-lg font-cinzel font-bold text-[var(--main-color)] group-hover:text-[var(--caret-color)] transition-colors">
                                                 {{ scorer.name }}
                                             </span>
-                                            <div v-if="scorer.badges && scorer.badges.length > 0" class="flex items-center gap-1.5">
-                                                <div v-for="badge in scorer.badges" :key="badge.id" 
-                                                      :title="badge.name + (badge.description ? ' - ' + badge.description : '')"
-                                                      class="flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/30 text-sm cursor-help hover:scale-110 hover:bg-amber-500/20 transition-all shadow-[0_0_10px_rgba(245,158,11,0.1)]"
-                                                >
-                                                    {{ badge.icon }}
-                                                </div>
+                                            <button v-if="canAdd(scorer)" type="button" :disabled="busy" @click="addFriend(scorer)"
+                                                    class="text-[9px] font-mono uppercase tracking-[0.2em] text-[var(--caret-color)] border border-[var(--caret-color)]/40 px-2 py-0.5 hover:bg-[var(--caret-color)]/10 disabled:opacity-40 transition-colors">
+                                                {{ t('friends.add') }}
+                                            </button>
+                                            <div v-if="scorer.badges && scorer.badges.length > 0" class="flex items-center gap-1">
+                                                <BadgeSeal v-for="badge in scorer.badges" :key="badge.id"
+                                                           :icon="badge.icon" :tier="badge.tier" :earned="true" :size="24"
+                                                           :title="badge.name + (badge.description ? ' - ' + badge.description : '')"
+                                                           class="cursor-help hover:scale-110 transition-transform" />
                                             </div>
                                         </div>
                                         <span class="text-[9px] uppercase tracking-widest opacity-40">{{ t('devoted_reader') }}</span>

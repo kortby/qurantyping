@@ -11,6 +11,8 @@ use App\Http\Controllers\ContestController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DrillController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\FriendController;
+use App\Http\Controllers\GhostController;
 use App\Http\Controllers\HifzController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\QuranMapController;
@@ -122,6 +124,12 @@ Route::middleware([
 
     Route::get('/drills', DrillController::class)->name('drills.index');
     Route::get('/test/drill', [TestController::class, 'drillText'])->name('test.drill');
+
+    Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
+    Route::post('/friends', [FriendController::class, 'store'])->name('friends.store');
+    Route::patch('/friends/{friendship}', [FriendController::class, 'update'])->name('friends.update');
+    Route::delete('/friends/{friendship}', [FriendController::class, 'destroy'])->name('friends.destroy');
+    Route::get('/ghost/{ghost}', [GhostController::class, 'show'])->name('ghost.show');
 
     Route::get('/races', [RaceController::class, 'index'])->name('races.index');
     Route::post('/races/quick', [RaceController::class, 'quick'])->name('races.quick');

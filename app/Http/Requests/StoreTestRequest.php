@@ -45,6 +45,10 @@ class StoreTestRequest extends FormRequest
             'char_stats.*.c' => 'nullable|string|max:8',
             'char_stats.*.attempts' => 'nullable|integer|min:0|max:100000',
             'char_stats.*.misses' => 'nullable|integer|min:0|max:100000',
+            // Coarse ghost-race trace: [ms, leading-correct-chars] pairs, ~2.5/sec.
+            'trace' => 'sometimes|array|max:600',
+            'trace.*' => 'array|size:2',
+            'trace.*.*' => 'integer|min:0',
         ];
     }
 }
