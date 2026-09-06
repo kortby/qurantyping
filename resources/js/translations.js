@@ -208,6 +208,20 @@ export const translations = {
             preparing: "Preparing…",
             count: "{n} certificates"
         },
+        drills: {
+            title: "Weak-letter drills",
+            subtitle: "Per-character accuracy across every passage you type",
+            start_drill: "Start weak-letter drill",
+            locked: "Drill locked",
+            empty_title: "Nothing to analyse yet",
+            empty_desc: "Type a few passages first — your letter accuracy will show up here.",
+            start_typing: "Start typing",
+            weakest: "Your weakest characters",
+            drill_hint: "A drill loads a real Quran passage dense in these characters.",
+            not_enough: "No character has enough data ({n}+ keystrokes) with a high enough error rate to target yet. Keep typing.",
+            letters: "Letters",
+            marks: "Marks"
+        },
         auth: {
             email: "Email",
             password: "Password",
@@ -483,6 +497,20 @@ export const translations = {
             preparing: "Préparation…",
             count: "{n} certificats"
         },
+        drills: {
+            title: "Exercices de lettres faibles",
+            subtitle: "Précision par caractère sur chaque passage que vous tapez",
+            start_drill: "Commencer l'exercice",
+            locked: "Exercice verrouillé",
+            empty_title: "Rien à analyser pour l'instant",
+            empty_desc: "Tapez d'abord quelques passages — votre précision par lettre s'affichera ici.",
+            start_typing: "Commencer à taper",
+            weakest: "Vos caractères les plus faibles",
+            drill_hint: "Un exercice charge un vrai passage du Coran riche en ces caractères.",
+            not_enough: "Aucun caractère n'a assez de données ({n}+ frappes) avec un taux d'erreur suffisant pour être ciblé. Continuez à taper.",
+            letters: "Lettres",
+            marks: "Signes"
+        },
         auth: {
             email: "E-mail",
             password: "Mot de passe",
@@ -757,6 +785,20 @@ export const translations = {
             save_image: "حفظ كصورة",
             preparing: "جارٍ التحضير…",
             count: "{n} شهادات"
+        },
+        drills: {
+            title: "تمارين الحروف الضعيفة",
+            subtitle: "دقّة كل حرف عبر كل مقطع تكتبه",
+            start_drill: "ابدأ تمرين الحروف الضعيفة",
+            locked: "التمرين مقفل",
+            empty_title: "لا شيء لتحليله بعد",
+            empty_desc: "اكتب بعض المقاطع أولاً — ستظهر دقّة حروفك هنا.",
+            start_typing: "ابدأ الكتابة",
+            weakest: "أضعف حروفك",
+            drill_hint: "يُحمِّل التمرين مقطعًا قرآنيًّا حقيقيًّا غنيًّا بهذه الحروف.",
+            not_enough: "لا يوجد حرف لديه بيانات كافية ({n}+ ضغطة) بمعدّل خطأ مرتفع بما يكفي لاستهدافه بعد. واصِل الكتابة.",
+            letters: "حروف",
+            marks: "علامات"
         },
         auth: {
             email: "البريد الإلكتروني",

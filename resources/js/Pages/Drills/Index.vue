@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { useSettings } from '../../useSettings';
 
 const props = defineProps({
     letters: { type: Array, default: () => [] },
@@ -9,6 +10,8 @@ const props = defineProps({
     ready: { type: Boolean, default: false },
     minAttempts: { type: Number, default: 25 },
 });
+
+const { t } = useSettings();
 
 const MARK = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/;
 
@@ -28,16 +31,16 @@ const markLabel = (character) => {
 </script>
 
 <template>
-    <Head><title>Weak-letter drills - QuranTyping</title></Head>
+    <Head><title>{{ t('drills.title') }} - QuranTyping</title></Head>
 
     <AppLayout>
         <div class="py-10 sm:py-12 animate-fade-in min-h-[80vh]">
             <div class="max-w-4xl mx-auto px-4 sm:px-6">
                 <header class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
-                        <h1 class="text-2xl font-cinzel font-semibold text-[var(--caret-color)]">Weak-letter drills</h1>
+                        <h1 class="text-2xl font-cinzel font-semibold text-[var(--caret-color)]">{{ t('drills.title') }}</h1>
                         <p class="text-[var(--sub-color)] font-mono text-[10px] uppercase tracking-[0.3em] mt-1">
-                            Per-character accuracy across every passage you type
+                            {{ t('drills.subtitle') }}
                         </p>
                     </div>
 
@@ -46,30 +49,30 @@ const markLabel = (character) => {
                         href="/?drill=1"
                         class="inline-flex items-center justify-center min-h-[44px] px-6 bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold whitespace-nowrap"
                     >
-                        Start weak-letter drill
+                        {{ t('drills.start_drill') }}
                     </Link>
                     <span
                         v-else
                         class="inline-flex items-center justify-center min-h-[44px] px-6 border border-[var(--border-color)] text-[var(--sub-color)] font-cinzel whitespace-nowrap cursor-not-allowed"
                     >
-                        Drill locked
+                        {{ t('drills.locked') }}
                     </span>
                 </header>
 
                 <div v-if="!letters.length" class="border border-[var(--border-color)] p-8 text-center">
-                    <p class="text-[var(--main-color)] mb-2">Nothing to analyse yet</p>
+                    <p class="text-[var(--main-color)] mb-2">{{ t('drills.empty_title') }}</p>
                     <p class="text-[var(--sub-color)] text-sm mb-6 max-w-md mx-auto">
-                        Type a few passages first — your letter accuracy will show up here.
+                        {{ t('drills.empty_desc') }}
                     </p>
                     <Link href="/" class="inline-flex items-center min-h-[44px] px-8 bg-[var(--caret-color)] text-[var(--bg-color)] font-cinzel font-semibold">
-                        Start typing
+                        {{ t('drills.start_typing') }}
                     </Link>
                 </div>
 
                 <template v-else>
                     <section v-if="weak.length" class="mb-10 border border-[var(--border-color)] p-5">
                         <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-4">
-                            Your weakest characters
+                            {{ t('drills.weakest') }}
                         </h2>
                         <div class="flex flex-wrap gap-3">
                             <div
@@ -86,16 +89,15 @@ const markLabel = (character) => {
                             </div>
                         </div>
                         <p class="font-mono text-[11px] text-[var(--sub-color)] mt-4">
-                            A drill loads a real Quran passage dense in these characters.
+                            {{ t('drills.drill_hint') }}
                         </p>
                     </section>
                     <p v-else class="mb-10 font-mono text-[11px] text-[var(--sub-color)]">
-                        No character has enough data ({{ minAttempts }}+ keystrokes) with a high enough error rate to
-                        target yet. Keep typing.
+                        {{ t('drills.not_enough').replace('{n}', minAttempts) }}
                     </p>
 
                     <section v-if="baseLetters.length" class="mb-10">
-                        <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-4">Letters</h2>
+                        <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-4">{{ t('drills.letters') }}</h2>
                         <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2">
                             <div
                                 v-for="l in baseLetters"
@@ -111,7 +113,7 @@ const markLabel = (character) => {
                     </section>
 
                     <section v-if="marks.length">
-                        <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-4">Marks</h2>
+                        <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-4">{{ t('drills.marks') }}</h2>
                         <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2">
                             <div
                                 v-for="m in marks"
