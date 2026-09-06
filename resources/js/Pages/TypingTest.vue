@@ -143,14 +143,13 @@ const DRILLABLE_CHAR = /[\u0621-\u064A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u0
 const normalizeForComparison = (text) => {
     if (!text) return '';
     let result = text.normalize('NFC')
-        .replace(/[أإآٱ]/g, 'ا')
+        .replace(/[أإآٱ\u0670]/g, 'ا') // ٱ wasla + ٰ dagger alif → plain alif (no key on standard layouts)
         .replace(/[ۀة]/g, 'ه')
         .replace(/[ىي]/g, 'ي');
     
     // If Tashkeel mode is ON, we only strip decorative/stop signs, but KEEP vowels (\u064B-\u065F)
     if (usePunctuation.value) {
         // Only strip Tatweel, stop signs, and the End of Ayah symbol
-        // Keep diacritics: \u064B-\u065F and \u0670 (dagger alif)
         result = result.replace(/[\u0610-\u061A\u0640\u06D6-\u06ED\u06DD]/g, '');
     } else {
         // Strip everything if Tashkeel is off
