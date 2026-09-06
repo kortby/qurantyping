@@ -154,6 +154,7 @@ php artisan migrate --force
 php artisan db:seed --class=QuranDivisionsSeeder     # one-time, idempotent (UPDATE only)
 php artisan db:seed --class=BadgeSeeder              # idempotent — badge catalogue (47 rows)
 php artisan badges:backfill                          # one-off — award existing users what they've earned
+php artisan progress:rebuild                         # one-off — fold pre-2026-09-04 tests into the Qur'an map
 php artisan quran:import-punctuation                 # only if TASHKIL_FEATURE=true (~4 min)
 
 php artisan config:cache
