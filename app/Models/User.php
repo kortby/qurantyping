@@ -123,6 +123,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all of the user's typing-race participations.
+     *
+     * @return HasMany<RaceParticipant, $this>
+     */
+    public function raceParticipations(): HasMany
+    {
+        return $this->hasMany(RaceParticipant::class);
+    }
+
+    /**
      * Get the user's preferences.
      */
     public function preferences(): HasOne

@@ -14,6 +14,7 @@ class Test extends Model
 
     protected $fillable = [
         'user_id',
+        'race_id',
         'quran_text_id',
         'mode',
         'duration',
