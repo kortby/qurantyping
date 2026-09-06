@@ -25,6 +25,7 @@ const now = ref(Date.now());
 let clock = null;
 let channel = null;
 let lastWhisper = 0;
+let lastRelay = 0;
 
 const input = ref('');
 const inputEl = ref(null);
@@ -47,17 +48,21 @@ const countdownSeconds = computed(() => {
 
 const racing = computed(() => status.value === 'racing' && !myResult.value);
 
-const opponents = computed(() =>
-    Object.keys(members)
-        .map(Number)
-        .filter((id) => id !== props.me)
-        .map((id) => ({
-            id,
-            name: nameFor(id),
-            pct: standingPct(id),
-            finished: standings.value.find((s) => s.id === id)?.finished ?? false,
-        })),
-);
+const opponents = computed(() => {
+    const ids = new Set([
+        ...Object.keys(members).map(Number),
+        ...standings.value.map((s) => s.id),
+        ...props.participants.map((p) => p.id),
+    ]);
+    ids.delete(props.me);
+
+    return [...ids].map((id) => ({
+        id,
+        name: nameFor(id),
+        pct: standingPct(id),
+        finished: standings.value.find((s) => s.id === id)?.finished ?? false,
+    }));
+});
 
 function standingPct(id) {
     const s = standings.value.find((x) => x.id === id);
@@ -128,15 +133,26 @@ watch(countdownSeconds, (s) => {
 
 watch([input, isFocused, () => score.charStates.value], updateCaret);
 
-watch(input, () => {
-    if (!racing.value) return;
-
+function pushProgress() {
+    const payload = { id: props.me, pct: score.progress.value, wpm: score.wpm.value };
     const nowTs = Date.now();
+
+    // Instant, zero-cost path (needs Soketi client messages enabled).
     if (channel && nowTs - lastWhisper > 200) {
         lastWhisper = nowTs;
-        channel.whisper('progress', { id: props.me, pct: score.progress.value, wpm: score.wpm.value });
+        try { channel.whisper('progress', payload); } catch { /* client events off */ }
     }
 
+    // Reliable path — a throttled server relay so bars still move if whispers are dropped.
+    if (nowTs - lastRelay > 800) {
+        lastRelay = nowTs;
+        axios.post(`/races/${props.race.key}/progress`, { pct: payload.pct, wpm: payload.wpm }).catch(() => {});
+    }
+}
+
+watch(input, () => {
+    if (!racing.value) return;
+    pushProgress();
     if (score.isComplete.value && !myResult.value) submitFinish();
 });
 
@@ -178,8 +194,11 @@ onMounted(() => {
             applySnapshot(e);
             status.value = 'finished';
         })
+        .listen('.progress.tick', (e) => {
+            if (e.id !== props.me) progressByUser[e.id] = { pct: e.pct, wpm: e.wpm };
+        })
         .listenForWhisper('progress', (e) => {
-            progressByUser[e.id] = { pct: e.pct, wpm: e.wpm };
+            if (e.id !== props.me) progressByUser[e.id] = { pct: e.pct, wpm: e.wpm };
         });
 });
 

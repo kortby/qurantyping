@@ -124,6 +124,7 @@ Route::middleware([
     Route::post('/races/{key}/join', [RaceController::class, 'join'])->name('races.join');
     Route::post('/races/{key}/start', [RaceController::class, 'start'])->name('races.start');
     Route::post('/races/{key}/finish', [RaceController::class, 'finish'])->name('races.finish');
+    Route::post('/races/{key}/progress', [RaceController::class, 'progress'])->name('races.progress');
     Route::post('/races/{key}/leave', [RaceController::class, 'leave'])->name('races.leave');
 });
 

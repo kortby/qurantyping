@@ -2,6 +2,7 @@
 
 use App\Events\Race\RaceFinished;
 use App\Events\Race\RaceParticipantFinished;
+use App\Events\Race\RaceProgress;
 use App\Events\Race\RaceStarting;
 use App\Jobs\StartRaceJob;
 use App\Models\QuranText;
@@ -110,6 +111,29 @@ it('records a finish, writes a Test, and orders positions by finish order', func
 
     expect($race->fresh()->status)->toBe('finished');
     Event::assertDispatched(RaceFinished::class);
+});
+
+it('relays a progress tick to the room while racing', function () {
+    Event::fake([RaceProgress::class]);
+
+    $a = User::factory()->create();
+    $b = User::factory()->create();
+    $service = app(RaceService::class);
+
+    $race = $service->quickMatch($a);
+    $service->quickMatch($b);
+    $race->refresh()->update(['status' => 'racing', 'starts_at' => now()->subSeconds(5)]);
+
+    actingAs($a)->post("/races/{$race->channelKey()}/progress", ['pct' => 0.4, 'wpm' => 55])
+        ->assertOk();
+
+    Event::assertDispatched(RaceProgress::class, fn ($e) => $e->userId === $a->id && $e->pct === 0.4);
+
+    // A non-racing race relays nothing.
+    Event::fake([RaceProgress::class]);
+    $race->update(['status' => 'lobby']);
+    actingAs($a)->post("/races/{$race->channelKey()}/progress", ['pct' => 0.9, 'wpm' => 80])->assertOk();
+    Event::assertNotDispatched(RaceProgress::class);
 });
 
 it('rejects a finish posted before the race starts', function () {

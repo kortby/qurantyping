@@ -145,6 +145,22 @@ class RaceController extends Controller
         ]);
     }
 
+    public function progress(Request $request, string $key): JsonResponse
+    {
+        $race = $this->races->resolve($key);
+
+        if ($race) {
+            $this->races->relayProgress(
+                $race,
+                $request->user(),
+                (float) $request->float('pct'),
+                (int) $request->integer('wpm'),
+            );
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
     public function leave(Request $request, string $key): RedirectResponse
     {
         $race = $this->races->resolve($key);

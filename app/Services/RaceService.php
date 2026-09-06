@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\Race\RaceFinished;
 use App\Events\Race\RaceLobbyUpdated;
 use App\Events\Race\RaceParticipantFinished;
+use App\Events\Race\RaceProgress;
 use App\Events\Race\RaceStarted;
 use App\Events\Race\RaceStarting;
 use App\Jobs\StartRaceJob;
@@ -215,6 +216,27 @@ class RaceService
         }
 
         return $participant->fresh();
+    }
+
+    /**
+     * Relay a live progress tick to the room (reliable fallback for client whispers).
+     */
+    public function relayProgress(Race $race, User $user, float $pct, int $wpm): void
+    {
+        if ($race->status !== 'racing') {
+            return;
+        }
+
+        if (! $race->participants()->where('user_id', $user->id)->exists()) {
+            return;
+        }
+
+        broadcast(new RaceProgress(
+            $race->channelKey(),
+            $user->id,
+            max(0, min(1, $pct)),
+            max(0, min(self::MAX_PLAUSIBLE_WPM, $wpm)),
+        ));
     }
 
     public function finish(Race $race): void
