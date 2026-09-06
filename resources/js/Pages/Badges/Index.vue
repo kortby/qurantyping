@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import BadgeSeal from '@/Components/BadgeSeal.vue';
+import BadgeSeal, { badgeColor } from '@/Components/BadgeSeal.vue';
 import { useSettings } from '../../useSettings';
 
 const props = defineProps({
@@ -36,13 +36,18 @@ const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString() : '');
                         v-for="b in badges"
                         :key="b.slug"
                         class="border p-4 flex items-start gap-4"
-                        :class="b.earned_at ? 'border-[var(--caret-color)]/40' : 'border-[var(--border-color)]'"
+                        :class="b.earned_at ? '' : 'border-[var(--border-color)]'"
+                        :style="b.earned_at ? { borderColor: badgeColor(b.icon), borderLeftWidth: '3px' } : {}"
                     >
                         <BadgeSeal :icon="b.icon" :tier="b.tier" :earned="!!b.earned_at" :size="52" />
                         <div class="min-w-0">
                             <p class="font-cinzel text-sm" :class="b.earned_at ? 'text-[var(--main-color)]' : 'text-[var(--sub-color)]'">{{ b.name }}</p>
                             <p class="text-[var(--sub-color)] text-xs mt-0.5 leading-snug">{{ b.description }}</p>
-                            <p v-if="b.earned_at" class="font-mono text-[10px] text-[var(--caret-color)] uppercase tracking-[0.15em] mt-1.5">
+                            <p
+                                v-if="b.earned_at"
+                                class="font-mono text-[10px] uppercase tracking-[0.15em] mt-1.5"
+                                :style="{ color: badgeColor(b.icon) }"
+                            >
                                 {{ t('badges.awarded_on').replace('{date}', fmtDate(b.earned_at)) }}
                             </p>
                         </div>

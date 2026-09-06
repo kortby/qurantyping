@@ -1,3 +1,17 @@
+<script>
+// Per-family hue — deliberately more colourful than the rest of the app.
+export const BADGE_COLORS = {
+    star: '#c99a2e',      // amber
+    bolt: '#3b6fb5',      // lapis
+    flame: '#c1452f',     // tomato
+    book: '#3f9d6b',      // green
+    crescent: '#7d5ba6',  // violet
+    trophy: '#b8732e',    // burnt orange
+};
+
+export const badgeColor = (icon) => BADGE_COLORS[icon] || BADGE_COLORS.star;
+</script>
+
 <script setup>
 import { computed } from 'vue';
 
@@ -24,7 +38,7 @@ const pip = computed(() => ({
     gold: 'var(--caret-color)',
 }[props.tier] || '#a97142'));
 
-const stroke = computed(() => (props.earned ? 'var(--caret-color)' : 'var(--border-color)'));
+const color = computed(() => (props.earned ? badgeColor(props.icon) : 'var(--border-color)'));
 const d = computed(() => glyphs[props.icon] || glyphs.star);
 </script>
 
@@ -34,19 +48,18 @@ const d = computed(() => glyphs[props.icon] || glyphs.star);
         :style="{ width: size + 'px', height: size + 'px' }"
         :class="earned ? '' : 'opacity-45'"
     >
-        <!-- outer seal ring -->
         <svg :width="size" :height="size" viewBox="0 0 56 56" aria-hidden="true">
-            <circle cx="28" cy="28" r="25" fill="none" :stroke="stroke" stroke-width="1.5" />
-            <circle cx="28" cy="28" r="21" fill="none" :stroke="stroke" stroke-width="0.75" />
+            <circle cx="28" cy="28" r="25" fill="none" :stroke="color" stroke-width="1.5" />
+            <circle cx="28" cy="28" r="21" fill="none" :stroke="color" stroke-width="0.75" />
+            <circle v-if="earned" cx="28" cy="28" r="25" fill="none" :stroke="color" stroke-width="1.5" opacity="0.12" />
         </svg>
-        <!-- glyph -->
         <svg
             :width="size * 0.5"
             :height="size * 0.5"
             viewBox="0 0 24 24"
             fill="none"
-            :stroke="stroke"
-            stroke-width="1.6"
+            :stroke="color"
+            stroke-width="1.7"
             stroke-linecap="round"
             stroke-linejoin="round"
             class="absolute"
@@ -54,7 +67,6 @@ const d = computed(() => glyphs[props.icon] || glyphs.star);
         >
             <path :d="d" />
         </svg>
-        <!-- tier pip -->
         <span
             v-if="earned"
             class="absolute bottom-0 right-0 w-2 h-2 rounded-full border border-[var(--bg-color)]"
