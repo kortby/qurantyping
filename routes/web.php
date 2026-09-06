@@ -12,6 +12,7 @@ use App\Http\Controllers\DrillController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HifzController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\QuranMapController;
 use App\Http\Controllers\RaceController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPageController;
@@ -113,6 +114,9 @@ Route::middleware([
     Route::post('/hifz/grade', [HifzController::class, 'grade'])->name('hifz.grade');
 
     Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+
+    Route::get('/map', [QuranMapController::class, 'index'])->name('map.index');
+    Route::get('/map/{surah}', [QuranMapController::class, 'surah'])->whereNumber('surah')->name('map.surah');
 
     Route::get('/drills', DrillController::class)->name('drills.index');
     Route::get('/test/drill', [TestController::class, 'drillText'])->name('test.drill');

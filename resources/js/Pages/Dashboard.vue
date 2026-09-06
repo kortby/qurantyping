@@ -37,6 +37,7 @@ const props = defineProps({
     chartData: Array,
     bestTest: Object,
     certificatesCount: { type: Number, default: 0 },
+    quranProgress: { type: Object, default: null },
 });
 
 const chartDataValues = computed(() => {
@@ -208,6 +209,25 @@ const formatDuration = (seconds) => {
                 </div>
 
                 <DailyGoal class="mb-6" />
+
+                <!-- Qur'an progress -->
+                <Link v-if="quranProgress" href="/map" class="block mb-6 border border-[var(--border-color)] p-4 hover:border-[var(--caret-color)] transition-colors">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-[9px] text-[var(--sub-color)] uppercase tracking-[0.2em] font-mono">{{ t('map.title') }}</h3>
+                        <span class="font-mono text-[10px] text-[var(--sub-color)] tabular-nums">{{ quranProgress.practiced }} / {{ quranProgress.ayah_count }} ayahs</span>
+                    </div>
+                    <div class="h-2 flex overflow-hidden">
+                        <div class="bg-[var(--lapis-color)]" :style="{ width: quranProgress.memorised_pct + '%' }"></div>
+                        <div class="bg-[var(--caret-color)]" :style="{ width: Math.max(0, quranProgress.mastered_pct - quranProgress.memorised_pct) + '%' }"></div>
+                        <div class="bg-[var(--sub-color)]/40" :style="{ width: Math.max(0, quranProgress.practiced_pct - quranProgress.mastered_pct) + '%' }"></div>
+                        <div class="bg-[var(--border-color)] flex-1"></div>
+                    </div>
+                    <div class="flex flex-wrap gap-x-5 gap-y-0.5 mt-2 font-mono text-[10px] text-[var(--sub-color)]">
+                        <span>{{ t('map.practiced') }} {{ quranProgress.practiced_pct }}%</span>
+                        <span>{{ t('map.mastered') }} {{ quranProgress.mastered_pct }}%</span>
+                        <span>{{ t('map.memorised') }} {{ quranProgress.memorised }}</span>
+                    </div>
+                </Link>
 
                 <!-- Evolution Chart -->
                 <div v-if="chartData.length > 1" class="mb-6 border border-[var(--border-color)] p-4">
