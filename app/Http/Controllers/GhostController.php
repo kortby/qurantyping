@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Test;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class GhostController extends Controller
@@ -32,6 +33,7 @@ class GhostController extends Controller
             abort_if(! $test, 404);
             abort_unless(
                 $test->user_id === $user->id
+                    || (int) $request->session()->get('ghost_grant') === $test->id
                     || ($test->user && $user->isFriendsWith($test->user)),
                 403,
             );
@@ -47,10 +49,26 @@ class GhostController extends Controller
             'tashkeel' => (bool) $test->tashkeel,
             'trace' => $test->result->history ?? [],
             'opponent' => [
+                'user_id' => $test->user_id,
                 'name' => $test->user?->name,
                 'wpm' => $test->wpm,
                 'is_self' => $test->user_id === $user->id,
+                'is_friend' => $test->user && $user->isFriendsWith($test->user),
             ],
         ]);
+    }
+
+    /**
+     * A signed "race my run" link. Grants a one-visit pass to that test's ghost
+     * and drops the visitor onto the typing screen with it loaded.
+     */
+    public function challenge(Request $request, Test $test): RedirectResponse
+    {
+        abort_unless($request->hasValidSignature(), 403);
+        abort_if(! $test->result, 404);
+
+        $request->session()->put('ghost_grant', $test->id);
+
+        return redirect('/?ghost='.$test->id);
     }
 }

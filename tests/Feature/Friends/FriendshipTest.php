@@ -108,6 +108,47 @@ it('renders the friends page for a signed-in user', function () {
     actingAs(User::factory()->create())->get('/friends')->assertOk();
 });
 
+it('creates a friend request when an authed user opens an invite link', function () {
+    $owner = User::factory()->create();
+    $token = $owner->inviteToken();
+    $visitor = User::factory()->create();
+
+    actingAs($visitor)->get("/i/{$token}")->assertRedirect(route('friends.index'));
+
+    $this->assertDatabaseHas('friendships', [
+        'user_id' => $visitor->id, 'friend_id' => $owner->id, 'status' => 'pending',
+    ]);
+});
+
+it('is a no-op when a user opens their own invite link', function () {
+    $owner = User::factory()->create();
+    $token = $owner->inviteToken();
+
+    actingAs($owner)->get("/i/{$token}")->assertRedirect(route('friends.index'));
+
+    expect(Friendship::count())->toBe(0);
+});
+
+it('404s on an unknown invite token', function () {
+    actingAs(User::factory()->create())->get('/i/nope-not-real')->assertNotFound();
+});
+
+it('stashes the invite for a guest and redeems it after they sign in', function () {
+    $owner = User::factory()->create();
+    $token = $owner->inviteToken();
+    $visitor = User::factory()->create();
+
+    $this->get("/i/{$token}")->assertRedirect(route('register'));
+    expect(session('pending_invite'))->toBe($token);
+
+    $this->post('/login', ['email' => $visitor->email, 'password' => 'password']);
+
+    $this->assertDatabaseHas('friendships', [
+        'user_id' => $visitor->id, 'friend_id' => $owner->id, 'status' => 'pending',
+    ]);
+    expect(session('pending_invite'))->toBeNull();
+});
+
 it('scopes the leaderboard to friends plus self', function () {
     seedFriendAyahs();
 

@@ -11,6 +11,7 @@ use App\Services\QuranNavigator;
 use App\Services\WeakLetterService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class TestController extends Controller
 {
@@ -192,11 +193,15 @@ class TestController extends Controller
 
         $this->weakLetters->record($test->user_id, $request->safe()->collect('char_stats'));
 
+        $challengeUrl = null;
+
         if ($test->user_id && $request->filled('trace')) {
             Result::create([
                 'test_id' => $test->id,
                 'history' => $request->validated('trace'),
             ]);
+
+            $challengeUrl = URL::signedRoute('challenge.show', ['test' => $test->id]);
         }
 
         $newBadges = ($test->newBadges ?? collect())->map(fn ($b): array => [
@@ -205,7 +210,10 @@ class TestController extends Controller
             'description' => $b->description,
         ])->values();
 
-        return response()->json(array_merge($test->toArray(), ['new_badges' => $newBadges]), 201);
+        return response()->json(array_merge($test->toArray(), [
+            'new_badges' => $newBadges,
+            'challenge_url' => $challengeUrl,
+        ]), 201);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Friendship;
 use App\Models\Test;
 use App\Models\User;
 use App\Observers\TestObserver;
@@ -31,9 +32,22 @@ class AppServiceProvider extends ServiceProvider
         Test::observe(TestObserver::class);
 
         Event::listen(Login::class, function (Login $event): void {
+            if (! $event->user instanceof User) {
+                return;
+            }
+
             // Don't count impersonation as the user signing in themselves.
-            if ($event->user instanceof User && ! request()->routeIs('admin.users.impersonate', 'impersonate.leave')) {
+            if (! request()->routeIs('admin.users.impersonate', 'impersonate.leave')) {
                 $event->user->forceFill(['last_login_at' => now()])->saveQuietly();
+            }
+
+            // Redeem a friend invite the guest followed before signing up.
+            if ($token = request()->session()?->pull('pending_invite')) {
+                $owner = User::where('invite_token', $token)->first();
+
+                if ($owner && $owner->id !== $event->user->id) {
+                    Friendship::request($event->user, $owner->id);
+                }
             }
         });
     }

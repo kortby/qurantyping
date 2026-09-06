@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -215,5 +216,17 @@ class User extends Authenticatable
     public function isFriendsWith(User $other): bool
     {
         return $this->friendIds()->contains($other->id);
+    }
+
+    /**
+     * The user's stable personal invite token, generated on first use.
+     */
+    public function inviteToken(): string
+    {
+        if (! $this->invite_token) {
+            $this->forceFill(['invite_token' => Str::random(20)])->save();
+        }
+
+        return $this->invite_token;
     }
 }
