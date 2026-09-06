@@ -191,11 +191,39 @@ onBeforeUnmount(() => {
 
 const shareUrl = computed(() => `${window.location.origin}/races/${props.race.key}`);
 const copied = ref(false);
-function copyShare() {
-    navigator.clipboard?.writeText(shareUrl.value).then(() => {
-        copied.value = true;
-        setTimeout(() => (copied.value = false), 1500);
-    });
+
+async function copyShare() {
+    const url = shareUrl.value;
+    let ok = false;
+
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(url);
+            ok = true;
+        }
+    } catch {
+        ok = false;
+    }
+
+    if (!ok) {
+        // Fallback for non-secure contexts (plain http).
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            ok = document.execCommand('copy');
+        } catch {
+            ok = false;
+        }
+        document.body.removeChild(ta);
+    }
+
+    copied.value = ok ? 'ok' : 'fail';
+    setTimeout(() => (copied.value = false), 2000);
 }
 
 const showSurface = computed(() => (status.value === 'racing' || myResult.value) && text.value);
@@ -221,12 +249,27 @@ const caretOk = computed(() => score.firstErrorIndex.value === -1);
                 <!-- Private room share -->
                 <div v-if="race.visibility === 'private' && status === 'lobby'" class="border border-[var(--border-color)] p-4 mb-6 font-mono text-sm">
                     <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--sub-color)] mb-2">{{ t('races.room_code') }}</p>
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
                         <span class="text-lg tracking-[0.3em] text-[var(--caret-color)]">{{ race.code }}</span>
-                        <button type="button" @click="copyShare" class="border border-[var(--border-color)] px-3 py-1 text-[11px] hover:border-[var(--caret-color)]">
-                            {{ copied ? t('races.copied') : t('races.share_link') }}
+                        <button
+                            type="button"
+                            @click="copyShare"
+                            class="border px-3 py-1 text-[11px] transition-colors"
+                            :class="copied === 'ok'
+                                ? 'border-[var(--caret-color)] text-[var(--caret-color)]'
+                                : copied === 'fail'
+                                    ? 'border-[var(--error-color)] text-[var(--error-color)]'
+                                    : 'border-[var(--border-color)] hover:border-[var(--caret-color)]'"
+                        >
+                            {{ copied === 'ok' ? t('races.copied') : copied === 'fail' ? t('races.copy_failed') : t('races.share_link') }}
                         </button>
                     </div>
+                    <input
+                        :value="shareUrl"
+                        readonly
+                        @focus="$event.target.select()"
+                        class="mt-3 w-full bg-[var(--bg-color)] border border-[var(--border-color)] px-3 py-2 text-[11px] text-[var(--sub-color)] focus:border-[var(--caret-color)] focus:outline-none"
+                    />
                     <button
                         v-if="race.is_host"
                         type="button"
