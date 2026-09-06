@@ -74,6 +74,29 @@ const ghostProgress = ref(0);
 const ghostOutcome = ref(null);
 let ghostTick = null;
 
+const challengeUrl = ref(null);
+const challengeCopied = ref(false);
+
+const copyChallenge = async () => {
+    if (!challengeUrl.value) return;
+    try {
+        await navigator.clipboard.writeText(challengeUrl.value);
+        challengeCopied.value = true;
+        setTimeout(() => (challengeCopied.value = false), 2000);
+    } catch {
+        // clipboard blocked
+    }
+};
+
+const addOpponent = () => {
+    if (!ghostMeta.value?.user_id) return;
+    router.post('/friends', { friend_id: ghostMeta.value.user_id }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+    ghostMeta.value.is_friend = true;
+};
+
 const liveProgress = computed(() => {
     const len = sourceCharacters.value.length;
     return len ? Math.min(1, userInput.value.length / len) : 0;
@@ -816,6 +839,7 @@ const finishTest = async () => {
         const { data } = await axios.post('/test/complete', testData);
         lastTestId.value = data?.id ?? null;
         newBadges.value = data?.new_badges ?? [];
+        challengeUrl.value = data?.challenge_url ?? null;
         if (newBadges.value.length) {
             confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 }, colors: ['#eab308', '#d1d0c5', '#4b7bec'] });
         }
@@ -839,6 +863,8 @@ const resetTest = () => {
     lastSample = 0;
     ghostProgress.value = 0;
     ghostOutcome.value = null;
+    challengeUrl.value = null;
+    challengeCopied.value = false;
     setTimeout(() => {
         focusInput();
     }, 100);
@@ -1266,6 +1292,20 @@ defineOptions({ layout: AppLayout });
                         .replace('{name}', ghostMeta?.is_self ? t('ghost.your_pb') : (ghostMeta?.name || ''))
                         .replace('{seconds}', ghostOutcome.seconds.toFixed(1)) }}
                 </p>
+
+                <!-- Race actions -->
+                <div v-if="challengeUrl || (ghostOutcome && ghostMeta && !ghostMeta.is_self && !ghostMeta.is_friend && ghostMeta.user_id && page.props.auth?.user)"
+                     class="flex flex-wrap items-center justify-center gap-2">
+                    <button v-if="challengeUrl" type="button" @click="copyChallenge"
+                            class="border border-[var(--caret-color)] text-[var(--caret-color)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] hover:bg-[var(--caret-color)]/10 transition-colors">
+                        {{ challengeCopied ? t('ghost.challenge_copied') : t('ghost.challenge_link') }}
+                    </button>
+                    <button v-if="ghostOutcome && ghostMeta && !ghostMeta.is_self && !ghostMeta.is_friend && ghostMeta.user_id && page.props.auth?.user"
+                            type="button" @click="addOpponent"
+                            class="border border-[var(--border-color)] text-[var(--main-color)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] hover:border-[var(--caret-color)] transition-colors">
+                        {{ t('ghost.add_opponent').replace('{name}', ghostMeta.name || '') }}
+                    </button>
+                </div>
 
                 <!-- New badges -->
                 <div v-if="newBadges.length" class="w-full max-w-md px-4">

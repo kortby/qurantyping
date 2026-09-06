@@ -82,6 +82,7 @@ class FriendController extends Controller
                 ])->all(),
             'results' => Inertia::optional(fn (): array => $this->search($request, $user, $friendIds)),
             'query' => $request->string('q')->toString(),
+            'invite_url' => url('/i/'.$user->inviteToken()),
         ]);
     }
 
@@ -94,41 +95,50 @@ class FriendController extends Controller
             'friend_id' => 'required|integer|exists:users,id',
         ]);
 
-        $targetId = (int) $validated['friend_id'];
+        return back()->with(...$this->flashFor(
+            Friendship::request($request->user(), (int) $validated['friend_id']),
+        ));
+    }
 
-        if ($targetId === $request->user()->id) {
-            return back()->with('error', __('You cannot add yourself.'));
+    /**
+     * Land on someone's personal invite link — befriend them, handing guests
+     * through registration first.
+     */
+    public function invite(Request $request, string $token): RedirectResponse
+    {
+        $owner = User::where('invite_token', $token)->first();
+
+        abort_if(! $owner, 404);
+
+        if (! $request->user()) {
+            $request->session()->put('pending_invite', $token);
+
+            return redirect()->route('register');
         }
 
-        $existing = Friendship::query()
-            ->where(function ($query) use ($request, $targetId): void {
-                $query->where('user_id', $request->user()->id)->where('friend_id', $targetId);
-            })
-            ->orWhere(function ($query) use ($request, $targetId): void {
-                $query->where('user_id', $targetId)->where('friend_id', $request->user()->id);
-            })
-            ->first();
-
-        if ($existing) {
-            if ($existing->status === 'accepted') {
-                return back()->with('message', __('You are already friends.'));
-            }
-
-            if ($existing->friend_id === $request->user()->id) {
-                $existing->update(['status' => 'accepted', 'accepted_at' => now()]);
-
-                return back()->with('message', __('Friend request accepted.'));
-            }
-
-            return back()->with('message', __('Friend request already sent.'));
+        if ($owner->id === $request->user()->id) {
+            return redirect()->route('friends.index');
         }
 
-        Friendship::create([
-            'user_id' => $request->user()->id,
-            'friend_id' => $targetId,
-        ]);
+        return redirect()->route('friends.index')->with(...$this->flashFor(
+            Friendship::request($request->user(), $owner->id),
+        ));
+    }
 
-        return back()->with('message', __('Friend request sent.'));
+    /**
+     * Map a Friendship::request() outcome to a flash key/message pair.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function flashFor(string $outcome): array
+    {
+        return match ($outcome) {
+            'self' => ['error', __('You cannot add yourself.')],
+            'friends' => ['message', __('You are already friends.')],
+            'exists' => ['message', __('Friend request already sent.')],
+            'accepted' => ['message', __('Friend request accepted.')],
+            default => ['message', __('Friend request sent.')],
+        };
     }
 
     /**

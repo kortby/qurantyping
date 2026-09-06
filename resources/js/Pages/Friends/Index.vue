@@ -10,13 +10,25 @@ const props = defineProps({
     outgoing: { type: Array, default: () => [] },
     results: { type: Array, default: () => null },
     query: { type: String, default: '' },
+    invite_url: { type: String, default: '' },
 });
 
 const { t } = useSettings();
 
 const search = ref(props.query || '');
 const busy = ref(false);
+const copied = ref(false);
 let debounce = null;
+
+const copyInvite = async () => {
+    try {
+        await navigator.clipboard.writeText(props.invite_url);
+        copied.value = true;
+        setTimeout(() => (copied.value = false), 2000);
+    } catch {
+        // clipboard blocked — the input is selectable as a fallback
+    }
+};
 
 watch(search, (value) => {
     clearTimeout(debounce);
@@ -60,6 +72,25 @@ const remove = (friendshipId) => act('delete', `/friends/${friendshipId}`);
                         {{ t('friends.race_pb') }}
                     </Link>
                 </header>
+
+                <!-- Invite link -->
+                <section class="mb-10">
+                    <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-3">{{ t('friends.invite_link') }}</h2>
+                    <div class="flex gap-2">
+                        <input
+                            :value="invite_url"
+                            type="text"
+                            readonly
+                            onclick="this.select()"
+                            class="flex-1 min-w-0 bg-transparent border border-[var(--border-color)] px-4 py-2.5 font-mono text-xs text-[var(--sub-color)] focus:outline-none"
+                        />
+                        <button type="button" @click="copyInvite"
+                                class="shrink-0 border border-[var(--caret-color)] text-[var(--caret-color)] px-4 font-mono text-[10px] uppercase tracking-[0.2em] hover:bg-[var(--caret-color)]/10 transition-colors">
+                            {{ copied ? t('friends.copied') : t('friends.copy') }}
+                        </button>
+                    </div>
+                    <p class="mt-2 font-mono text-[10px] text-[var(--sub-color)] opacity-70">{{ t('friends.invite_hint') }}</p>
+                </section>
 
                 <!-- Find people -->
                 <section class="mb-10">

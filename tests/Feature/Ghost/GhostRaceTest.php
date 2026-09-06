@@ -5,6 +5,7 @@ use App\Models\QuranText;
 use App\Models\Result;
 use App\Models\Test;
 use App\Models\User;
+use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
 
@@ -93,7 +94,7 @@ it('404s on /ghost/pb when the caller has no recorded run', function () {
 it('persists a trace to the results table on POST /test/complete', function () {
     $me = User::factory()->create();
 
-    actingAs($me)->postJson('/test/complete', completePayload(QuranText::first()->id, [
+    $response = actingAs($me)->postJson('/test/complete', completePayload(QuranText::first()->id, [
         'trace' => [[0, 0], [1200, 25], [2400, 50]],
     ]))->assertCreated();
 
@@ -101,6 +102,33 @@ it('persists a trace to the results table on POST /test/complete', function () {
 
     expect($test->result)->not->toBeNull()
         ->and($test->result->history)->toBe([[0, 0], [1200, 25], [2400, 50]]);
+
+    expect($response->json('challenge_url'))->toContain('/challenge/'.$test->id)
+        ->and($response->json('challenge_url'))->toContain('signature=');
+});
+
+it('rejects an unsigned challenge link', function () {
+    $owner = User::factory()->create();
+    $test = Test::factory()->for($owner)->create(['quran_text_id' => QuranText::first()->id]);
+    Result::create(['test_id' => $test->id, 'history' => [[0, 0], [500, 10]]]);
+
+    actingAs(User::factory()->create())->get("/challenge/{$test->id}")->assertForbidden();
+});
+
+it('grants a non-friend a one-visit ghost pass through a signed challenge link', function () {
+    $me = User::factory()->create();
+    $owner = User::factory()->create();
+    $test = Test::factory()->for($owner)->create(['quran_text_id' => QuranText::first()->id]);
+    Result::create(['test_id' => $test->id, 'history' => [[0, 0], [500, 10], [1000, 22]]]);
+
+    $signed = URL::signedRoute('challenge.show', ['test' => $test->id]);
+
+    actingAs($me)->get($signed)->assertRedirect('/?ghost='.$test->id);
+
+    actingAs($me)->getJson("/ghost/{$test->id}")
+        ->assertOk()
+        ->assertJsonPath('opponent.is_friend', false)
+        ->assertJsonPath('trace.2.1', 22);
 });
 
 it('creates no result row when no trace is sent', function () {
