@@ -51,6 +51,8 @@ const testFinished = ref(false);
 const isFocused = ref(false);
 const showResults = ref(false);
 const totalErrors = ref(0);
+const charStats = ref(new Map());
+const isDrill = ref(false);
 const isShiftPressed = ref(false);
 const isTyping = ref(false);
 const showLanguageWarning = ref(false);
@@ -607,10 +609,16 @@ const handleInput = (event) => {
             if (index < sourceCharacters.value.length) {
                 const typedChar = newValue[index];
                 const expectedChar = sourceCharacters.value[index];
-                if (normalizeForComparison(typedChar) !== normalizeForComparison(expectedChar)) {
+                const miss = normalizeForComparison(typedChar) !== normalizeForComparison(expectedChar);
+
+                const stat = charStats.value.get(expectedChar) ?? { attempts: 0, misses: 0 };
+                stat.attempts++;
+                if (miss) {
+                    stat.misses++;
                     totalErrors.value++;
                     playErrorSound();
                 }
+                charStats.value.set(expectedChar, stat);
             }
         }
     }
@@ -678,6 +686,14 @@ const finishTest = async () => {
             testData.peeks = peeks.value;
         }
 
+        if (charStats.value.size > 0) {
+            testData.char_stats = [...charStats.value].map(([c, s]) => ({
+                c,
+                attempts: s.attempts,
+                misses: s.misses,
+            }));
+        }
+
         if (!page.props.auth?.user) {
             localStorage.setItem('cached_typing_test', JSON.stringify(testData));
             setTimeout(() => {
@@ -697,6 +713,7 @@ const resetTest = () => {
     userInput.value = '';
     timer.value = 0;
     totalErrors.value = 0;
+    charStats.value = new Map();
     testFinished.value = false;
     showResults.value = false;
     setTimeout(() => {
@@ -742,6 +759,15 @@ onMounted(async () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('hifz') === '1') {
         await loadHifzSession(urlParams.get('mode') === 'new' ? 'new' : 'due');
+    } else if (urlParams.get('drill') === '1') {
+        isDrill.value = true;
+        try {
+            const { data } = await axios.get('/test/drill');
+            applyPassage(data);
+        } catch {
+            isDrill.value = false;
+            await fetchTestText(false);
+        }
     } else if (urlParams.has('after')) {
         await fetchTestText({ after: parseInt(urlParams.get('after')) });
     } else if (urlParams.has('scope') && urlParams.get('scope') !== 'surah') {
@@ -915,6 +941,10 @@ defineOptions({ layout: AppLayout });
             <span class="cartouche">
                 <span class="name" dir="rtl">{{ quranText.surah_name_arabic }}</span>
                 <span class="font-mono">{{ quranText.surah_number }}:{{ quranText.start_ayah }}–{{ quranText.end_ayah }}</span>
+            </span>
+
+            <span v-if="isDrill" class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--lapis-color)] border border-[var(--border-color)] px-2 py-1">
+                {{ t('navigation.drills') }}
             </span>
 
             <div v-if="hifzMode" class="flex items-center gap-2 font-mono text-[11px]">

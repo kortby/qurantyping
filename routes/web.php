@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ContestController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DrillController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HifzController;
 use App\Http\Controllers\LeaderboardController;
@@ -110,6 +111,9 @@ Route::middleware([
     Route::post('/hifz/grade', [HifzController::class, 'grade'])->name('hifz.grade');
 
     Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+
+    Route::get('/drills', DrillController::class)->name('drills.index');
+    Route::get('/test/drill', [TestController::class, 'drillText'])->name('test.drill');
 });
 
 // Admin users management (super admins only).

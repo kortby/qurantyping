@@ -39,6 +39,10 @@ class StoreTestRequest extends FormRequest
             'total_errors' => 'required|integer|min:0',
             'hifz_level' => 'sometimes|nullable|integer|min:1|max:3',
             'peeks' => 'sometimes|integer|min:0',
+            'char_stats' => 'sometimes|array|max:200',
+            'char_stats.*.c' => 'required|string|min:1|max:8',
+            'char_stats.*.attempts' => 'required|integer|min:1|max:100000',
+            'char_stats.*.misses' => 'required|integer|min:0|max:100000',
         ];
     }
 }
