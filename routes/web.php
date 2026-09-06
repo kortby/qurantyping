@@ -12,6 +12,7 @@ use App\Http\Controllers\DrillController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HifzController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\RaceController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPageController;
 use App\Http\Controllers\UserSettingController;
@@ -115,6 +116,15 @@ Route::middleware([
 
     Route::get('/drills', DrillController::class)->name('drills.index');
     Route::get('/test/drill', [TestController::class, 'drillText'])->name('test.drill');
+
+    Route::get('/races', [RaceController::class, 'index'])->name('races.index');
+    Route::post('/races/quick', [RaceController::class, 'quick'])->name('races.quick');
+    Route::post('/races', [RaceController::class, 'store'])->name('races.store');
+    Route::get('/races/{key}', [RaceController::class, 'show'])->name('races.show');
+    Route::post('/races/{key}/join', [RaceController::class, 'join'])->name('races.join');
+    Route::post('/races/{key}/start', [RaceController::class, 'start'])->name('races.start');
+    Route::post('/races/{key}/finish', [RaceController::class, 'finish'])->name('races.finish');
+    Route::post('/races/{key}/leave', [RaceController::class, 'leave'])->name('races.leave');
 });
 
 // Admin users management (super admins only).
