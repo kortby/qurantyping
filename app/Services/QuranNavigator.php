@@ -142,15 +142,16 @@ class QuranNavigator
     }
 
     /**
-     * Every surah with its names, ayah count, and the juz its first ayah sits in.
+     * Every surah with its names, ayah count, and the span of juz it covers
+     * (`juz` = first ayah's juz, `juz_end` = last ayah's juz — long surahs span several).
      *
-     * @return list<array{number:int, name_en:string, name_ar:string, ayah_count:int, juz:int}>
+     * @return list<array{number:int, name_en:string, name_ar:string, ayah_count:int, juz:int, juz_end:int}>
      */
     public function surahIndex(): array
     {
         return Cache::rememberForever('quran.surah_index', function (): array {
             return QuranText::query()
-                ->selectRaw('surah_number, MAX(surah_name_english) as name_en, MAX(surah_name_arabic) as name_ar, COUNT(*) as ayah_count, MIN(juz) as juz')
+                ->selectRaw('surah_number, MAX(surah_name_english) as name_en, MAX(surah_name_arabic) as name_ar, COUNT(*) as ayah_count, MIN(juz) as juz, MAX(juz) as juz_end')
                 ->groupBy('surah_number')
                 ->orderBy('surah_number')
                 ->get()
@@ -160,7 +161,25 @@ class QuranNavigator
                     'name_ar' => (string) $row->name_ar,
                     'ayah_count' => (int) $row->ayah_count,
                     'juz' => (int) $row->juz,
+                    'juz_end' => (int) $row->juz_end,
                 ])
+                ->all();
+        });
+    }
+
+    /**
+     * Ayah count per juz, straight from the per-ayah `juz` column.
+     *
+     * @return array<int, int>
+     */
+    public function juzAyahCounts(): array
+    {
+        return Cache::rememberForever('quran.juz_ayah_counts', function (): array {
+            return QuranText::query()
+                ->selectRaw('juz, COUNT(*) as c')
+                ->groupBy('juz')
+                ->pluck('c', 'juz')
+                ->map(fn ($c): int => (int) $c)
                 ->all();
         });
     }

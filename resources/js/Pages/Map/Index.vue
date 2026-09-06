@@ -35,7 +35,7 @@ function pctOf(s) {
 const surahs = computed(() => {
     let list = props.map.surahs.map((s) => ({ ...s, ...seg(s), pct: pctOf(s) }));
 
-    if (activeJuz.value) list = list.filter((s) => s.juz === activeJuz.value);
+    if (activeJuz.value) list = list.filter((s) => activeJuz.value >= s.juz && activeJuz.value <= (s.juz_end ?? s.juz));
 
     if (filter.value === 'progress') list = list.filter((s) => s.touched > 0 && s.touched < s.ayah_count);
     else if (filter.value === 'mastered') list = list.filter((s) => s.mastered >= s.ayah_count);
@@ -54,6 +54,7 @@ const totals = computed(() => props.map.totals);
 const R = 15;
 const CIRC = 2 * Math.PI * R;
 function juzFill(j) {
+    if (!j.ayah_count) return 0;
     return Math.min(1, Math.max(j.practiced, j.memorised) / j.ayah_count);
 }
 function juzTint(j) {

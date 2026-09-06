@@ -29,6 +29,10 @@ function seedMapAyahs(): void
     for ($a = 1; $a <= 4; $a++) {
         $rows[] = $make(1, $a, 1, 'Al-Fatihah', 'الفاتحة');
     }
+    // A surah that straddles two juz (like Al-Baqarah spanning 1-3).
+    for ($a = 1; $a <= 6; $a++) {
+        $rows[] = $make(2, $a, $a <= 4 ? 1 : 2, 'Al-Baqarah', 'البقرة');
+    }
     QuranText::insert($rows);
 }
 
@@ -76,10 +80,18 @@ it('aggregates practised / mastered / memorised per surah and totals', function 
     expect($map['totals']['practiced'])->toBe(3)
         ->and($map['totals']['mastered'])->toBe(2)
         ->and($map['totals']['memorised'])->toBe(1)
-        ->and($map['totals']['ayah_count'])->toBe(12);
+        ->and($map['totals']['ayah_count'])->toBe(18);
 
     $juz30 = collect($map['juz'])->firstWhere('juz', 30);
     expect($juz30['practiced'])->toBe(3)->and($juz30['memorised'])->toBe(1)->and($juz30['ayah_count'])->toBe(8);
+});
+
+it('counts juz ayah_count from the per-ayah juz column, not the surah rollup', function () {
+    $map = app(QuranMapService::class)->overview($this->user);
+
+    // Surah 2 puts 4 ayahs in juz 1 and 2 ayahs in juz 2; surah 1 adds 4 to juz 1.
+    expect(collect($map['juz'])->firstWhere('juz', 1)['ayah_count'])->toBe(8)
+        ->and(collect($map['juz'])->firstWhere('juz', 2)['ayah_count'])->toBe(2);
 });
 
 it('reports per-ayah state with the highest layer winning', function () {

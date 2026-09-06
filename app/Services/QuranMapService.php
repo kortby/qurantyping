@@ -35,7 +35,6 @@ class QuranMapService
         $memorisedByJuz = $this->memorisedCounts($user->id, 'juz');
 
         $surahs = [];
-        $juzTotals = [];
         $grand = ['ayah_count' => 0, 'practiced' => 0, 'mastered' => 0, 'memorised' => 0];
 
         foreach ($this->navigator->surahIndex() as $s) {
@@ -49,6 +48,7 @@ class QuranMapService
                 'name_en' => $s['name_en'],
                 'name_ar' => $s['name_ar'],
                 'juz' => $s['juz'],
+                'juz_end' => $s['juz_end'],
                 'ayah_count' => $s['ayah_count'],
                 'practiced' => $practiced,
                 'mastered' => $mastered,
@@ -59,17 +59,15 @@ class QuranMapService
             $grand['practiced'] += $practiced;
             $grand['mastered'] += $mastered;
             $grand['memorised'] += $memorised;
-
-            $j = $s['juz'];
-            $juzTotals[$j] ??= ['ayah_count' => 0];
-            $juzTotals[$j]['ayah_count'] += $s['ayah_count'];
         }
+
+        $juzCounts = $this->navigator->juzAyahCounts();
 
         $juz = [];
         for ($j = 1; $j <= 30; $j++) {
             $juz[] = [
                 'juz' => $j,
-                'ayah_count' => (int) ($juzTotals[$j]['ayah_count'] ?? 0),
+                'ayah_count' => (int) ($juzCounts[$j] ?? 0),
                 'practiced' => (int) ($completionsByJuz[$j]->practiced ?? 0),
                 'mastered' => (int) ($completionsByJuz[$j]->mastered ?? 0),
                 'memorised' => (int) ($memorisedByJuz[$j] ?? 0),
