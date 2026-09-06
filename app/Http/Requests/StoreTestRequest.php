@@ -52,6 +52,8 @@ class StoreTestRequest extends FormRequest
             // Ghost race context: which run was raced, and whether it was beaten.
             'ghost_of' => 'sometimes|nullable|integer',
             'ghost_beat' => 'sometimes|boolean',
+            // Marks a run as an attempt at today's daily challenge.
+            'daily' => 'sometimes|boolean',
         ];
     }
 }

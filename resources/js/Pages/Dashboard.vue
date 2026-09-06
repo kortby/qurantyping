@@ -209,6 +209,15 @@ const formatDuration = (seconds) => {
                             >
                                 {{ t('friends.requests_count').replace('{n}', $page.props.auth.friend_requests) }}
                             </Link>
+                            <Link
+                                href="/today"
+                                class="inline-flex items-center min-h-[36px] border px-4 font-cinzel text-xs uppercase tracking-[0.12em] transition-colors"
+                                :class="$page.props.auth?.daily_done
+                                    ? 'border-[var(--border-color)] text-[var(--sub-color)] hover:border-[var(--caret-color)]'
+                                    : 'border-[var(--caret-color)] text-[var(--caret-color)] hover:opacity-80'"
+                            >
+                                {{ $page.props.auth?.daily_done ? t('daily.done_chip') : t('daily.todo_chip') }}
+                            </Link>
                         </div>
                     </div>
                     <div class="flex gap-3">

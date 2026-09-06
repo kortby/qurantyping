@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\ContestController;
+use App\Http\Controllers\DailyChallengeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DrillController;
 use App\Http\Controllers\FeedbackController;
@@ -91,6 +92,7 @@ Route::get('api/test/new', [TestController::class, 'getNewTest']);
 Route::get('api/surahs', [TestController::class, 'getSurahs']);
 Route::get('api/quran/scopes', [TestController::class, 'getScopes']);
 Route::get('api/test/text', [TestController::class, 'getTextForTest']);
+Route::get('api/daily', [DailyChallengeController::class, 'text'])->name('daily.text');
 Route::post('/test/complete', [TestController::class, 'store']);
 
 // Route::get('/', function () {
@@ -129,6 +131,8 @@ Route::middleware([
     Route::get('/test/drill', [TestController::class, 'drillText'])->name('test.drill');
 
     Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
+    Route::get('/today', [DailyChallengeController::class, 'index'])->name('daily.index');
 
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends', [FriendController::class, 'store'])->name('friends.store');

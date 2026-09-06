@@ -109,6 +109,9 @@ if (typeof window !== 'undefined') {
                         <Link href="/" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('leaderboard') }}</Link>
                         <template v-if="$page.props.auth.user">
+                            <Link href="/today" class="hover:text-[var(--main-color)] transition-colors">
+                                {{ t('navigation.today') }}<span v-if="!$page.props.auth.daily_done" class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-[var(--caret-color)] align-middle"></span>
+                            </Link>
                             <Link href="/dashboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/hifz" class="hover:text-[var(--main-color)] transition-colors">
                                 {{ t('navigation.hifz') }}<span v-if="$page.props.auth.hifz_due" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.hifz_due }}</span>
@@ -231,6 +234,9 @@ if (typeof window !== 'undefined') {
                         <Link href="/" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('leaderboard') }}</Link>
                         <template v-if="$page.props.auth.user">
+                            <Link href="/today" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
+                                {{ t('navigation.today') }}<span v-if="!$page.props.auth.daily_done" class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-[var(--caret-color)] align-middle"></span>
+                            </Link>
                             <Link href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/hifz" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
                                 {{ t('navigation.hifz') }}<span v-if="$page.props.auth.hifz_due" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.hifz_due }}</span>
