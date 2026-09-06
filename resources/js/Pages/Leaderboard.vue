@@ -77,23 +77,23 @@ const sendRequest = (scorer) => {
                 </div>
 
                 <!-- Leaderboard Table -->
-                <div class="bg-[var(--panel-color)] overflow-hidden border border-[var(--border-color)]">
+                <div class="bg-[var(--panel-color)] overflow-x-auto border border-[var(--border-color)]">
                     <table class="w-full text-left font-mono text-sm border-collapse">
                         <thead>
                             <tr class="bg-[var(--caret-color)]/5 text-[var(--sub-color)] uppercase tracking-[0.3em] text-[10px]">
-                                <th class="px-8 py-4 font-bold text-center">{{ t('rank') }}</th>
-                                <th class="px-8 py-4 font-bold">{{ t('seeker') }}</th>
-                                <th class="px-8 py-4 font-bold text-center">{{ t('wpm') }}</th>
-                                <th class="px-8 py-4 font-bold text-center">{{ t('accuracy') }}</th>
-                                <th class="px-8 py-4 font-bold text-center">{{ t('errors') }}</th>
-                                <th class="px-8 py-4 font-bold text-center">{{ t('chars') }}</th>
-                                <th class="px-8 py-4 font-bold text-right">{{ t('tests_count') }}</th>
+                                <th class="px-3 sm:px-6 py-4 font-bold text-center">{{ t('rank') }}</th>
+                                <th class="px-3 sm:px-6 py-4 font-bold">{{ t('seeker') }}</th>
+                                <th class="px-3 sm:px-6 py-4 font-bold text-center">{{ t('wpm') }}</th>
+                                <th class="px-3 sm:px-6 py-4 font-bold text-center">{{ t('accuracy') }}</th>
+                                <th class="hidden sm:table-cell px-3 sm:px-6 py-4 font-bold text-center">{{ t('errors') }}</th>
+                                <th class="hidden sm:table-cell px-3 sm:px-6 py-4 font-bold text-center">{{ t('chars') }}</th>
+                                <th class="hidden sm:table-cell px-3 sm:px-6 py-4 font-bold text-right">{{ t('tests_count') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[var(--border-color)]">
                             <tr v-for="(scorer, index) in topScorers" :key="index" 
                                 class="hover:bg-[var(--caret-color)]/[0.03] transition-all duration-500 group">
-                                <td class="px-8 py-4 text-center relative overflow-hidden">
+                                <td class="px-3 sm:px-6 py-4 text-center relative overflow-hidden">
                                      <div v-if="scorer.is_eligible" 
                                           class="absolute left-[-36px] top-[10px] w-[140px] -rotate-45 bg-[var(--caret-color)] text-emerald-950 text-[8px] font-bold uppercase tracking-widest py-0.5 text-center shadow-[0_2px_4px_rgba(0,0,0,0.3)] opacity-95 cursor-help hover:opacity-100 transition-opacity"
                                           :title="t('contest.eligible_tooltip')
@@ -109,10 +109,10 @@ const sendRequest = (scorer) => {
                                         <span v-else class="text-base opacity-40 font-cinzel font-bold">#{{ index + 1 }}</span>
                                     </div>
                                 </td>
-                                <td class="px-8 py-4">
+                                <td class="px-3 sm:px-6 py-4">
                                     <div class="flex flex-col">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-lg font-cinzel font-bold text-[var(--main-color)] group-hover:text-[var(--caret-color)] transition-colors">
+                                            <span class="text-base sm:text-lg font-cinzel font-bold text-[var(--main-color)] group-hover:text-[var(--caret-color)] transition-colors break-all">
                                                 {{ scorer.name }}
                                             </span>
                                             <template v-if="friendState(scorer)">
@@ -151,24 +151,24 @@ const sendRequest = (scorer) => {
                                         <span class="text-[9px] uppercase tracking-widest opacity-40">{{ t('devoted_reader') }}</span>
                                     </div>
                                 </td>
-                                <td class="px-8 py-4 text-center">
+                                <td class="px-3 sm:px-6 py-4 text-center">
                                     <div class="flex flex-col items-center">
-                                        <span class="text-3xl font-cinzel font-bold text-[var(--caret-color)]">{{ scorer.best_wpm }}</span>
+                                        <span class="text-2xl sm:text-3xl font-cinzel font-bold text-[var(--caret-color)]">{{ scorer.best_wpm }}</span>
                                         <span class="text-[8px] uppercase tracking-widest opacity-40">{{ t('words_min') }}</span>
                                     </div>
                                 </td>
-                                <td class="px-8 py-4 text-center">
+                                <td class="px-3 sm:px-6 py-4 text-center">
                                     <div class="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-[var(--border-color)] bg-[var(--caret-color)]/[0.02] text-[var(--caret-color)] font-bold">
                                         {{ Math.round(scorer.best_accuracy) }}%
                                     </div>
                                 </td>
-                                <td class="px-8 py-4 text-center font-bold text-[var(--error-color)]">
+                                <td class="hidden sm:table-cell px-3 sm:px-6 py-4 text-center font-bold text-[var(--error-color)]">
                                     {{ scorer.total_errors }}
                                 </td>
-                                <td class="px-8 py-4 text-center font-bold text-[var(--caret-color)] opacity-80">
+                                <td class="hidden sm:table-cell px-3 sm:px-6 py-4 text-center font-bold text-[var(--caret-color)] opacity-80">
                                     {{ scorer.char_count }}
                                 </td>
-                                <td class="px-8 py-4 text-right opacity-40 font-bold">
+                                <td class="hidden sm:table-cell px-3 sm:px-6 py-4 text-right opacity-40 font-bold">
                                     {{ scorer.total_tests }}
                                 </td>
                             </tr>

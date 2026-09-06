@@ -76,7 +76,7 @@ if (typeof window !== 'undefined') {
 
         <transition name="dropdown">
             <div v-if="open"
-                 class="absolute mt-2 w-72 bg-[var(--panel-color)] border border-[var(--border-color)] z-[60]"
+                 class="absolute mt-2 w-72 max-w-[calc(100vw-2rem)] bg-[var(--panel-color)] border border-[var(--border-color)] z-[60]"
                  :class="currentLang === 'ar' ? 'left-0' : 'right-0'">
                 <div class="px-4 py-2.5 border-b border-[var(--border-color)] font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--sub-color)]">
                     {{ t('notifications.title') }}

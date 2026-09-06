@@ -52,13 +52,13 @@ const prettyDate = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString(undef
                     <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-3">{{ t('daily.friends_board') }}</h2>
                     <div v-if="board.length" class="border border-[var(--border-color)] divide-y divide-[var(--border-color)] font-mono text-sm">
                         <div v-for="(row, i) in board" :key="row.user_id"
-                             class="flex items-center justify-between px-4 py-3"
+                             class="flex items-center justify-between gap-3 px-4 py-3"
                              :class="row.is_me ? 'bg-[var(--caret-color)]/[0.05]' : ''">
-                            <span class="flex items-center gap-3">
-                                <span class="opacity-40 tabular-nums w-5">#{{ i + 1 }}</span>
-                                <span class="text-[var(--main-color)]">{{ row.name }}</span>
+                            <span class="flex items-center gap-3 min-w-0">
+                                <span class="opacity-40 tabular-nums w-5 shrink-0">#{{ i + 1 }}</span>
+                                <span class="text-[var(--main-color)] truncate">{{ row.name }}</span>
                             </span>
-                            <span class="flex items-center gap-4">
+                            <span class="flex items-center gap-3 sm:gap-4 shrink-0">
                                 <span class="text-[var(--caret-color)] tabular-nums">{{ row.wpm }} {{ t('wpm') }}</span>
                                 <span class="text-[var(--sub-color)] tabular-nums">{{ row.accuracy }}%</span>
                             </span>
