@@ -21,6 +21,23 @@ const currentIndex = ref(0);
 const isPlaying = ref(false);
 const errored = ref(false);
 
+const readRepeat = () => {
+    try {
+        return localStorage.getItem('recitation_repeat') === '1';
+    } catch {
+        return false;
+    }
+};
+const repeat = ref(readRepeat());
+const toggleRepeat = () => {
+    repeat.value = !repeat.value;
+    try {
+        localStorage.setItem('recitation_repeat', repeat.value ? '1' : '0');
+    } catch {
+        // ignore — private mode / disabled storage
+    }
+};
+
 const pad3 = (n) => String(n).padStart(3, '0');
 
 const audioUrls = computed(() => {
@@ -71,6 +88,8 @@ const toggle = () => {
 const onEnded = () => {
     if (currentIndex.value < audioUrls.value.length - 1) {
         playIndex(currentIndex.value + 1);
+    } else if (repeat.value && audioUrls.value.length > 0) {
+        playIndex(0);
     } else {
         isPlaying.value = false;
         currentIndex.value = 0;
@@ -121,6 +140,17 @@ const statusLabel = computed(() => {
         >
             <svg v-if="!isPlaying" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3l14 9-14 9V3z" /></svg>
             <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
+        </button>
+
+        <button
+            type="button"
+            @click="toggleRepeat"
+            :title="t('repeat')"
+            :aria-pressed="repeat"
+            class="w-8 h-8 flex items-center justify-center border transition-colors"
+            :class="repeat ? 'border-[var(--caret-color)] text-[var(--caret-color)]' : 'border-[var(--border-color)] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)]'"
+        >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>
         </button>
 
         <div class="flex flex-col gap-1 min-w-[92px]">
