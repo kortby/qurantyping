@@ -217,9 +217,9 @@ const formatDuration = (seconds) => {
                         <span class="font-mono text-[10px] text-[var(--sub-color)] tabular-nums">{{ quranProgress.practiced }} / {{ quranProgress.ayah_count }} {{ t('map.ayahs') }}</span>
                     </div>
                     <div class="h-2 flex overflow-hidden">
-                        <div class="bg-[var(--lapis-color)]" :style="{ width: quranProgress.memorised_pct + '%' }"></div>
-                        <div class="bg-[var(--caret-color)]" :style="{ width: Math.max(0, quranProgress.mastered_pct - quranProgress.memorised_pct) + '%' }"></div>
-                        <div class="bg-[var(--sub-color)]/40" :style="{ width: Math.max(0, quranProgress.practiced_pct - quranProgress.mastered_pct) + '%' }"></div>
+                        <div class="bg-[#1e6b47]" :style="{ width: quranProgress.memorised_pct + '%' }"></div>
+                        <div class="bg-[#3f9d6b]" :style="{ width: Math.max(0, quranProgress.mastered_pct - quranProgress.memorised_pct) + '%' }"></div>
+                        <div class="bg-[#7fbf9c]/60" :style="{ width: Math.max(0, quranProgress.practiced_pct - quranProgress.mastered_pct) + '%' }"></div>
                         <div class="bg-[var(--border-color)] flex-1"></div>
                     </div>
                     <div class="flex flex-wrap gap-x-5 gap-y-0.5 mt-2 font-mono text-[10px] text-[var(--sub-color)]">

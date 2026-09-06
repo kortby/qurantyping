@@ -57,9 +57,9 @@ function juzFill(j) {
     return Math.min(1, Math.max(j.practiced, j.memorised) / j.ayah_count);
 }
 function juzTint(j) {
-    if (j.memorised > 0) return 'var(--lapis-color)';
-    if (j.mastered > 0) return 'var(--caret-color)';
-    if (j.practiced > 0) return 'var(--sub-color)';
+    if (j.memorised > 0) return '#1e6b47';
+    if (j.mastered > 0) return '#3f9d6b';
+    if (j.practiced > 0) return '#7fbf9c';
     return 'var(--border-color)';
 }
 
@@ -93,9 +93,9 @@ function typeRange() {
 
 const ayahCls = {
     untouched: 'border border-[var(--border-color)] text-[var(--sub-color)]',
-    practiced: 'bg-[var(--sub-color)]/25 text-[var(--main-color)]',
-    mastered: 'bg-[var(--caret-color)] text-[var(--bg-color)]',
-    memorised: 'bg-[var(--lapis-color)] text-white',
+    practiced: 'bg-[#7fbf9c]/40 text-[var(--main-color)]',
+    mastered: 'bg-[#3f9d6b] text-white',
+    memorised: 'bg-[#1e6b47] text-white',
 };
 </script>
 
@@ -113,15 +113,15 @@ const ayahCls = {
                 <!-- Overall -->
                 <section class="border border-[var(--border-color)] p-5 mb-8">
                     <div class="h-2 flex mb-3 overflow-hidden">
-                        <div class="bg-[var(--lapis-color)]" :style="{ width: totals.memorised_pct + '%' }"></div>
-                        <div class="bg-[var(--caret-color)]" :style="{ width: Math.max(0, totals.mastered_pct - totals.memorised_pct) + '%' }"></div>
-                        <div class="bg-[var(--sub-color)]/40" :style="{ width: Math.max(0, totals.practiced_pct - totals.mastered_pct) + '%' }"></div>
+                        <div class="bg-[#1e6b47]" :style="{ width: totals.memorised_pct + '%' }"></div>
+                        <div class="bg-[#3f9d6b]" :style="{ width: Math.max(0, totals.mastered_pct - totals.memorised_pct) + '%' }"></div>
+                        <div class="bg-[#7fbf9c]/60" :style="{ width: Math.max(0, totals.practiced_pct - totals.mastered_pct) + '%' }"></div>
                         <div class="bg-[var(--border-color)] flex-1"></div>
                     </div>
                     <div class="flex flex-wrap gap-x-6 gap-y-1 font-mono text-xs text-[var(--sub-color)]">
-                        <span><span class="text-[var(--sub-color)]">■</span> {{ t('map.practiced') }} {{ totals.practiced }} ({{ totals.practiced_pct }}%)</span>
-                        <span><span class="text-[var(--caret-color)]">■</span> {{ t('map.mastered') }} {{ totals.mastered }} ({{ totals.mastered_pct }}%)</span>
-                        <span><span class="text-[var(--lapis-color)]">■</span> {{ t('map.memorised') }} {{ totals.memorised }} ({{ totals.memorised_pct }}%)</span>
+                        <span><span class="text-[#7fbf9c]">■</span> {{ t('map.practiced') }} {{ totals.practiced }} ({{ totals.practiced_pct }}%)</span>
+                        <span><span class="text-[#3f9d6b]">■</span> {{ t('map.mastered') }} {{ totals.mastered }} ({{ totals.mastered_pct }}%)</span>
+                        <span><span class="text-[#1e6b47]">■</span> {{ t('map.memorised') }} {{ totals.memorised }} ({{ totals.memorised_pct }}%)</span>
                         <span class="text-[var(--main-color)]">{{ totals.ayah_count }} {{ t('map.ayahs') }}</span>
                     </div>
                 </section>
@@ -179,9 +179,9 @@ const ayahCls = {
                                 <span class="font-mono text-[10px] text-[var(--sub-color)] tabular-nums">{{ s.pct }}%</span>
                             </div>
                             <div class="h-1.5 flex mt-2 overflow-hidden">
-                                <div class="bg-[var(--lapis-color)]" :style="{ width: (s.mem / s.ayah_count * 100) + '%' }"></div>
-                                <div class="bg-[var(--caret-color)]" :style="{ width: (s.mas / s.ayah_count * 100) + '%' }"></div>
-                                <div class="bg-[var(--sub-color)]/40" :style="{ width: (s.pra / s.ayah_count * 100) + '%' }"></div>
+                                <div class="bg-[#1e6b47]" :style="{ width: (s.mem / s.ayah_count * 100) + '%' }"></div>
+                                <div class="bg-[#3f9d6b]" :style="{ width: (s.mas / s.ayah_count * 100) + '%' }"></div>
+                                <div class="bg-[#7fbf9c]/60" :style="{ width: (s.pra / s.ayah_count * 100) + '%' }"></div>
                                 <div class="bg-[var(--border-color)] flex-1"></div>
                             </div>
                         </button>
