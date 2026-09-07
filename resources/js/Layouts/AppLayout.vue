@@ -206,6 +206,10 @@ if (typeof window !== 'undefined') {
                                         class="block px-4 py-2.5 text-[var(--sub-color)] hover:bg-[var(--caret-color)]/10 hover:text-[var(--main-color)] transition-colors">
                                         {{ t('navigation.dashboard') }}
                                     </Link>
+                                    <Link href="/certificates" @click="userMenuOpen = false"
+                                        class="block px-4 py-2.5 text-[var(--sub-color)] hover:bg-[var(--caret-color)]/10 hover:text-[var(--main-color)] transition-colors">
+                                        {{ t('navigation.certificates') }}
+                                    </Link>
                                     <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" @click="userMenuOpen = false"
                                         class="block px-4 py-2.5 text-[var(--lapis-color)] hover:bg-[var(--caret-color)]/10 transition-colors">
                                         {{ t('navigation.admin') }}
@@ -267,6 +271,7 @@ if (typeof window !== 'undefined') {
                                 {{ t('navigation.friends') }}<span v-if="$page.props.auth.friend_requests" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.friend_requests }}</span>
                             </Link>
                             <Link href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
+                            <Link href="/certificates" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.certificates') }}</Link>
 
                             <span class="mx-auto w-8 border-t border-[var(--border-color)] my-1"></span>
 

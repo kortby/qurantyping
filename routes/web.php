@@ -34,6 +34,7 @@ Route::get('/leaderboard', LeaderboardController::class)->name('leaderboard');
 Route::get('/contest', [ContestController::class, 'index'])->name('contest.index');
 Route::get('/i/{token}', [FriendController::class, 'invite'])->name('friends.invite');
 Route::get('/challenge/{test}', [GhostController::class, 'challenge'])->name('challenge.show');
+Route::get('/c/{token}', [CertificateController::class, 'show'])->name('certificates.show');
 Route::get('/privacy-policy', function () {
     $lang = App::getLocale();
     $file = resource_path("markdown/policy.{$lang}.md");
