@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import ShareBar from './ShareBar.vue';
 import { useSettings } from '../useSettings';
 
 const props = defineProps({
@@ -11,87 +12,171 @@ const busy = ref(false);
 
 const formatDate = (d) => new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
+const shareTitle = computed(
+    () => `${props.cert.holder} completed Surah ${props.cert.surah_name_english} · QuranTyping`,
+);
+const shareText = computed(
+    () => `I completed Surah ${props.cert.surah_name_english} on QuranTyping — ${props.cert.accuracy}% accuracy. Type the Qur'an, letter by letter:`,
+);
+
 /* ---- shareable image (hand-drawn, no dependency) ---- */
+
+const spacedText = (ctx, text, x, y, spacing) => {
+    ctx.letterSpacing = `${spacing}px`;
+    ctx.fillText(text, x + spacing / 2, y);
+    ctx.letterSpacing = '0px';
+};
+
+const cornerFlourish = (ctx, x, y, dx, dy, gold) => {
+    const r = 26;
+    ctx.strokeStyle = gold;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(x + dx * r, y + dy * r, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + dx * r, y + dy * r, r - 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = gold;
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+};
+
+const diamond = (ctx, x, y, s, fill) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = fill;
+    ctx.fillRect(-s / 2, -s / 2, s, s);
+    ctx.restore();
+};
 
 const drawCertificate = (ctx, w, h) => {
     const c = props.cert;
     // Fixed "paper" palette so the export reads the same in any theme.
-    const paper = '#f6f1e7', ink = '#1f1c17', gold = '#9a6f28', sub = '#8c8371';
+    const paper = '#f7f2e7', ink = '#211d17', gold = '#9a6f28', goldSoft = '#c6a15a', sub = '#8a8069';
+    const mid = w / 2;
 
     ctx.fillStyle = paper;
     ctx.fillRect(0, 0, w, h);
 
-    // double gold rule
+    // frame: hairline · heavy rule · inner hairline
     ctx.strokeStyle = gold;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(48, 48, w - 96, h - 96);
-    ctx.lineWidth = 6;
-    ctx.strokeRect(64, 64, w - 128, h - 128);
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(40, 40, w - 80, h - 80);
+    ctx.lineWidth = 4;
+    ctx.strokeRect(54, 54, w - 108, h - 108);
+    ctx.strokeStyle = goldSoft;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(72, 72, w - 144, h - 144);
 
-    // corner marks
-    const m = 40;
-    ctx.lineWidth = 2;
-    [[92, 92, 1, 1], [w - 92, 92, -1, 1], [92, h - 92, 1, -1], [w - 92, h - 92, -1, -1]].forEach(([x, y, dx, dy]) => {
-        ctx.beginPath();
-        ctx.moveTo(x + dx * m, y);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x, y + dy * m);
-        ctx.stroke();
-    });
+    // corner rosettes, just inside the inner hairline
+    cornerFlourish(ctx, 92, 92, 1, 1, gold);
+    cornerFlourish(ctx, w - 92, 92, -1, 1, gold);
+    cornerFlourish(ctx, 92, h - 92, 1, -1, gold);
+    cornerFlourish(ctx, w - 92, h - 92, -1, -1, gold);
 
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
 
+    // eyebrow
     ctx.fillStyle = sub;
-    ctx.font = "500 26px 'IBM Plex Sans', system-ui, sans-serif";
-    ctx.fillText('C E R T I F I C A T E   O F   C O M P L E T I O N', w / 2, 170);
+    ctx.font = "500 23px 'IBM Plex Sans', system-ui, sans-serif";
+    spacedText(ctx, 'CERTIFICATE OF COMPLETION', mid, 124, 8);
 
-    ctx.fillStyle = ink;
-    ctx.font = "700 150px 'Noto Naskh Arabic', serif";
+    // divider under the eyebrow
+    ctx.strokeStyle = gold;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(mid - 168, 148);
+    ctx.lineTo(mid - 46, 148);
+    ctx.moveTo(mid + 46, 148);
+    ctx.lineTo(mid + 168, 148);
+    ctx.stroke();
+    diamond(ctx, mid, 148, 9, gold);
+
+    // hero — the surah name in Arabic, shrunk to fit the safe width
+    let size = 116;
     ctx.direction = 'rtl';
-    ctx.fillText(c.surah_name_arabic, w / 2, h / 2 - 20);
+    do {
+        ctx.font = `700 ${size}px 'Noto Naskh Arabic', serif`;
+        size -= 6;
+    } while (ctx.measureText(c.surah_name_arabic).width > w - 500 && size > 56);
+    ctx.fillStyle = ink;
+    ctx.fillText(c.surah_name_arabic, mid, 284);
     ctx.direction = 'ltr';
 
-    ctx.font = "600 52px 'IBM Plex Sans', system-ui, sans-serif";
-    ctx.fillText(`Surah ${c.surah_name_english}`, w / 2, h / 2 + 80);
+    // short rule
+    ctx.strokeStyle = goldSoft;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(mid - 44, 324);
+    ctx.lineTo(mid + 44, 324);
+    ctx.stroke();
+
+    // english title
+    ctx.fillStyle = ink;
+    ctx.font = "600 32px 'IBM Plex Sans', system-ui, sans-serif";
+    spacedText(ctx, `SURAH ${c.surah_name_english.toUpperCase()}`, mid, 368, 5);
+
+    // stats
+    ctx.fillStyle = sub;
+    ctx.font = "400 21px 'IBM Plex Mono', monospace";
+    spacedText(ctx, `${c.ayah_count} AYAHS   ·   ${c.accuracy}% ACCURACY`, mid, 410, 2);
+
+    // awarded to
+    ctx.fillStyle = sub;
+    ctx.font = "500 16px 'IBM Plex Sans', system-ui, sans-serif";
+    spacedText(ctx, 'AWARDED TO', mid, 470, 6);
+
+    ctx.fillStyle = ink;
+    ctx.font = "500 33px 'IBM Plex Sans', system-ui, sans-serif";
+    ctx.fillText(c.holder, mid, 508);
+
+    // signature rule beneath the holder
+    ctx.strokeStyle = goldSoft;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(mid - 140, 524);
+    ctx.lineTo(mid + 140, 524);
+    ctx.stroke();
 
     ctx.fillStyle = sub;
-    ctx.font = "400 30px 'IBM Plex Mono', monospace";
-    ctx.fillText(`${c.ayah_count} ayahs  ·  ${c.accuracy}% accuracy or better`, w / 2, h / 2 + 150);
+    ctx.font = "400 18px 'IBM Plex Mono', monospace";
+    ctx.fillText(`${formatDate(c.issued_at)}  ·  qurantyping.com`, mid, 548);
 
-    // seal
+    // wax-style seal, in the right quiet zone beside the title
+    const cx = w - 152, cy = 356, r = 40;
     ctx.strokeStyle = gold;
     ctx.lineWidth = 3;
-    const cx = w / 2, cy = h - 210, r = 46;
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(cx, cy, r - 10, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r - 9, 0, Math.PI * 2);
     ctx.stroke();
-    for (let i = 0; i < 8; i++) {
-        const a = (i / 8) * Math.PI * 2;
+    for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
         ctx.beginPath();
-        ctx.moveTo(cx + Math.cos(a) * (r - 10), cy + Math.sin(a) * (r - 10));
-        ctx.lineTo(cx + Math.cos(a) * (r + 8), cy + Math.sin(a) * (r + 8));
+        ctx.moveTo(cx + Math.cos(a) * (r - 9), cy + Math.sin(a) * (r - 9));
+        ctx.lineTo(cx + Math.cos(a) * (r + 7), cy + Math.sin(a) * (r + 7));
         ctx.stroke();
     }
-
-    ctx.fillStyle = ink;
-    ctx.font = "500 34px 'IBM Plex Sans', system-ui, sans-serif";
-    ctx.fillText(c.holder, w / 2, h - 110);
-    ctx.fillStyle = sub;
-    ctx.font = "400 24px 'IBM Plex Mono', monospace";
-    ctx.fillText(`${formatDate(c.issued_at)}  ·  QuranTyping`, w / 2, h - 72);
+    diamond(ctx, cx, cy, 12, gold);
 };
 
 const saveImage = async () => {
-    if (busy.value) return;
+    if (busy.value) {
+        return;
+    }
     busy.value = true;
     try {
         await Promise.all([
-            document.fonts.load("700 150px 'Noto Naskh Arabic'"),
-            document.fonts.load("600 52px 'IBM Plex Sans'"),
-            document.fonts.load("400 30px 'IBM Plex Mono'"),
+            document.fonts.load("700 132px 'Noto Naskh Arabic'"),
+            document.fonts.load("600 33px 'IBM Plex Sans'"),
+            document.fonts.load("400 21px 'IBM Plex Mono'"),
         ]).catch(() => {});
         await document.fonts.ready;
 
@@ -105,7 +190,8 @@ const saveImage = async () => {
         drawCertificate(ctx, W, H);
 
         const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
-        const file = new File([blob], `quran-typing-surah-${props.cert.surah_number}.png`, { type: 'image/png' });
+        const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        const file = new File([blob], `quran-typing-surah-${props.cert.surah_number}-${stamp}.png`, { type: 'image/png' });
 
         if (navigator.canShare?.({ files: [file] })) {
             await navigator.share({ files: [file], title: `Surah ${props.cert.surah_name_english}` });
@@ -147,13 +233,16 @@ const saveImage = async () => {
         <p class="text-sm text-[var(--main-color)]">{{ cert.holder }}</p>
         <p class="font-mono text-[10px] text-[var(--sub-color)]">{{ formatDate(cert.issued_at) }} · QuranTyping</p>
 
-        <button
-            type="button"
-            @click="saveImage"
-            :disabled="busy"
-            class="mt-2 min-h-[36px] px-4 border border-[var(--border-color)] font-cinzel text-[11px] uppercase tracking-[0.12em] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors disabled:opacity-50"
-        >
-            {{ busy ? t('certificates.preparing') : t('certificates.save_image') }}
-        </button>
+        <div class="mt-2 flex flex-col items-center gap-3">
+            <button
+                type="button"
+                @click="saveImage"
+                :disabled="busy"
+                class="min-h-[36px] px-4 border border-[var(--border-color)] font-cinzel text-[11px] uppercase tracking-[0.12em] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors disabled:opacity-50"
+            >
+                {{ busy ? t('certificates.preparing') : t('certificates.save_image') }}
+            </button>
+            <ShareBar v-if="cert.share_url" :url="cert.share_url" :title="shareTitle" :text="shareText" />
+        </div>
     </figure>
 </template>

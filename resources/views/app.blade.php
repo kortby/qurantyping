@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <title> {{ env('APP_NAME') }} - إختبار سرعة الكتابة</title>
+    @php($meta = $meta ?? [])
+    <title>{{ $meta['title'] ?? env('APP_NAME') . ' - إختبار سرعة الكتابة' }}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!-- Google tag (gtag.js) -->
@@ -23,27 +24,38 @@
     @endproduction
 
     <!-- SEO Meta Tags -->
-    <meta name="description"
-        content="Enhance your Quran memorization and Arabic typing speed with QuranTyping. Progress through the Quran, test your accuracy, and track your performance in a beautiful, minimalist environment.">
+    @php($ogTitle = $meta['title'] ?? 'QuranTyping - Quran Memorization & Arabic Typing Tool')
+    @php($ogDescription = $meta['description'] ?? 'Enhance your Quran memorization and Arabic typing speed with QuranTyping. Test your accuracy and track your performance.')
+    @php($ogUrl = $meta['url'] ?? url()->current())
+    @php($ogImage = $meta['image'] ?? asset('images/og-image.png'))
+    @php($ogImageAlt = $meta['image_alt'] ?? 'QuranTyping — type the Qur\'an, letter by letter')
+    <meta name="description" content="{{ $ogDescription }}">
     <meta name="keywords"
         content="Quran Typing, Arabic Typing Test, Memorize Quran, Quran Hifz Tool, Learn Arabic Typing, Speed Typing Arabic, Islamic Typing Website">
     <meta name="author" content="QuranTyping">
+    <link rel="canonical" href="{{ $ogUrl }}">
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="QuranTyping - Quran Memorization & Arabic Typing Tool">
-    <meta property="og:description"
-        content="Enhance your Quran memorization and Arabic typing speed with QuranTyping. Test your accuracy and track your performance.">
-    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+    <meta property="og:site_name" content="QuranTyping">
+    <meta property="og:locale" content="{{ ['en' => 'en_US', 'fr' => 'fr_FR', 'ar' => 'ar_AR'][app()->getLocale()] ?? 'en_US' }}">
+    <meta property="og:type" content="{{ $meta['type'] ?? 'website' }}">
+    <meta property="og:url" content="{{ $ogUrl }}">
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $ogImageAlt }}">
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ url()->current() }}">
-    <meta property="twitter:title" content="QuranTyping - Quran Memorization & Arabic Typing Tool">
-    <meta property="twitter:description"
-        content="Enhance your Quran memorization and Arabic typing speed with QuranTyping. Test your accuracy and track your performance.">
-    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ $ogUrl }}">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    <meta name="twitter:image:alt" content="{{ $ogImageAlt }}">
 
     {{-- Naskh for scripture, IBM Plex for the interface --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

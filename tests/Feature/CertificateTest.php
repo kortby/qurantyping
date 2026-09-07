@@ -123,3 +123,52 @@ it('lists only the viewer\'s certificates', function () {
 
     $response->assertOk()->assertSee('Al-Asr')->assertDontSee('Al-Fil');
 });
+
+it('assigns a share token to every issued certificate', function () {
+    $user = User::factory()->create();
+    completeSurah($user, 103, 97.0);
+
+    $cert = Certificate::where('user_id', $user->id)->firstOrFail();
+
+    expect($cert->share_token)->toBeString()->toHaveLength(10);
+});
+
+it('exposes the public share url on the certificates page', function () {
+    $user = User::factory()->create();
+    completeSurah($user, 103, 97.0);
+    $cert = Certificate::where('user_id', $user->id)->firstOrFail();
+
+    actingAs($user)->get('/certificates')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('certificates.0.share_url', url('/c/'.$cert->share_token)));
+});
+
+it('serves a certificate publicly to guests via its share token', function () {
+    $owner = User::factory()->create(['name' => 'Aisha Rahman']);
+    completeSurah($owner, 103, 97.0);
+    $cert = Certificate::where('user_id', $owner->id)->firstOrFail();
+
+    $this->get('/c/'.$cert->share_token)
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Certificates/Show')
+            ->where('certificate.holder', 'Aisha Rahman')
+            ->where('certificate.surah_name_english', 'Al-Asr'));
+});
+
+it('404s on an unknown share token', function () {
+    $this->get('/c/nope-nope-nope')->assertNotFound();
+});
+
+it('renders social share meta tags on the public certificate page', function () {
+    $owner = User::factory()->create(['name' => 'Bilal Khan']);
+    completeSurah($owner, 103, 97.0);
+    $cert = Certificate::where('user_id', $owner->id)->firstOrFail();
+
+    $this->get('/c/'.$cert->share_token)
+        ->assertOk()
+        ->assertSee('og:title', false)
+        ->assertSee('Bilal Khan completed Surah Al-Asr', false)
+        ->assertSee('images/certificate-og.png', false)
+        ->assertSee('twitter:card', false);
+});

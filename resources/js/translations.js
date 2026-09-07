@@ -259,6 +259,7 @@ export const translations = {
             practice: "Practice",
             map: "Map",
             badges: "Badges",
+            certificates: "Certificates",
             hifz: "Hifz",
             impersonating_as: "Impersonating",
             stop_impersonating: "Stop impersonating"
@@ -333,7 +334,15 @@ export const translations = {
             detail: "{count} ayahs · {acc}% accuracy or better",
             save_image: "Save image",
             preparing: "Preparing…",
-            count: "{n} certificates"
+            count: "{n} certificates",
+            share: "Share",
+            share_link: "Copy link",
+            link_copied: "Link copied",
+            public_eyebrow: "A QuranTyping certificate",
+            public_intro: "{holder} completed this surah",
+            public_cta_title: "Type the Qur'an, letter by letter.",
+            public_cta_desc: "Practice your Arabic typing on real Quranic text, track accuracy, and earn a certificate for every surah you finish.",
+            public_cta_button: "Start typing"
         },
         share: {
             button: "Share result",
@@ -679,6 +688,7 @@ export const translations = {
             practice: "S'entraîner",
             map: "Progression",
             badges: "Badges",
+            certificates: "Certificats",
             hifz: "Hifz",
             impersonating_as: "Usurpation de",
             stop_impersonating: "Arrêter l'usurpation"
@@ -753,7 +763,15 @@ export const translations = {
             detail: "{count} versets · {acc}% de précision ou plus",
             save_image: "Enregistrer l'image",
             preparing: "Préparation…",
-            count: "{n} certificats"
+            count: "{n} certificats",
+            share: "Partager",
+            share_link: "Copier le lien",
+            link_copied: "Lien copié",
+            public_eyebrow: "Un certificat QuranTyping",
+            public_intro: "{holder} a terminé cette sourate",
+            public_cta_title: "Tapez le Coran, lettre par lettre.",
+            public_cta_desc: "Entraînez votre saisie de l'arabe sur le texte coranique, suivez votre précision et gagnez un certificat pour chaque sourate terminée.",
+            public_cta_button: "Commencer"
         },
         share: {
             button: "Partager le résultat",
@@ -1099,6 +1117,7 @@ export const translations = {
             practice: "التدريب",
             map: "الخريطة",
             badges: "الأوسمة",
+            certificates: "الشهادات",
             hifz: "الحفظ",
             impersonating_as: "انتحال هوية",
             stop_impersonating: "إيقاف انتحال الهوية"
@@ -1173,7 +1192,15 @@ export const translations = {
             detail: "{count} آيات · دقّة {acc}٪ أو أكثر",
             save_image: "حفظ كصورة",
             preparing: "جارٍ التحضير…",
-            count: "{n} شهادات"
+            count: "{n} شهادات",
+            share: "مشاركة",
+            share_link: "نسخ الرابط",
+            link_copied: "تم نسخ الرابط",
+            public_eyebrow: "شهادة من QuranTyping",
+            public_intro: "أتمّ {holder} هذه السورة",
+            public_cta_title: "اكتب القرآن، حرفًا حرفًا.",
+            public_cta_desc: "تدرّب على كتابة العربية على نص قرآني حقيقي، وتابع دقتك، واحصل على شهادة لكل سورة تُتمّها.",
+            public_cta_button: "ابدأ الكتابة"
         },
         share: {
             button: "مشاركة النتيجة",
