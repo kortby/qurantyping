@@ -133,6 +133,7 @@ const timeAgo = (value) => {
                                         <Link :href="`/admin/feedback/${item.id}`" class="text-[var(--main-color)] hover:text-[var(--caret-color)] transition-colors line-clamp-2">
                                             {{ item.excerpt }}
                                         </Link>
+                                        <span v-if="item.responded_at" class="mt-1 inline-block text-[9px] uppercase tracking-[0.15em] text-emerald-500" title="A reply was sent">Replied</span>
                                     </td>
                                     <td class="px-6 py-4 align-top text-[var(--sub-color)] whitespace-nowrap">
                                         <template v-if="item.user">

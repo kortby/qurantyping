@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -14,6 +14,14 @@ const props = defineProps({
 const page = usePage();
 
 const confirmingDeletion = ref(false);
+
+const replyForm = useForm({
+    response: props.feedback.admin_response ?? '',
+});
+
+const sendReply = () => {
+    replyForm.post(`/admin/feedback/${props.feedback.id}/reply`, { preserveScroll: true });
+};
 
 const toggleHandled = () => {
     router.patch(`/admin/feedback/${props.feedback.id}`, {
@@ -85,6 +93,32 @@ const typeStyles = {
                 <div class="bg-[var(--panel-color)] border border-[var(--border-color)] p-6">
                     <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)] mb-4">Message</h2>
                     <p class="whitespace-pre-wrap font-mono text-sm leading-relaxed text-[var(--main-color)]">{{ feedback.message }}</p>
+                </div>
+
+                <!-- Reply -->
+                <div class="bg-[var(--panel-color)] border border-[var(--border-color)] p-6 space-y-4">
+                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <h2 class="font-cinzel text-sm uppercase tracking-[0.3em] text-[var(--caret-color)]">Reply to user</h2>
+                        <span v-if="feedback.responded_at" class="font-mono text-[10px] uppercase tracking-widest text-[var(--sub-color)]">
+                            Sent {{ formatDate(feedback.responded_at) }}<template v-if="feedback.responder"> · {{ feedback.responder }}</template>
+                        </span>
+                    </div>
+
+                    <p v-if="!feedback.user" class="font-mono text-xs text-[var(--error-color)]">
+                        This user account no longer exists — a saved reply won't be emailed.
+                    </p>
+
+                    <textarea
+                        v-model="replyForm.response"
+                        rows="5"
+                        placeholder="Write a reply. It is emailed to the user and marks this feedback as handled."
+                        class="w-full bg-[var(--bg-color)] border border-[var(--border-color)] px-3 py-2 font-mono text-sm text-[var(--main-color)] focus:border-[var(--caret-color)] focus:outline-none"
+                    ></textarea>
+                    <p v-if="replyForm.errors.response" class="font-mono text-xs text-[var(--error-color)]">{{ replyForm.errors.response }}</p>
+
+                    <PrimaryButton type="button" :class="{ 'opacity-50': replyForm.processing }" :disabled="replyForm.processing" @click="sendReply">
+                        {{ feedback.responded_at ? 'Send updated reply' : 'Send reply' }}
+                    </PrimaryButton>
                 </div>
 
                 <!-- Actions -->

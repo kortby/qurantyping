@@ -1,8 +1,10 @@
 <?php
 
+use App\Mail\FeedbackReplied;
 use App\Models\Feedback;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 
 beforeEach(function () {
     Config::set('admin.super_admins', ['admin@example.com']);
@@ -20,6 +22,7 @@ it('forbids non-admins from every feedback route', function () {
     $this->actingAs($user)->get('/admin/feedback')->assertForbidden();
     $this->actingAs($user)->get("/admin/feedback/{$item->id}")->assertForbidden();
     $this->actingAs($user)->patch("/admin/feedback/{$item->id}", ['handled' => true])->assertForbidden();
+    $this->actingAs($user)->post("/admin/feedback/{$item->id}/reply", ['response' => 'hi'])->assertForbidden();
     $this->actingAs($user)->delete("/admin/feedback/{$item->id}")->assertForbidden();
 });
 
@@ -81,6 +84,48 @@ it('marks feedback as handled and reopens it', function () {
         ->assertRedirect();
 
     expect($item->fresh()->handled_at)->toBeNull();
+});
+
+it('emails an admin reply to the user and marks the feedback handled', function () {
+    Mail::fake();
+    $author = User::factory()->create(['email' => 'author@example.com']);
+    $item = Feedback::factory()->for($author)->create(['handled_at' => null]);
+
+    $this->actingAs($this->admin)
+        ->post("/admin/feedback/{$item->id}/reply", ['response' => 'Thanks — fixed in the next release.'])
+        ->assertRedirect();
+
+    $item->refresh();
+
+    expect($item->admin_response)->toBe('Thanks — fixed in the next release.')
+        ->and($item->responded_at)->not->toBeNull()
+        ->and($item->responded_by)->toBe($this->admin->id)
+        ->and($item->handled_at)->not->toBeNull();
+
+    Mail::assertSent(FeedbackReplied::class, fn ($mail) => $mail->hasTo('author@example.com'));
+});
+
+it('requires a non-empty reply', function () {
+    Mail::fake();
+    $item = Feedback::factory()->create();
+
+    $this->actingAs($this->admin)
+        ->post("/admin/feedback/{$item->id}/reply", ['response' => ''])
+        ->assertSessionHasErrors('response');
+
+    Mail::assertNothingSent();
+});
+
+it('keeps the original handled timestamp when replying to already-handled feedback', function () {
+    Mail::fake();
+    $handledAt = now()->subDays(3);
+    $item = Feedback::factory()->create(['handled_at' => $handledAt]);
+
+    $this->actingAs($this->admin)
+        ->post("/admin/feedback/{$item->id}/reply", ['response' => 'Following up on this.'])
+        ->assertRedirect();
+
+    expect($item->fresh()->handled_at->toDateTimeString())->toBe($handledAt->toDateTimeString());
 });
 
 it('deletes feedback', function () {

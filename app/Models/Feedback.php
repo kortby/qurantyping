@@ -17,6 +17,9 @@ class Feedback extends Model
         'message',
         'type',
         'handled_at',
+        'admin_response',
+        'responded_at',
+        'responded_by',
     ];
 
     /**
@@ -26,6 +29,7 @@ class Feedback extends Model
     {
         return [
             'handled_at' => 'datetime',
+            'responded_at' => 'datetime',
         ];
     }
 
@@ -35,5 +39,13 @@ class Feedback extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function responder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responded_by');
     }
 }
