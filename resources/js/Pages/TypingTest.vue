@@ -10,6 +10,7 @@ import QuranAudioPlayer from '@/Components/QuranAudioPlayer.vue';
 import GuestTestModal from '@/Components/GuestTestModal.vue';
 import LunarCountdown from '@/Components/LunarCountdown.vue';
 import BadgeSeal from '@/Components/BadgeSeal.vue';
+import ShareCard from '@/Components/ShareCard.vue';
 import { useSettings } from '../useSettings';
 
 const activeKey = ref(null);
@@ -625,6 +626,7 @@ const peeking = ref(false);
 const peeks = ref(0);
 const lastTestId = ref(null);
 const newBadges = ref([]);
+const sessionStreak = ref(0);
 const hifzMessage = ref('');
 
 const effectiveLevel = computed(() => (peeking.value ? 1 : revealLevel.value));
@@ -867,6 +869,7 @@ const finishTest = async () => {
         lastTestId.value = data?.id ?? null;
         newBadges.value = data?.new_badges ?? [];
         challengeUrl.value = data?.challenge_url ?? null;
+        sessionStreak.value = data?.streak ?? page.props.auth?.streak?.current ?? 0;
         if (newBadges.value.length) {
             confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 }, colors: ['#eab308', '#d1d0c5', '#4b7bec'] });
         }
@@ -883,6 +886,7 @@ const resetTest = () => {
     totalErrors.value = 0;
     charStats.value = new Map();
     newBadges.value = [];
+    sessionStreak.value = 0;
     testFinished.value = false;
     showResults.value = false;
     trace.value = [];
@@ -1335,6 +1339,19 @@ defineOptions({ layout: AppLayout });
                         {{ t('ghost.add_opponent').replace('{name}', ghostMeta.name || '') }}
                     </button>
                 </div>
+
+                <!-- Shareable result card -->
+                <ShareCard
+                    v-if="quranText.surah_name_arabic"
+                    :wpm="wpm"
+                    :accuracy="accuracy"
+                    :surah-arabic="quranText.surah_name_arabic"
+                    :surah-english="quranText.surah_name_english || ''"
+                    :surah-number="quranText.surah_number"
+                    :start-ayah="quranText.start_ayah"
+                    :end-ayah="quranText.end_ayah"
+                    :streak="sessionStreak"
+                />
 
                 <!-- New badges -->
                 <div v-if="newBadges.length" class="w-full max-w-md px-4">

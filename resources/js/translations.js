@@ -335,6 +335,10 @@ export const translations = {
             preparing: "Preparing…",
             count: "{n} certificates"
         },
+        share: {
+            button: "Share result",
+            preparing: "Preparing…"
+        },
         drills: {
             title: "Weak-letter drills",
             subtitle: "Per-character accuracy across every passage you type",
@@ -751,6 +755,10 @@ export const translations = {
             preparing: "Préparation…",
             count: "{n} certificats"
         },
+        share: {
+            button: "Partager le résultat",
+            preparing: "Préparation…"
+        },
         drills: {
             title: "Exercices de lettres faibles",
             subtitle: "Précision par caractère sur chaque passage que vous tapez",
@@ -1166,6 +1174,10 @@ export const translations = {
             save_image: "حفظ كصورة",
             preparing: "جارٍ التحضير…",
             count: "{n} شهادات"
+        },
+        share: {
+            button: "مشاركة النتيجة",
+            preparing: "جارٍ التحضير…"
         },
         drills: {
             title: "تمارين الحروف الضعيفة",

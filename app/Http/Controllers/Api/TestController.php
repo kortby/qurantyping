@@ -11,6 +11,7 @@ use App\Models\Test;
 use App\Notifications\GhostRaced;
 use App\Services\DailyChallengeService;
 use App\Services\QuranNavigator;
+use App\Services\StreakService;
 use App\Services\WeakLetterService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -175,6 +176,7 @@ class TestController extends Controller
             'text_simple' => $combinedTextSimple,
             'text_punctuated' => $combinedTextPunctuated,
             'surah_name_arabic' => $ayahs->first()->surah_name_arabic,
+            'surah_name_english' => $ayahs->first()->surah_name_english,
             'surah_number' => $surahNumber,
             'start_ayah' => $startAyah,
             'end_ayah' => $endAyah,
@@ -229,9 +231,16 @@ class TestController extends Controller
             'description' => $b->description,
         ])->values();
 
+        $streak = null;
+
+        if ($test->user_id) {
+            $streak = app(StreakService::class)->forInertia($request->user()->refresh())['current'];
+        }
+
         return response()->json(array_merge($test->toArray(), [
             'new_badges' => $newBadges,
             'challenge_url' => $challengeUrl,
+            'streak' => $streak,
         ]), 201);
     }
 
