@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     @php($meta = $meta ?? [])
-    <title>{{ $meta['title'] ?? env('APP_NAME') . ' - إختبار سرعة الكتابة' }}</title>
+    <title>{{ $meta['title'] ?? config('app.name') . ' - إختبار سرعة الكتابة' }}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!-- Google tag (gtag.js) -->
@@ -56,6 +56,9 @@
     <meta name="twitter:description" content="{{ $ogDescription }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
     <meta name="twitter:image:alt" content="{{ $ogImageAlt }}">
+
+    {{-- Structured data (JSON-LD built by the app view composer) --}}
+    <script type="application/ld+json">{!! $structuredDataJson !!}</script>
 
     {{-- Naskh for scripture, IBM Plex for the interface --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
