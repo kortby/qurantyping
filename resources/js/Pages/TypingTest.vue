@@ -986,11 +986,18 @@ defineOptions({ layout: AppLayout });
 
 <template>
     <Head>
-        <title>Quran Typing Test - Speed & Memorization | QuranTyping</title>
-        <meta name="description" content="Test your Quranic typing speed and accuracy. Practice memorization by typing surahs in Arabic with real-time feedback.">
+        <title>Type the Qur'an Online — Free Arabic Typing Practice & Hifz | QuranTyping</title>
+        <meta name="description" content="Practise typing the Qur'an in Arabic with live accuracy feedback, full tashkil, an on-screen Arabic keyboard, and a spaced-repetition Hifz mode. Completely free.">
     </Head>
 
     <div class="flex flex-col items-center justify-start py-8 px-6 md:px-8 lg:px-0 min-h-[80vh]">
+        <header v-if="!showResults" class="w-full max-w-6xl mb-6 text-center">
+            <h1 class="font-cinzel text-lg sm:text-xl text-[var(--main-color)]">{{ t('seo.landing_h1') }}</h1>
+            <p class="mt-1 mx-auto max-w-2xl font-mono text-[11px] sm:text-xs leading-relaxed text-[var(--sub-color)]">
+                {{ t('seo.landing_intro') }}
+            </p>
+        </header>
+
         <!-- Global Ramadan Countdown -->
         <LunarCountdown v-if="contestConfig?.enabled" :config="contestConfig" />
 

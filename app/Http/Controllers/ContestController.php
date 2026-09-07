@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Test;
 use App\Services\ContestService;
+use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
 
 class ContestController extends Controller
 {
-    public function __construct(private ContestService $contest)
-    {
-    }
+    public function __construct(private ContestService $contest) {}
 
     public function index()
     {
-        if (!$this->contest->isActive()) {
+        View::share('meta', [
+            'title' => 'Quran Typing Contest | QuranTyping',
+            'description' => 'Compete for the top spot in the QuranTyping speed-and-accuracy contest on real Quranic passages.',
+        ]);
+
+        if (! $this->contest->isActive()) {
             return Inertia::render('Contest/Inactive', [
                 'config' => $this->contest->getConfig(),
             ]);

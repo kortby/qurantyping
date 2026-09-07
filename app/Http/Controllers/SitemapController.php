@@ -2,38 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Certificate;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 class SitemapController extends Controller
 {
     public function index(): Response
     {
-        $urls = [
-            '/',
-            '/login',
-            '/register',
-            '/leaderboard',
-            '/privacy-policy',
-            '/terms-of-service',
-        ];
+        $xml = Cache::remember('sitemap.xml', now()->addHour(), function (): string {
+            $now = now();
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            /** @var list<array{0: string, 1: string, 2: string}> $pages */
+            $pages = [
+                ['/', '1.0', 'daily'],
+                ['/leaderboard', '0.8', 'daily'],
+                ['/contest', '0.6', 'weekly'],
+                ['/privacy-policy', '0.2', 'yearly'],
+                ['/terms-of-service', '0.2', 'yearly'],
+                ['/data-deletion', '0.2', 'yearly'],
+            ];
 
-        foreach ($urls as $uri) {
-            $xml .= '<url>';
-            $xml .= '<loc>' . url($uri) . '</loc>';
-            $xml .= '<lastmod>' . now()->toAtomString() . '</lastmod>';
-            $xml .= '<changefreq>weekly</changefreq>';
-            $xml .= '<priority>' . ($uri === '/' ? '1.0' : '0.8') . '</priority>';
-            $xml .= '</url>';
-        }
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
-        $xml .= '</urlset>';
+            foreach ($pages as [$path, $priority, $frequency]) {
+                $xml .= $this->entry(url($path), $now, $frequency, $priority);
+            }
 
-        return response($xml, 200, [
-            'Content-Type' => 'application/xml',
-        ]);
+            Certificate::query()
+                ->select('share_token', 'updated_at')
+                ->orderByDesc('updated_at')
+                ->chunk(500, function ($certificates) use (&$xml): void {
+                    foreach ($certificates as $certificate) {
+                        $xml .= $this->entry(
+                            url('/c/'.$certificate->share_token),
+                            $certificate->updated_at,
+                            'monthly',
+                            '0.5',
+                        );
+                    }
+                });
+
+            return $xml.'</urlset>';
+        });
+
+        return response($xml, 200, ['Content-Type' => 'application/xml']);
+    }
+
+    private function entry(string $loc, CarbonInterface $lastmod, string $frequency, string $priority): string
+    {
+        return '<url>'
+            .'<loc>'.e($loc).'</loc>'
+            .'<lastmod>'.$lastmod->toAtomString().'</lastmod>'
+            .'<changefreq>'.$frequency.'</changefreq>'
+            .'<priority>'.$priority.'</priority>'
+            .'</url>';
     }
 }

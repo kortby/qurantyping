@@ -242,6 +242,10 @@ export const translations = {
             message: "We are currently perfecting this section of the site to provide you with the best experience. It will be available very soon, Insha'Allah.",
             back_home: "Back to Home"
         },
+        seo: {
+            landing_h1: "Quran Typing Practice",
+            landing_intro: "Type the Qur'an in Arabic with live accuracy feedback, full tashkeel, an on-screen keyboard, and a spaced-repetition Hifz mode. Free."
+        },
         navigation: {
             home: "Home",
             dashboard: "Dashboard",
@@ -671,6 +675,10 @@ export const translations = {
             message: "Nous perfectionnons actuellement cette section du site pour vous offrir la meilleure expérience. Elle sera disponible très bientôt, Insha'Allah.",
             back_home: "Retour à l'Accueil"
         },
+        seo: {
+            landing_h1: "Entraînement à la saisie du Coran",
+            landing_intro: "Tapez le Coran en arabe avec un retour de précision en temps réel, le tashkeel complet, un clavier à l'écran et un mode Hifz à répétition espacée. Gratuit."
+        },
         navigation: {
             home: "Accueil",
             dashboard: "Tableau de bord",
@@ -1099,6 +1107,10 @@ export const translations = {
             subtitle: "نعمل بجد للتميز",
             message: "نحن نعمل حالياً على تحسين هذا القسم من الموقع لنقدم لكم أفضل تجربة. سيكون متاحاً قريباً جداً، إن شاء الله.",
             back_home: "العودة للرئيسية"
+        },
+        seo: {
+            landing_h1: "تدريب على كتابة القرآن",
+            landing_intro: "اكتب القرآن بالعربية مع تصحيح فوري للدقة، وتشكيل كامل، ولوحة مفاتيح على الشاشة، ووضع حفظ بالمراجعة المتباعدة. مجانًا."
         },
         navigation: {
             home: "الرئيسية",

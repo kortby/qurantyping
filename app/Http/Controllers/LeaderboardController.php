@@ -8,12 +8,18 @@ use App\Models\User;
 use App\Services\ContestService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
 
 class LeaderboardController extends Controller
 {
     public function __invoke(Request $request)
     {
+        View::share('meta', [
+            'title' => 'Quran Typing Leaderboard — Fastest Arabic Typists | QuranTyping',
+            'description' => "See the fastest and most accurate Qur'an typists. Compare words per minute and accuracy on real Quranic text, globally or among friends.",
+        ]);
+
         $scope = $request->query('scope') === 'friends' && $request->user() ? 'friends' : 'global';
 
         // Subquery to rank tests per user by WPM desc
