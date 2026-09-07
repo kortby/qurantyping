@@ -102,7 +102,12 @@ it('emails an admin reply to the user and marks the feedback handled', function 
         ->and($item->responded_by)->toBe($this->admin->id)
         ->and($item->handled_at)->not->toBeNull();
 
-    Mail::assertSent(FeedbackReplied::class, fn ($mail) => $mail->hasTo('author@example.com'));
+    Mail::assertSent(FeedbackReplied::class, function ($mail) {
+        $mail->assertSeeInHtml('Thanks — fixed in the next release.');
+        $mail->assertSeeInHtml(config('app.url'));
+
+        return $mail->hasTo('author@example.com');
+    });
 });
 
 it('requires a non-empty reply', function () {

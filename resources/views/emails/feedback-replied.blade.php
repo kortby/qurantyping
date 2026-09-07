@@ -9,6 +9,10 @@ You wrote to {{ config('app.name') }}:
 
 {{ $feedback->admin_response }}
 
+<x-mail::button :url="config('app.url')">
+Open {{ config('app.name') }}
+</x-mail::button>
+
 Thank you for helping us improve,<br>
 {{ config('app.name') }}
 </x-mail::message>
