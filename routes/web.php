@@ -170,6 +170,7 @@ Route::middleware([
 
     Route::get('feedback', [AdminFeedbackController::class, 'index'])->name('feedback.index');
     Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])->name('feedback.show');
+    Route::post('feedback/{feedback}/reply', [AdminFeedbackController::class, 'reply'])->name('feedback.reply');
     Route::patch('feedback/{feedback}', [AdminFeedbackController::class, 'update'])->name('feedback.update');
     Route::delete('feedback/{feedback}', [AdminFeedbackController::class, 'destroy'])->name('feedback.destroy');
 });

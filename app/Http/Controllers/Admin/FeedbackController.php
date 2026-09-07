@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\FeedbackReplied;
 use App\Models\Feedback;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,6 +49,7 @@ class FeedbackController extends Controller
                     'type' => $item->type,
                     'excerpt' => Str::limit($item->message, 160),
                     'handled_at' => $item->handled_at?->toIso8601String(),
+                    'responded_at' => $item->responded_at?->toIso8601String(),
                     'created_at' => $item->created_at->toIso8601String(),
                     'user' => $item->user ? [
                         'id' => $item->user->id,
@@ -59,7 +62,7 @@ class FeedbackController extends Controller
 
     public function show(Feedback $feedback): Response
     {
-        $feedback->load('user:id,name,email');
+        $feedback->load(['user:id,name,email', 'responder:id,name']);
 
         return Inertia::render('Admin/Feedback/Show', [
             'feedback' => [
@@ -68,6 +71,9 @@ class FeedbackController extends Controller
                 'message' => $feedback->message,
                 'handled_at' => $feedback->handled_at?->toIso8601String(),
                 'created_at' => $feedback->created_at->toIso8601String(),
+                'admin_response' => $feedback->admin_response,
+                'responded_at' => $feedback->responded_at?->toIso8601String(),
+                'responder' => $feedback->responder?->name,
                 'user' => $feedback->user ? [
                     'id' => $feedback->user->id,
                     'name' => $feedback->user->name,
@@ -84,6 +90,30 @@ class FeedbackController extends Controller
         ])->save();
 
         return back()->with('message', $feedback->handled_at ? 'Marked as handled.' : 'Reopened.');
+    }
+
+    public function reply(Request $request, Feedback $feedback): RedirectResponse
+    {
+        $validated = $request->validate([
+            'response' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $feedback->forceFill([
+            'admin_response' => $validated['response'],
+            'responded_at' => now(),
+            'responded_by' => $request->user()->id,
+            'handled_at' => $feedback->handled_at ?? now(),
+        ])->save();
+
+        $recipient = $feedback->user?->email;
+
+        if ($recipient) {
+            Mail::to($recipient)->send(new FeedbackReplied($feedback));
+        }
+
+        return back()->with('message', $recipient
+            ? 'Reply sent to '.$recipient.'.'
+            : 'Reply saved. The user account no longer exists, so no email was sent.');
     }
 
     public function destroy(Feedback $feedback): RedirectResponse
