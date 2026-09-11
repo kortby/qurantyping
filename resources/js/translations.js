@@ -66,6 +66,27 @@ export const translations = {
         reciter: "Reciter",
         recitation_title: "Recitation",
         recitation_desc: "Choose the reciter you hear on the typing screen.",
+        surah_index: {
+            title: "Browse Surahs",
+            subtitle: "Pick a surah to practise typing or memorising",
+            verses: "verses"
+        },
+        surah_page: {
+            verses_label: "Verses",
+            intro_template: "This surah has {count} verses. Type it below to sharpen your Arabic typing speed, or switch to Hifz mode to memorise it verse by verse.",
+            start_button: "Start Typing This Surah",
+            cta_note: "Free, no signup",
+            browse_all: "Browse all surahs",
+            cross_link_typing_text: "Want a general typing test instead? ",
+            cross_link_typing_label: "Try our Arabic typing test",
+            cross_link_hifz_text: "Focused on memorisation? ",
+            cross_link_hifz_label: "Explore our Quran memorisation tool",
+            faq_title: "FAQ",
+            faq_verses_q: "How many verses does this surah have?",
+            faq_verses_a_template: "This surah has {count} verses.",
+            faq_free_q: "Is it free to type or memorise this surah?",
+            faq_free_a: "Yes. Every feature is free, and you can start typing immediately without creating an account."
+        },
         classes: {
             title: "Classes",
             subtitle: "Teach a class, or track your progress in one you've joined",
@@ -590,6 +611,27 @@ export const translations = {
         reciter: "Récitateur",
         recitation_title: "Récitation",
         recitation_desc: "Choisissez le récitateur que vous entendez sur l'écran de saisie.",
+        surah_index: {
+            title: "Parcourir les sourates",
+            subtitle: "Choisissez une sourate à taper ou à mémoriser",
+            verses: "versets"
+        },
+        surah_page: {
+            verses_label: "Versets",
+            intro_template: "Cette sourate compte {count} versets. Tapez-la ci-dessous pour améliorer votre vitesse de frappe en arabe, ou passez en mode Hifz pour la mémoriser verset par verset.",
+            start_button: "Commencer à taper cette sourate",
+            cta_note: "Gratuit, sans inscription",
+            browse_all: "Parcourir toutes les sourates",
+            cross_link_typing_text: "Vous cherchez plutôt un test de frappe général ? ",
+            cross_link_typing_label: "Essayez notre test de frappe en arabe",
+            cross_link_hifz_text: "Concentré sur la mémorisation ? ",
+            cross_link_hifz_label: "Découvrez notre outil de mémorisation du Coran",
+            faq_title: "FAQ",
+            faq_verses_q: "Combien de versets compte cette sourate ?",
+            faq_verses_a_template: "Cette sourate compte {count} versets.",
+            faq_free_q: "Est-ce gratuit de taper ou mémoriser cette sourate ?",
+            faq_free_a: "Oui. Toutes les fonctionnalités sont gratuites, et vous pouvez commencer à taper immédiatement sans créer de compte."
+        },
         classes: {
             title: "Classes",
             subtitle: "Enseignez une classe, ou suivez votre progression dans une classe rejointe",
@@ -1114,6 +1156,27 @@ export const translations = {
         reciter: "القارئ",
         recitation_title: "التلاوة",
         recitation_desc: "اختر القارئ الذي تسمعه في شاشة الكتابة.",
+        surah_index: {
+            title: "تصفح السور",
+            subtitle: "اختر سورة للتدرب على كتابتها أو حفظها",
+            verses: "آية"
+        },
+        surah_page: {
+            verses_label: "عدد الآيات",
+            intro_template: "تحتوي هذه السورة على {count} آية. اكتبها أدناه لتحسين سرعة كتابتك بالعربية، أو انتقل إلى وضع الحفظ لحفظها آية آية.",
+            start_button: "ابدأ كتابة هذه السورة",
+            cta_note: "مجاني، دون تسجيل",
+            browse_all: "تصفح كل السور",
+            cross_link_typing_text: "تريد اختبار كتابة عام بدلاً من ذلك؟ ",
+            cross_link_typing_label: "جرّب اختبار الكتابة بالعربية",
+            cross_link_hifz_text: "تركّز على الحفظ؟ ",
+            cross_link_hifz_label: "اكتشف أداة حفظ القرآن",
+            faq_title: "الأسئلة الشائعة",
+            faq_verses_q: "كم عدد آيات هذه السورة؟",
+            faq_verses_a_template: "تحتوي هذه السورة على {count} آية.",
+            faq_free_q: "هل كتابة أو حفظ هذه السورة مجاني؟",
+            faq_free_a: "نعم. جميع الميزات مجانية، ويمكنك البدء بالكتابة فورًا دون إنشاء حساب."
+        },
         classes: {
             title: "الفصول",
             subtitle: "أنشئ فصلاً لتدريسه، أو تابع تقدّمك في فصل انضممت إليه",

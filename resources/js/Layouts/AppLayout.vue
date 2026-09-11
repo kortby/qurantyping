@@ -371,7 +371,7 @@ if (typeof window !== 'undefined') {
                     <div class="flex flex-col gap-4">
                         <h4 class="text-[10px] uppercase tracking-[0.3em] text-[var(--caret-color)]">{{ t('resources') }}</h4>
                         <nav class="flex flex-col gap-3 text-sm text-[var(--sub-color)]">
-                            <Link href="/" class="hover:text-[var(--main-color)] transition-colors">{{ t('surah_list') }}</Link>
+                            <Link href="/surah" class="hover:text-[var(--main-color)] transition-colors">{{ t('surah_list') }}</Link>
                             <Link href="/leaderboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('statistics') }}</Link>
                             <Link href="/arabic-typing-test" class="hover:text-[var(--main-color)] transition-colors">{{ t('nav_arabic_typing_test') }}</Link>
                             <Link href="/quran-memorization" class="hover:text-[var(--main-color)] transition-colors">{{ t('nav_quran_memorization') }}</Link>

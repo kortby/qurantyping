@@ -23,6 +23,7 @@ use App\Http\Controllers\QuranMapController;
 use App\Http\Controllers\QuranMemorizationPageController;
 use App\Http\Controllers\RaceController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SurahController;
 use App\Http\Controllers\TestPageController;
 use App\Http\Controllers\UserSettingController;
 use Illuminate\Foundation\Application;
@@ -41,6 +42,8 @@ Route::get('/c/{token}', [CertificateController::class, 'show'])->name('certific
 Route::get('/c-join/{code}', [ClassController::class, 'join'])->name('classes.join');
 Route::get('/arabic-typing-test', ArabicTypingTestPageController::class)->name('marketing.arabic-typing-test');
 Route::get('/quran-memorization', QuranMemorizationPageController::class)->name('marketing.quran-memorization');
+Route::get('/surah', [SurahController::class, 'index'])->name('surah.index');
+Route::get('/surah/{slug}', [SurahController::class, 'show'])->name('surah.show');
 Route::get('/privacy-policy', function () {
     $lang = App::getLocale();
     $file = resource_path("markdown/policy.{$lang}.md");

@@ -21,6 +21,7 @@ class SitemapController extends Controller
                 ['/contest', '0.6', 'weekly'],
                 ['/arabic-typing-test', '0.7', 'weekly'],
                 ['/quran-memorization', '0.7', 'weekly'],
+                ['/surah', '0.6', 'monthly'],
                 ['/privacy-policy', '0.2', 'yearly'],
                 ['/terms-of-service', '0.2', 'yearly'],
                 ['/data-deletion', '0.2', 'yearly'],
@@ -31,6 +32,10 @@ class SitemapController extends Controller
 
             foreach ($pages as [$path, $priority, $frequency]) {
                 $xml .= $this->entry(url($path), $now, $frequency, $priority);
+            }
+
+            foreach (SurahController::all() as $surah) {
+                $xml .= $this->entry(url('/surah/'.$surah['slug']), $now, 'monthly', '0.5');
             }
 
             Certificate::query()
