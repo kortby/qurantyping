@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -228,5 +229,26 @@ class User extends Authenticatable
         }
 
         return $this->invite_token;
+    }
+
+    /**
+     * Classes this user teaches (owns).
+     *
+     * @return HasMany<ClassGroup, $this>
+     */
+    public function ownedClasses(): HasMany
+    {
+        return $this->hasMany(ClassGroup::class, 'owner_user_id');
+    }
+
+    /**
+     * Classes this user has joined as a student.
+     *
+     * @return BelongsToMany<ClassGroup, $this>
+     */
+    public function classMemberships(): BelongsToMany
+    {
+        return $this->belongsToMany(ClassGroup::class, 'class_members', 'user_id', 'class_id')
+            ->withPivot('joined_at');
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\ArabicTypingTestPageController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ContestController;
 use App\Http\Controllers\DailyChallengeController;
 use App\Http\Controllers\DashboardController;
@@ -37,6 +38,7 @@ Route::get('/contest', [ContestController::class, 'index'])->name('contest.index
 Route::get('/i/{token}', [FriendController::class, 'invite'])->name('friends.invite');
 Route::get('/challenge/{test}', [GhostController::class, 'challenge'])->name('challenge.show');
 Route::get('/c/{token}', [CertificateController::class, 'show'])->name('certificates.show');
+Route::get('/c-join/{code}', [ClassController::class, 'join'])->name('classes.join');
 Route::get('/arabic-typing-test', ArabicTypingTestPageController::class)->name('marketing.arabic-typing-test');
 Route::get('/quran-memorization', QuranMemorizationPageController::class)->name('marketing.quran-memorization');
 Route::get('/privacy-policy', function () {
@@ -138,6 +140,11 @@ Route::middleware([
     Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
     Route::get('/today', [DailyChallengeController::class, 'index'])->name('daily.index');
+
+    Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
+    Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
+    Route::get('/classes/{class}', [ClassController::class, 'show'])->name('classes.show');
+    Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
 
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('/friends', [FriendController::class, 'store'])->name('friends.store');

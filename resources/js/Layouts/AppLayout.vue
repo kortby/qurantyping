@@ -122,6 +122,7 @@ if (typeof window !== 'undefined') {
                             <Link href="/friends" class="hover:text-[var(--main-color)] transition-colors">
                                 {{ t('navigation.friends') }}<span v-if="$page.props.auth.friend_requests" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.friend_requests }}</span>
                             </Link>
+                            <Link href="/classes" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.classes') }}</Link>
 
                             <!-- Practice group -->
                             <div class="relative practice-menu-container">
@@ -270,6 +271,7 @@ if (typeof window !== 'undefined') {
                             <Link href="/friends" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">
                                 {{ t('navigation.friends') }}<span v-if="$page.props.auth.friend_requests" class="ml-1 text-[var(--caret-color)]">{{ $page.props.auth.friend_requests }}</span>
                             </Link>
+                            <Link href="/classes" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.classes') }}</Link>
                             <Link href="/dashboard" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.dashboard') }}</Link>
                             <Link href="/certificates" @click="mobileMenuOpen = false" class="hover:text-[var(--caret-color)] transition-colors">{{ t('navigation.certificates') }}</Link>
 
