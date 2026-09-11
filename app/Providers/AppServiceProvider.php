@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\ClassGroup;
 use App\Models\Friendship;
 use App\Models\Test;
 use App\Models\User;
 use App\Observers\TestObserver;
+use App\Services\ClassService;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -52,6 +54,15 @@ class AppServiceProvider extends ServiceProvider
 
                 if ($owner && $owner->id !== $event->user->id) {
                     Friendship::request($event->user, $owner->id);
+                }
+            }
+
+            // Redeem a class join code the guest followed before signing up.
+            if ($code = request()->session()?->pull('pending_class_code')) {
+                $class = ClassGroup::where('code', $code)->first();
+
+                if ($class) {
+                    app(ClassService::class)->join($class, $event->user);
                 }
             }
         });
