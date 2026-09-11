@@ -16,7 +16,7 @@ import { useSettings } from '../useSettings';
 const activeKey = ref(null);
 const activeCode = ref(null);
 
-const { t, currentLang, usePunctuation, setPunctuation } = useSettings();
+const { t, currentLang, usePunctuation, setPunctuation, showVirtualKeyboard, setShowVirtualKeyboard } = useSettings();
 const page = usePage();
 
 const showTashkilFeature = computed(() => page.props.features?.tashkil ?? false);
@@ -216,6 +216,11 @@ const toggleErrorSound = () => {
     }
 };
 
+// --- Floating virtual keyboard dock ---
+const keyboardDockRef = ref(null);
+const keyboardDockHeight = ref(0);
+let keyboardResizeObserver = null;
+
 // --- Caret Position State ---
 const caretPosition = ref({ top: 0, left: 0, width: 0, height: 0, opacity: 0 });
 const containerRef = ref(null);
@@ -247,9 +252,21 @@ const updateCaret = () => {
 
             // Long passages overflow the viewport — follow the caret so the
             // user never has to scroll manually, in either typing direction.
-            const edgeMargin = 140;
-            if (rect.top < edgeMargin || rect.bottom > window.innerHeight - edgeMargin) {
-                activeSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // The floating keyboard dock covers the bottom of the screen, so
+            // the "safe" reading zone is whatever's left above it — center
+            // the caret inside *that* zone (leaning toward its lower edge,
+            // so the next couple of lines stay visible above the keyboard)
+            // rather than the raw viewport, or the caret would end up
+            // scrolled right behind the dock.
+            const keyboardSpace = showVirtualKeyboard.value ? keyboardDockHeight.value : 0;
+            const safeZoneHeight = window.innerHeight - keyboardSpace;
+            const topMargin = 100;
+            const bottomTrigger = safeZoneHeight - 100;
+
+            if (rect.top < topMargin || rect.bottom > bottomTrigger) {
+                const targetY = safeZoneHeight * 0.68;
+                const currentY = (rect.top + rect.bottom) / 2;
+                window.scrollBy({ top: currentY - targetY, behavior: 'smooth' });
             }
         }
     }, 32);
@@ -977,15 +994,23 @@ onMounted(async () => {
     isLoading.value = false;
     window.addEventListener('keydown', handleGlobalKeydown);
     window.addEventListener('keyup', handleGlobalKeyup);
-    
+
     // Initialize caret position
     setTimeout(updateCaret, 500);
+
+    if (keyboardDockRef.value && typeof ResizeObserver !== 'undefined') {
+        keyboardResizeObserver = new ResizeObserver(([entry]) => {
+            keyboardDockHeight.value = entry.contentRect.height;
+        });
+        keyboardResizeObserver.observe(keyboardDockRef.value);
+    }
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleGlobalKeydown);
     window.removeEventListener('keyup', handleGlobalKeyup);
     stopGhost();
+    keyboardResizeObserver?.disconnect();
 });
 
 defineOptions({ layout: AppLayout });
@@ -997,7 +1022,8 @@ defineOptions({ layout: AppLayout });
         <meta name="description" content="Practise typing the Qur'an in Arabic with live accuracy feedback, full harakat, an on-screen Arabic keyboard, and a spaced-repetition Hifz mode. Completely free.">
     </Head>
 
-    <div class="flex flex-col items-center justify-start py-8 px-6 md:px-8 lg:px-0 min-h-[80vh]">
+    <div class="flex flex-col items-center justify-start py-8 px-6 md:px-8 lg:px-0 min-h-[80vh]"
+         :style="showVirtualKeyboard && currentDisplayText && !showResults ? { paddingBottom: (keyboardDockHeight + 260) + 'px' } : null">
         <header v-if="!showResults" class="w-full max-w-6xl mb-6 text-center">
             <h1 class="font-cinzel text-lg sm:text-xl text-[var(--main-color)]">{{ t('seo.landing_h1') }}</h1>
             <p class="mt-1 mx-auto max-w-2xl font-mono text-[11px] sm:text-xs leading-relaxed text-[var(--sub-color)]">
@@ -1297,14 +1323,26 @@ defineOptions({ layout: AppLayout });
             </div>
         </div>
 
-        <!-- Animated Keyboard -->
-        <ArabicKeyboard v-if="currentDisplayText && !showResults"
-                        class="hidden lg:block"
-                        :active-key="activeKey" 
-                        :active-code="activeCode"
-                        :is-shift-on="isShiftPressed"
-                        :has-error="firstErrorIndex !== -1"
-                        :next-key="sourceCharacters[userInput.length]" />
+        <!-- Floating virtual keyboard — docked to the viewport bottom so it
+             stays reachable next to whatever line is currently being typed,
+             instead of scrolling away with a long passage. -->
+        <div v-if="currentDisplayText && !showResults"
+             class="hidden lg:block fixed inset-x-0 bottom-0 z-40 pointer-events-none">
+            <div ref="keyboardDockRef"
+                 class="pointer-events-auto mx-auto max-w-6xl px-6 transition-transform duration-300 ease-out"
+                 :class="showVirtualKeyboard ? 'translate-y-0' : 'translate-y-full'">
+                <ArabicKeyboard :active-key="activeKey"
+                                :active-code="activeCode"
+                                :is-shift-on="isShiftPressed"
+                                :has-error="firstErrorIndex !== -1"
+                                :next-key="sourceCharacters[userInput.length]" />
+            </div>
+
+            <button type="button" @click="setShowVirtualKeyboard(!showVirtualKeyboard)"
+                    class="pointer-events-auto absolute bottom-3 right-6 sm:right-9 px-3 py-1.5 bg-[var(--panel-color)] border border-[var(--border-color)] text-[10px] font-mono uppercase tracking-[0.15em] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors">
+                {{ showVirtualKeyboard ? t('hide_keyboard') : t('show_keyboard') }}
+            </button>
+        </div>
 
         <!-- Results — an ijāza-style record -->
         <div v-if="showResults" class="w-full max-w-2xl mx-auto py-8 sm:py-12 animate-fade-in">

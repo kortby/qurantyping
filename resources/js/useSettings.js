@@ -5,11 +5,17 @@ const currentLang = ref(localStorage.getItem('lang') || 'en');
 const currentTheme = ref(localStorage.getItem('theme') || 'dark');
 const currentKeyboardLayout = ref(localStorage.getItem('keyboardLayout') || 'qwerty');
 const usePunctuation = ref(localStorage.getItem('usePunctuation') === 'true');
+const showVirtualKeyboard = ref(localStorage.getItem('showVirtualKeyboard') !== 'false');
 
 export function useSettings() {
     const setPunctuation = (value) => {
         usePunctuation.value = value;
         localStorage.setItem('usePunctuation', value);
+    };
+
+    const setShowVirtualKeyboard = (value) => {
+        showVirtualKeyboard.value = value;
+        localStorage.setItem('showVirtualKeyboard', value);
     };
 
     const setKeyboardLayout = (layout) => {
@@ -56,10 +62,12 @@ export function useSettings() {
         currentTheme,
         currentKeyboardLayout,
         usePunctuation,
+        showVirtualKeyboard,
         setLang,
         setTheme,
         setKeyboardLayout,
         setPunctuation,
+        setShowVirtualKeyboard,
         t
     };
 }
