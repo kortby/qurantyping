@@ -160,7 +160,7 @@ const CARD = 'border border-[var(--border-color)] bg-[var(--panel-color)] p-6';
                     <p class="font-mono text-[11px] text-[var(--sub-color)]">
                         Last practised {{ progress.streak.practiced_today ? 'today' : (user.last_practiced_on ?? '—') }}
                         · grace used {{ account.streak_grace_used_on ?? 'never' }}
-                        · avg accuracy {{ stats.avg_accuracy }}% · {{ num(stats.total_chars) }} chars total · {{ stats.tashkeel_tests }} tashkeel tests
+                        · avg accuracy {{ stats.avg_accuracy }}% · {{ num(stats.total_chars) }} chars total · {{ stats.tashkeel_tests }} harakat tests
                     </p>
                     <div v-if="progress.certificates.length">
                         <p class="text-[9px] uppercase tracking-[0.2em] text-[var(--sub-color)] mb-2 font-mono">Certificates ({{ progress.certificates.length }})</p>

@@ -11,8 +11,8 @@ export const translations = {
         wpm: "wpm",
         accuracy: "acc",
         time: "time",
-        tashkeel_on: "Tashkeel ON",
-        tashkeel_off: "Tashkeel OFF",
+        tashkeel_on: "Harakat ON",
+        tashkeel_off: "Harakat OFF",
         sound_label: "Sound",
         error_sound_tooltip: "Play a sound when a typing error occurs",
         switch_to_arabic: "Please switch your keyboard to Arabic",
@@ -89,7 +89,7 @@ export const translations = {
             max_players: "Max players",
             passage_scope: "Passage",
             scope_any: "Anywhere in the Qur'an",
-            with_tashkeel: "Include tashkeel (harder)",
+            with_tashkeel: "Include harakat (harder)",
             waiting_for_host: "Waiting for the host to start…",
         },
         map: {
@@ -184,6 +184,8 @@ export const translations = {
         surah_list: "Surah List",
         statistics: "Statistics",
         help_center: "Help Center",
+        nav_arabic_typing_test: "Arabic Typing Test",
+        nav_quran_memorization: "Quran Memorization",
         support_project: "Support the Project",
         support_now: "Support Now",
         footer_tagline: "Reading and typing the word of Allah is a form of dhikr that strengthens both memory and faith.",
@@ -244,7 +246,48 @@ export const translations = {
         },
         seo: {
             landing_h1: "Quran Typing Practice",
-            landing_intro: "Type the Qur'an in Arabic with live accuracy feedback, full tashkeel, an on-screen keyboard, and a spaced-repetition Hifz mode. Free."
+            landing_intro: "Type the Qur'an in Arabic with live accuracy feedback, full harakat, an on-screen keyboard, and a spaced-repetition Hifz mode. Free."
+        },
+        text_source_note: "Qur'an text is presented in standard Uthmani mushaf script. Spot an error? Let us know and we'll fix it.",
+        arabic_typing_test_page: {
+            h1: "Free Arabic Typing Test",
+            intro: "Measure your Arabic typing speed and accuracy on real Qur'anic text — words per minute, live error highlighting, full harakat, and a built-in on-screen Arabic keyboard. No account needed.",
+            cta: "Start the Typing Test",
+            cta_note: "Free, no signup",
+            features: [
+                { title: "Live WPM & accuracy", desc: "See your words-per-minute and accuracy update as you type, with a full breakdown at the end." },
+                { title: "Full harakat support", desc: "Practise on fully-vowelled text exactly as printed in the mushaf, or switch it off for plain script." },
+                { title: "On-screen Arabic keyboard", desc: "No Arabic keyboard? Use the built-in virtual keyboard, or type with your own layout." },
+                { title: "Track your progress", desc: "Create a free account to save your personal best, build a streak, and unlock certificates." }
+            ],
+            cross_link_text: "Practising to memorise the Qur'an rather than just typing speed? ",
+            cross_link_label: "Try our Quran memorisation tool",
+            faq: [
+                { q: "Is this Arabic typing test free?", a: "Yes. It is completely free and you can start typing immediately without creating an account." },
+                { q: "Do I need an Arabic keyboard to take the test?", a: "No. An on-screen Arabic keyboard is built in, and a physical Arabic keyboard layout works too if you have one." },
+                { q: "How is my typing speed measured?", a: "The test tracks your words per minute (WPM) and accuracy in real time as you type, and shows a full breakdown when you finish." },
+                { q: "Does the test include harakat (diacritics)?", a: "Yes. You can toggle full harakat on to practise typing fully-vowelled Arabic text exactly as it appears in the mushaf." }
+            ]
+        },
+        quran_memorization_page: {
+            h1: "Free Quran Memorization Tool",
+            intro: "Hifz mode helps you memorise the Qur'an by progressively hiding the text as you type it correctly, then scheduling spaced-repetition reviews so what you've learned sticks.",
+            cta: "Start Memorising",
+            cta_note: "Free account, takes a minute",
+            features: [
+                { title: "Progressive hiding", desc: "Words fade out as you type them correctly, so you gradually rely on memory instead of the screen." },
+                { title: "Spaced-repetition reviews", desc: "Passages you've learned come back for review at increasing intervals, the way memory research shows retention works best." },
+                { title: "Full harakat", desc: "Practise with complete diacritics so your memorisation matches correct pronunciation." },
+                { title: "Track every surah", desc: "See your progress ayah by ayah across the mushaf, and pick up exactly where you left off." }
+            ],
+            cross_link_text: "Just want to practise typing speed? ",
+            cross_link_label: "Try our Arabic typing test",
+            faq: [
+                { q: "How does Hifz mode help with Quran memorisation?", a: "Hifz mode progressively hides the ayah text as you type it correctly, and schedules spaced-repetition reviews so you keep recalling what you have memorised." },
+                { q: "Do I need an account to use Hifz mode?", a: "Yes, a free account is needed so your memorisation progress and review schedule are saved between sessions." },
+                { q: "Is this a replacement for a Quran teacher?", a: "No. It is a practice aid that reinforces memorisation between sessions with a teacher or on your own; it does not correct your recitation or tajwid." },
+                { q: "Is Quran memorisation practice free?", a: "Yes, Hifz mode and every other feature on QuranTyping are free to use." }
+            ]
         },
         navigation: {
             home: "Home",
@@ -444,8 +487,8 @@ export const translations = {
         wpm: "mots/min",
         accuracy: "précision",
         time: "temps",
-        tashkeel_on: "Tashkeel ON",
-        tashkeel_off: "Tashkeel OFF",
+        tashkeel_on: "Harakat ON",
+        tashkeel_off: "Harakat OFF",
         sound_label: "Son",
         error_sound_tooltip: "Jouer un son lorsqu'une erreur de frappe se produit",
         switch_to_arabic: "Veuillez passer votre clavier en arabe",
@@ -522,7 +565,7 @@ export const translations = {
             max_players: "Joueurs max",
             passage_scope: "Passage",
             scope_any: "N'importe où dans le Coran",
-            with_tashkeel: "Avec tashkeel (plus difficile)",
+            with_tashkeel: "Avec harakat (plus difficile)",
             waiting_for_host: "En attente du démarrage par l'hôte…",
         },
         map: {
@@ -617,6 +660,8 @@ export const translations = {
         surah_list: "Liste des sourates",
         statistics: "Statistiques",
         help_center: "Centre d'Aide",
+        nav_arabic_typing_test: "Test de Frappe Arabe",
+        nav_quran_memorization: "Mémorisation du Coran",
         support_project: "Soutenir le Projet",
         support_now: "Soutenir Maintenant",
         footer_tagline: "Lire et taper la parole d'Allah est une forme de dhikr qui fortifie à la fois la mémoire et la foi.",
@@ -677,7 +722,48 @@ export const translations = {
         },
         seo: {
             landing_h1: "Entraînement à la saisie du Coran",
-            landing_intro: "Tapez le Coran en arabe avec un retour de précision en temps réel, le tashkeel complet, un clavier à l'écran et un mode Hifz à répétition espacée. Gratuit."
+            landing_intro: "Tapez le Coran en arabe avec un retour de précision en temps réel, les harakat complets, un clavier à l'écran et un mode Hifz à répétition espacée. Gratuit."
+        },
+        text_source_note: "Le texte coranique est présenté selon l'écriture othmanie standard du mushaf. Vous relevez une erreur ? Signalez-la, nous la corrigerons.",
+        arabic_typing_test_page: {
+            h1: "Test de Frappe en Arabe Gratuit",
+            intro: "Mesurez votre vitesse et votre précision de frappe en arabe sur de vrais versets coraniques : mots par minute, mise en évidence des erreurs en temps réel, harakat complets et clavier arabe virtuel intégré. Aucun compte requis.",
+            cta: "Commencer le Test",
+            cta_note: "Gratuit, sans inscription",
+            features: [
+                { title: "Vitesse et précision en direct", desc: "Suivez vos mots par minute et votre précision pendant que vous tapez, avec un bilan complet à la fin." },
+                { title: "Harakat complets", desc: "Entraînez-vous sur un texte entièrement vocalisé, exactement comme il apparaît dans le mushaf, ou désactivez-le." },
+                { title: "Clavier arabe à l'écran", desc: "Pas de clavier arabe ? Utilisez le clavier virtuel intégré, ou tapez avec votre propre disposition." },
+                { title: "Suivez votre progression", desc: "Créez un compte gratuit pour enregistrer votre record personnel, construire une série et débloquer des certificats." }
+            ],
+            cross_link_text: "Vous cherchez plutôt à mémoriser le Coran ? ",
+            cross_link_label: "Essayez notre outil de mémorisation",
+            faq: [
+                { q: "Ce test de frappe en arabe est-il gratuit ?", a: "Oui. Il est entièrement gratuit et vous pouvez commencer à taper immédiatement sans créer de compte." },
+                { q: "Ai-je besoin d'un clavier arabe pour passer le test ?", a: "Non. Un clavier arabe virtuel est intégré, et un clavier physique arabe fonctionne aussi si vous en avez un." },
+                { q: "Comment ma vitesse de frappe est-elle mesurée ?", a: "Le test suit vos mots par minute (WPM) et votre précision en temps réel pendant que vous tapez, avec un bilan complet à la fin." },
+                { q: "Le test inclut-il les harakat (les diacritiques) ?", a: "Oui. Vous pouvez activer les harakat complets pour vous entraîner à taper un texte arabe entièrement vocalisé, exactement comme il apparaît dans le mushaf." }
+            ]
+        },
+        quran_memorization_page: {
+            h1: "Outil Gratuit de Mémorisation du Coran",
+            intro: "Le mode Hifz vous aide à mémoriser le Coran en masquant progressivement le texte à mesure que vous le tapez correctement, puis en planifiant des révisions à répétition espacée pour que la mémorisation dure.",
+            cta: "Commencer à Mémoriser",
+            cta_note: "Compte gratuit, une minute suffit",
+            features: [
+                { title: "Masquage progressif", desc: "Les mots disparaissent au fur et à mesure que vous les tapez correctement, pour vous appuyer de moins en moins sur l'écran." },
+                { title: "Révisions à répétition espacée", desc: "Les passages mémorisés reviennent en révision à intervalles croissants, la méthode la plus efficace pour la rétention." },
+                { title: "Harakat complets", desc: "Entraînez-vous avec les diacritiques complets pour que votre mémorisation corresponde à la prononciation correcte." },
+                { title: "Suivez chaque sourate", desc: "Visualisez votre progression verset par verset sur tout le mushaf, et reprenez exactement où vous vous étiez arrêté." }
+            ],
+            cross_link_text: "Vous voulez seulement travailler votre vitesse de frappe ? ",
+            cross_link_label: "Essayez notre test de frappe en arabe",
+            faq: [
+                { q: "Comment le mode Hifz aide-t-il à mémoriser le Coran ?", a: "Le mode Hifz masque progressivement le texte du verset à mesure que vous le tapez correctement, et planifie des révisions à répétition espacée pour continuer à le rappeler." },
+                { q: "Ai-je besoin d'un compte pour utiliser le mode Hifz ?", a: "Oui, un compte gratuit est nécessaire pour que votre progression et votre calendrier de révision soient enregistrés entre les sessions." },
+                { q: "Est-ce un remplacement pour un professeur de Coran ?", a: "Non. C'est un outil de pratique qui renforce la mémorisation entre les sessions avec un professeur ou seul ; il ne corrige pas votre récitation ni votre tajwid." },
+                { q: "La pratique de mémorisation du Coran est-elle gratuite ?", a: "Oui, le mode Hifz et toutes les autres fonctionnalités de QuranTyping sont gratuites." }
+            ]
         },
         navigation: {
             home: "Accueil",
@@ -877,8 +963,8 @@ export const translations = {
         wpm: "كلمة/دقيقة",
         accuracy: "الدقة",
         time: "الوقت",
-        tashkeel_on: "تشكيل مفعل",
-        tashkeel_off: "تشكيل معطل",
+        tashkeel_on: "حركات مفعّلة",
+        tashkeel_off: "حركات معطّلة",
         sound_label: "صوت",
         error_sound_tooltip: "تشغيل صوت عند حدوث خطأ في الكتابة",
         switch_to_arabic: "يرجى تغيير لغة لوحة المفاتيح إلى العربية",
@@ -955,7 +1041,7 @@ export const translations = {
             max_players: "أقصى عدد لاعبين",
             passage_scope: "المقطع",
             scope_any: "أي موضع في القرآن",
-            with_tashkeel: "مع التشكيل (أصعب)",
+            with_tashkeel: "مع الحركات (أصعب)",
             waiting_for_host: "في انتظار بدء المضيف…",
         },
         map: {
@@ -1050,6 +1136,8 @@ export const translations = {
         surah_list: "قائمة السور",
         statistics: "الإحصائيات",
         help_center: "مركز المساعدة",
+        nav_arabic_typing_test: "اختبار الكتابة بالعربية",
+        nav_quran_memorization: "حفظ القرآن",
         support_project: "دعم المشروع",
         support_now: "ادعمنا الآن",
         footer_tagline: "قراءة وطباعة كلام الله هي شكل من أشكال الذكر التي تقوي الذاكرة والإيمان.",
@@ -1110,7 +1198,48 @@ export const translations = {
         },
         seo: {
             landing_h1: "تدريب على كتابة القرآن",
-            landing_intro: "اكتب القرآن بالعربية مع تصحيح فوري للدقة، وتشكيل كامل، ولوحة مفاتيح على الشاشة، ووضع حفظ بالمراجعة المتباعدة. مجانًا."
+            landing_intro: "اكتب القرآن بالعربية مع تصحيح فوري للدقة، وحركات كاملة، ولوحة مفاتيح على الشاشة، ووضع حفظ بالمراجعة المتباعدة. مجانًا."
+        },
+        text_source_note: "يُعرض نص القرآن الكريم بالرسم العثماني المعتمد في المصحف. هل لاحظت خطأً؟ أخبرنا لنصححه.",
+        arabic_typing_test_page: {
+            h1: "اختبار مجاني لسرعة الكتابة بالعربية",
+            intro: "قِس سرعتك ودقتك في الكتابة بالعربية على نص قرآني حقيقي: عدد الكلمات في الدقيقة، وتمييز الأخطاء لحظيًا، وحركات كاملة، ولوحة مفاتيح عربية مدمجة على الشاشة. دون الحاجة لحساب.",
+            cta: "ابدأ الاختبار",
+            cta_note: "مجاني، دون تسجيل",
+            features: [
+                { title: "سرعة ودقة لحظية", desc: "تابع عدد كلماتك في الدقيقة ودقتك أثناء الكتابة، مع تقرير كامل في النهاية." },
+                { title: "حركات كاملة", desc: "تدرّب على نص مُشكّل بالكامل كما يظهر في المصحف، أو عطّل الحركات إن أردت." },
+                { title: "لوحة مفاتيح عربية على الشاشة", desc: "لا تملك لوحة مفاتيح عربية؟ استخدم اللوحة الافتراضية المدمجة، أو اكتب بلوحتك الخاصة." },
+                { title: "تتبّع تقدّمك", desc: "أنشئ حسابًا مجانيًا لحفظ رقمك القياسي الشخصي، وبناء سلسلة أيام متواصلة، وفتح الشهادات." }
+            ],
+            cross_link_text: "تتدرب على حفظ القرآن لا سرعة الكتابة فقط؟ ",
+            cross_link_label: "جرّب أداة حفظ القرآن",
+            faq: [
+                { q: "هل اختبار الكتابة بالعربية هذا مجاني؟", a: "نعم. إنه مجاني بالكامل ويمكنك البدء بالكتابة فورًا دون إنشاء حساب." },
+                { q: "هل أحتاج إلى لوحة مفاتيح عربية لخوض الاختبار؟", a: "لا. توجد لوحة مفاتيح عربية افتراضية مدمجة، وتعمل لوحة المفاتيح العربية الفعلية أيضًا إن توفرت لديك." },
+                { q: "كيف تُقاس سرعة كتابتي؟", a: "يتتبّع الاختبار عدد كلماتك في الدقيقة ودقتك لحظيًا أثناء الكتابة، ويعرض تقريرًا كاملًا عند الانتهاء." },
+                { q: "هل يتضمن الاختبار الحركات؟", a: "نعم. يمكنك تفعيل الحركات الكاملة للتدرب على كتابة نص عربي مُشكّل بالكامل كما يظهر في المصحف." }
+            ]
+        },
+        quran_memorization_page: {
+            h1: "أداة مجانية لحفظ القرآن",
+            intro: "وضع الحفظ يساعدك على حفظ القرآن بإخفاء النص تدريجيًا كلما كتبته بشكل صحيح، ثم جدولة مراجعات بالتكرار المتباعد لترسيخ ما حفظته.",
+            cta: "ابدأ الحفظ",
+            cta_note: "حساب مجاني، يستغرق دقيقة",
+            features: [
+                { title: "إخفاء تدريجي", desc: "تختفي الكلمات تباعًا كلما كتبتها بشكل صحيح، لتعتمد تدريجيًا على ذاكرتك بدل الشاشة." },
+                { title: "مراجعات بالتكرار المتباعد", desc: "تعود المقاطع التي حفظتها للمراجعة بفواصل زمنية متزايدة، وهي الطريقة الأثبت علميًا للترسيخ." },
+                { title: "حركات كاملة", desc: "تدرّب بالحركات الكاملة ليطابق حفظك النطق الصحيح." },
+                { title: "تتبّع كل سورة", desc: "تابع تقدّمك آية آية على امتداد المصحف، واستأنف تمامًا من حيث توقفت." }
+            ],
+            cross_link_text: "تريد فقط تحسين سرعة كتابتك؟ ",
+            cross_link_label: "جرّب اختبار سرعة الكتابة بالعربية",
+            faq: [
+                { q: "كيف يساعد وضع الحفظ في حفظ القرآن؟", a: "يخفي وضع الحفظ نص الآية تدريجيًا كلما كتبتها بشكل صحيح، ويجدول مراجعات بالتكرار المتباعد لتستمر في استرجاع ما حفظته." },
+                { q: "هل أحتاج إلى حساب لاستخدام وضع الحفظ؟", a: "نعم، يلزم حساب مجاني ليتم حفظ تقدّمك في الحفظ وجدول المراجعة بين الجلسات." },
+                { q: "هل هذا بديل عن معلم القرآن؟", a: "لا. إنها أداة تدريب تعزّز الحفظ بين جلساتك مع معلم أو بمفردك؛ ولا تصحّح تلاوتك أو تجويدك." },
+                { q: "هل التدرب على حفظ القرآن مجاني؟", a: "نعم، وضع الحفظ وكل ميزات QuranTyping الأخرى مجانية الاستخدام." }
+            ]
         },
         navigation: {
             home: "الرئيسية",

@@ -24,7 +24,7 @@ class TestPageController extends Controller
 
         View::share('meta', [
             'title' => "Type the Qur'an Online — Free Arabic Typing Practice & Hifz | QuranTyping",
-            'description' => "Practise typing the Qur'an in Arabic with live accuracy feedback, full tashkil, an on-screen Arabic keyboard, and a spaced-repetition Hifz mode. Completely free.",
+            'description' => "Practise typing the Qur'an in Arabic with live accuracy feedback, full harakat, an on-screen Arabic keyboard, and a spaced-repetition Hifz mode. Completely free.",
         ]);
 
         View::share('faq', [
@@ -45,8 +45,8 @@ class TestPageController extends Controller
                 'a' => 'No. An on-screen Arabic keyboard is built in, and your physical keyboard works too if it has an Arabic layout.',
             ],
             [
-                'q' => 'Does it show harakat (tashkil)?',
-                'a' => 'Yes. Turn on the "Tashkeel" toggle to type fully-vowelled text exactly as it appears in the mushaf, which helps with correct recitation.',
+                'q' => 'Does it show harakat (diacritics)?',
+                'a' => 'Yes. Turn on the "Harakat" toggle to type fully-vowelled text exactly as it appears in the mushaf, which helps with correct recitation.',
             ],
         ]);
 

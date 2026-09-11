@@ -352,6 +352,9 @@ if (typeof window !== 'undefined') {
                         <p class="text-sm border-l border-[var(--rule-color)] pl-4 text-[var(--sub-color)] leading-relaxed">
                             {{ t('footer_tagline') }}
                         </p>
+                        <p class="mt-4 text-xs text-[var(--sub-color)] opacity-70 leading-relaxed">
+                            {{ t('text_source_note') }}
+                        </p>
                     </div>
 
                     <div class="flex flex-col gap-4">
@@ -368,6 +371,8 @@ if (typeof window !== 'undefined') {
                         <nav class="flex flex-col gap-3 text-sm text-[var(--sub-color)]">
                             <Link href="/" class="hover:text-[var(--main-color)] transition-colors">{{ t('surah_list') }}</Link>
                             <Link href="/leaderboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('statistics') }}</Link>
+                            <Link href="/arabic-typing-test" class="hover:text-[var(--main-color)] transition-colors">{{ t('nav_arabic_typing_test') }}</Link>
+                            <Link href="/quran-memorization" class="hover:text-[var(--main-color)] transition-colors">{{ t('nav_quran_memorization') }}</Link>
                             <Link href="/work-in-progress" class="hover:text-[var(--main-color)] transition-colors">{{ t('help_center') }}</Link>
                         </nav>
                     </div>

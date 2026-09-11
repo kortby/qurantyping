@@ -15,7 +15,9 @@ it('serves an XML sitemap listing the public pages', function () {
     $response->assertSee(url('/'), false)
         ->assertSee(url('/leaderboard'), false)
         ->assertSee(url('/contest'), false)
-        ->assertSee(url('/privacy-policy'), false);
+        ->assertSee(url('/privacy-policy'), false)
+        ->assertSee(url('/arabic-typing-test'), false)
+        ->assertSee(url('/quran-memorization'), false);
 });
 
 it('lists public certificate links in the sitemap', function () {
@@ -62,4 +64,20 @@ it('gives the leaderboard its own title tag', function () {
     $this->get('/leaderboard')
         ->assertOk()
         ->assertSee('Quran Typing Leaderboard — Fastest Arabic Typists | QuranTyping');
+});
+
+it('serves the arabic typing test landing page with its own SEO title and FAQ', function () {
+    $this->get('/arabic-typing-test')
+        ->assertOk()
+        ->assertSee('Free Arabic Typing Test — Practice Typing Speed & Accuracy | QuranTyping')
+        ->assertSee('"@type":"FAQPage"', false)
+        ->assertSee('Is this Arabic typing test free?', false);
+});
+
+it('serves the quran memorization landing page with its own SEO title and FAQ', function () {
+    $this->get('/quran-memorization')
+        ->assertOk()
+        ->assertSee('Free Quran Memorization Tool — Hifz Practice with Spaced Repetition | QuranTyping')
+        ->assertSee('"@type":"FAQPage"', false)
+        ->assertSee('How does Hifz mode help with Quran memorisation?', false);
 });

@@ -987,7 +987,7 @@ defineOptions({ layout: AppLayout });
 <template>
     <Head>
         <title>Type the Qur'an Online — Free Arabic Typing Practice & Hifz | QuranTyping</title>
-        <meta name="description" content="Practise typing the Qur'an in Arabic with live accuracy feedback, full tashkil, an on-screen Arabic keyboard, and a spaced-repetition Hifz mode. Completely free.">
+        <meta name="description" content="Practise typing the Qur'an in Arabic with live accuracy feedback, full harakat, an on-screen Arabic keyboard, and a spaced-repetition Hifz mode. Completely free.">
     </Head>
 
     <div class="flex flex-col items-center justify-start py-8 px-6 md:px-8 lg:px-0 min-h-[80vh]">

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\TestController;
+use App\Http\Controllers\ArabicTypingTestPageController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CertificateController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\HifzController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\QuranMapController;
+use App\Http\Controllers\QuranMemorizationPageController;
 use App\Http\Controllers\RaceController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPageController;
@@ -35,6 +37,8 @@ Route::get('/contest', [ContestController::class, 'index'])->name('contest.index
 Route::get('/i/{token}', [FriendController::class, 'invite'])->name('friends.invite');
 Route::get('/challenge/{test}', [GhostController::class, 'challenge'])->name('challenge.show');
 Route::get('/c/{token}', [CertificateController::class, 'show'])->name('certificates.show');
+Route::get('/arabic-typing-test', ArabicTypingTestPageController::class)->name('marketing.arabic-typing-test');
+Route::get('/quran-memorization', QuranMemorizationPageController::class)->name('marketing.quran-memorization');
 Route::get('/privacy-policy', function () {
     $lang = App::getLocale();
     $file = resource_path("markdown/policy.{$lang}.md");

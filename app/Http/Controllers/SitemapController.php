@@ -19,6 +19,8 @@ class SitemapController extends Controller
                 ['/', '1.0', 'daily'],
                 ['/leaderboard', '0.8', 'daily'],
                 ['/contest', '0.6', 'weekly'],
+                ['/arabic-typing-test', '0.7', 'weekly'],
+                ['/quran-memorization', '0.7', 'weekly'],
                 ['/privacy-policy', '0.2', 'yearly'],
                 ['/terms-of-service', '0.2', 'yearly'],
                 ['/data-deletion', '0.2', 'yearly'],
