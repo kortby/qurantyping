@@ -7,6 +7,7 @@ const props = defineProps({
     group: { type: Object, required: true },
     student: { type: Object, required: true },
     progress: { type: Object, required: true },
+    assignments: { type: Array, default: () => [] },
 });
 
 const { t } = useSettings();
@@ -93,6 +94,26 @@ const VALUE = 'text-xl text-[var(--main-color)] tabular-nums';
                         <p class="text-xl text-[var(--main-color)]">{{ fmtDay(progress.last_practiced_on) }}</p>
                     </div>
                 </div>
+
+                <section class="mb-10">
+                    <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-3">{{ t('classes.assignments_title') }}</h2>
+                    <p v-if="!assignments.length" class="font-mono text-xs text-[var(--sub-color)] opacity-70">{{ t('classes.no_assignments') }}</p>
+                    <div v-else class="border border-[var(--border-color)] divide-y divide-[var(--border-color)] font-mono text-sm">
+                        <div v-for="a in assignments" :key="a.id" class="flex items-center justify-between gap-3 px-4 py-3">
+                            <div>
+                                <p class="text-[var(--main-color)]">
+                                    {{ a.surah_name }} <span class="text-[var(--sub-color)]">{{ a.start_ayah }}–{{ a.end_ayah }}</span>
+                                </p>
+                                <p v-if="a.due_on" class="text-[10px] uppercase tracking-[0.1em] text-[var(--sub-color)] opacity-70 mt-0.5">
+                                    {{ t('classes.due_date') }}: {{ fmtDay(a.due_on) }}
+                                </p>
+                            </div>
+                            <span :class="a.completed ? 'text-[var(--caret-color)]' : 'text-[var(--sub-color)]'" class="text-xs uppercase tracking-[0.1em] shrink-0">
+                                {{ a.completed ? t('classes.completed') : t('classes.not_completed') }}
+                            </span>
+                        </div>
+                    </div>
+                </section>
 
                 <section>
                     <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-3">{{ t('classes.recent_tests') }}</h2>

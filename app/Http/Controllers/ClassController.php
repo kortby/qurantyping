@@ -151,6 +151,9 @@ class ClassController extends Controller
                 'joined_at' => $this->classes->joinedAtFor($class, $student),
             ],
             'progress' => $this->classes->detailedProgressFor($student),
+            'assignments' => $this->classes->assignmentsFor($class, fn (ClassAssignment $a): array => [
+                'completed' => $this->classes->hasCompletedAssignment($a, $student),
+            ]),
         ]);
     }
 

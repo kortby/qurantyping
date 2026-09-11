@@ -111,6 +111,27 @@ it('shows the owner a detailed page for one student in the class', function () {
         );
 });
 
+it('shows assignment completion on the student detail page', function () {
+    $qt = seedClassAyah();
+    $teacher = User::factory()->create();
+    $class = ClassGroup::factory()->for($teacher, 'owner')->create();
+    $done = User::factory()->create();
+    $notDone = User::factory()->create();
+    $class->members()->attach([$done->id, $notDone->id], ['joined_at' => now()]);
+
+    actingAs($teacher)->post("/classes/{$class->id}/assignments", [
+        'surah_number' => 112, 'start_ayah' => 1, 'end_ayah' => 1,
+    ]);
+
+    Test::factory()->for($done)->create(['quran_text_id' => $qt->id, 'created_at' => now()->addMinute()]);
+
+    actingAs($teacher)->get("/classes/{$class->id}/students/{$done->id}")
+        ->assertInertia(fn ($page) => $page->where('assignments.0.completed', true));
+
+    actingAs($teacher)->get("/classes/{$class->id}/students/{$notDone->id}")
+        ->assertInertia(fn ($page) => $page->where('assignments.0.completed', false));
+});
+
 it('leaves first_test_at null for a student who has not typed anything', function () {
     $teacher = User::factory()->create();
     $class = ClassGroup::factory()->for($teacher, 'owner')->create();
