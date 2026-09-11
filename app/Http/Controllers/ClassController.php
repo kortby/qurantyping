@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ClassAssignment;
 use App\Models\ClassGroup;
 use App\Models\User;
 use App\Services\ClassService;
@@ -67,6 +68,18 @@ class ClassController extends Controller
 
         abort_unless($isOwner || $class->members()->where('user_id', $user->id)->exists(), 403);
 
+        if ($isOwner) {
+            $members = $class->members;
+            $assignments = $this->classes->assignmentsFor($class, fn (ClassAssignment $a): array => [
+                'completed_count' => $members->filter(fn (User $m) => $this->classes->hasCompletedAssignment($a, $m))->count(),
+                'members_count' => $members->count(),
+            ]);
+        } else {
+            $assignments = $this->classes->assignmentsFor($class, fn (ClassAssignment $a): array => [
+                'completed' => $this->classes->hasCompletedAssignment($a, $user),
+            ]);
+        }
+
         return Inertia::render('Classes/Show', [
             'group' => [
                 'id' => $class->id,
@@ -77,7 +90,46 @@ class ClassController extends Controller
             'isOwner' => $isOwner,
             'roster' => $isOwner ? $this->classes->rosterFor($class) : [],
             'myProgress' => $isOwner ? null : $this->classes->progressFor($user),
+            'assignments' => $assignments,
         ]);
+    }
+
+    /**
+     * Assign a surah range for the class to practise.
+     */
+    public function storeAssignment(Request $request, ClassGroup $class): RedirectResponse
+    {
+        abort_unless($class->owner_user_id === $request->user()->id, 403);
+
+        $validated = $request->validate([
+            'surah_number' => ['required', 'integer', 'min:1', 'max:114'],
+            'start_ayah' => ['required', 'integer', 'min:1'],
+            'end_ayah' => ['required', 'integer', 'min:1', 'gte:start_ayah'],
+            'due_on' => ['nullable', 'date'],
+        ]);
+
+        $this->classes->createAssignment(
+            $class,
+            $validated['surah_number'],
+            $validated['start_ayah'],
+            $validated['end_ayah'],
+            $validated['due_on'] ?? null,
+        );
+
+        return back();
+    }
+
+    /**
+     * Remove an assignment from the class.
+     */
+    public function destroyAssignment(Request $request, ClassGroup $class, ClassAssignment $assignment): RedirectResponse
+    {
+        abort_unless($class->owner_user_id === $request->user()->id, 403);
+        abort_unless($assignment->class_id === $class->id, 404);
+
+        $assignment->delete();
+
+        return back();
     }
 
     /**

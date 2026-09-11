@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClassGroup extends Model
 {
@@ -32,5 +33,11 @@ class ClassGroup extends Model
     {
         return $this->belongsToMany(User::class, 'class_members', 'class_id', 'user_id')
             ->withPivot('joined_at');
+    }
+
+    /** @return HasMany<ClassAssignment, $this> */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ClassAssignment::class, 'class_id');
     }
 }

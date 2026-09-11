@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Http\Controllers\SurahController;
+use App\Models\ClassAssignment;
 use App\Models\ClassGroup;
+use App\Models\Test;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -131,6 +134,67 @@ class ClassService
                     'created_at' => $t->created_at->toIso8601String(),
                 ]),
         ];
+    }
+
+    /**
+     * Assign a surah range for the class to practise.
+     */
+    public function createAssignment(ClassGroup $class, int $surahNumber, int $startAyah, int $endAyah, ?string $dueOn): ClassAssignment
+    {
+        return $class->assignments()->create([
+            'surah_number' => $surahNumber,
+            'start_ayah' => $startAyah,
+            'end_ayah' => $endAyah,
+            'due_on' => $dueOn,
+        ]);
+    }
+
+    /**
+     * This class's assignments, enriched with the surah's name and a deep
+     * link straight into that range on the homepage. Pass `$enrich` to add
+     * role-specific fields (e.g. completion) while the model is still in
+     * scope, rather than re-fetching each assignment afterwards.
+     *
+     * @param  (callable(ClassAssignment): array<string, mixed>)|null  $enrich
+     * @return list<array<string, mixed>>
+     */
+    public function assignmentsFor(ClassGroup $class, ?callable $enrich = null): array
+    {
+        $surahIndex = SurahController::all()->keyBy('surah_number');
+
+        return $class->assignments()
+            ->latest()
+            ->get()
+            ->map(function (ClassAssignment $assignment) use ($surahIndex, $enrich): array {
+                $surah = $surahIndex->get($assignment->surah_number);
+
+                $data = [
+                    'id' => $assignment->id,
+                    'surah_number' => $assignment->surah_number,
+                    'surah_name' => $surah['name_english'] ?? "Surah {$assignment->surah_number}",
+                    'start_ayah' => $assignment->start_ayah,
+                    'end_ayah' => $assignment->end_ayah,
+                    'due_on' => $assignment->due_on?->toDateString(),
+                    'start_url' => "/?surah={$assignment->surah_number}&start={$assignment->start_ayah}&end={$assignment->end_ayah}",
+                    'created_at' => $assignment->created_at->toIso8601String(),
+                ];
+
+                return $enrich ? [...$data, ...$enrich($assignment)] : $data;
+            })
+            ->all();
+    }
+
+    /**
+     * Whether a student has typed anything from the assigned surah since it
+     * was assigned. A loose definition on purpose — no strict ayah-range
+     * matching, so practising the surah in more than one sitting still counts.
+     */
+    public function hasCompletedAssignment(ClassAssignment $assignment, User $student): bool
+    {
+        return Test::where('user_id', $student->id)
+            ->whereHas('quranText', fn ($query) => $query->where('surah_number', $assignment->surah_number))
+            ->where('created_at', '>=', $assignment->created_at)
+            ->exists();
     }
 
     private function uniqueCode(): string

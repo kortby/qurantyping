@@ -148,6 +148,8 @@ Route::middleware([
     Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
     Route::get('/classes/{class}', [ClassController::class, 'show'])->name('classes.show');
     Route::get('/classes/{class}/students/{student}', [ClassController::class, 'student'])->name('classes.students.show');
+    Route::post('/classes/{class}/assignments', [ClassController::class, 'storeAssignment'])->name('classes.assignments.store');
+    Route::delete('/classes/{class}/assignments/{assignment}', [ClassController::class, 'destroyAssignment'])->name('classes.assignments.destroy');
     Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
 
     Route::get('/friends', [FriendController::class, 'index'])->name('friends.index');

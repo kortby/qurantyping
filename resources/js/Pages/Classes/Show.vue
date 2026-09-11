@@ -1,7 +1,9 @@
 <script setup>
-import { ref } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, onMounted, watch } from 'vue';
+import axios from 'axios';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SurahSelect from '@/Components/SurahSelect.vue';
 import { useSettings } from '../../useSettings';
 
 const props = defineProps({
@@ -9,9 +11,49 @@ const props = defineProps({
     isOwner: { type: Boolean, default: false },
     roster: { type: Array, default: () => [] },
     myProgress: { type: Object, default: null },
+    assignments: { type: Array, default: () => [] },
 });
 
 const { t } = useSettings();
+
+const surahs = ref([]);
+onMounted(async () => {
+    if (!props.isOwner) return;
+    try {
+        const { data } = await axios.get('/api/surahs');
+        surahs.value = data;
+    } catch {
+        // the assignment form still works without the picker pre-filled
+    }
+});
+
+const assignForm = useForm({
+    surah_number: '',
+    start_ayah: 1,
+    end_ayah: 1,
+    due_on: '',
+});
+
+watch(() => assignForm.surah_number, (num) => {
+    const surah = surahs.value.find((s) => s.surah_number == num);
+    if (surah) {
+        assignForm.start_ayah = 1;
+        assignForm.end_ayah = surah.total_ayahs;
+    }
+});
+
+const createAssignment = () => {
+    assignForm.post(`/classes/${props.group.id}/assignments`, {
+        preserveScroll: true,
+        onSuccess: () => assignForm.reset(),
+    });
+};
+
+const deleteAssignment = (assignmentId) => {
+    if (confirm(t('classes.delete_assignment_confirm'))) {
+        router.delete(`/classes/${props.group.id}/assignments/${assignmentId}`, { preserveScroll: true });
+    }
+};
 
 const copied = ref(false);
 const copyJoinLink = async () => {
@@ -52,6 +94,66 @@ const num = (v) => (v ?? 0).toLocaleString();
                         {{ t('classes.delete') }}
                     </button>
                 </header>
+
+                <!-- Assignments -->
+                <section class="mb-10">
+                    <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-3">{{ t('classes.assignments_title') }}</h2>
+
+                    <form v-if="isOwner" @submit.prevent="createAssignment" class="flex flex-wrap items-end gap-2 mb-4">
+                        <SurahSelect
+                            class="w-full sm:w-auto"
+                            :model-value="assignForm.surah_number"
+                            :options="surahs"
+                            :label="t('surah')"
+                            @update:model-value="v => assignForm.surah_number = v"
+                        />
+                        <div class="flex items-center gap-1">
+                            <input v-model.number="assignForm.start_ayah" type="number" min="1" aria-label="Start ayah"
+                                   class="w-16 text-center font-mono text-sm bg-transparent border border-[var(--border-color)] px-2 py-2 focus:outline-none focus:border-[var(--caret-color)]" />
+                            <span class="text-[var(--sub-color)] opacity-40 px-1">–</span>
+                            <input v-model.number="assignForm.end_ayah" type="number" min="1" aria-label="End ayah"
+                                   class="w-16 text-center font-mono text-sm bg-transparent border border-[var(--border-color)] px-2 py-2 focus:outline-none focus:border-[var(--caret-color)]" />
+                        </div>
+                        <input v-model="assignForm.due_on" type="date" :aria-label="t('classes.due_date')"
+                               class="font-mono text-sm bg-transparent border border-[var(--border-color)] px-3 py-2 text-[var(--main-color)] focus:outline-none focus:border-[var(--caret-color)]" />
+                        <button type="submit" :disabled="assignForm.processing || !assignForm.surah_number"
+                                class="border border-[var(--caret-color)] text-[var(--caret-color)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] hover:bg-[var(--caret-color)]/10 transition-colors disabled:opacity-40">
+                            {{ t('classes.assign_button') }}
+                        </button>
+                    </form>
+
+                    <p v-if="!assignments.length" class="font-mono text-xs text-[var(--sub-color)] opacity-70">{{ t('classes.no_assignments') }}</p>
+                    <div v-else class="border border-[var(--border-color)] divide-y divide-[var(--border-color)] font-mono text-sm">
+                        <div v-for="a in assignments" :key="a.id" class="flex items-center justify-between gap-3 px-4 py-3">
+                            <div>
+                                <p class="text-[var(--main-color)]">
+                                    {{ a.surah_name }} <span class="text-[var(--sub-color)]">{{ a.start_ayah }}–{{ a.end_ayah }}</span>
+                                </p>
+                                <p v-if="a.due_on" class="text-[10px] uppercase tracking-[0.1em] text-[var(--sub-color)] opacity-70 mt-0.5">
+                                    {{ t('classes.due_date') }}: {{ fmtDay(a.due_on) }}
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <template v-if="isOwner">
+                                    <span class="text-[var(--sub-color)] text-xs tabular-nums">{{ a.completed_count }}/{{ a.members_count }} {{ t('classes.completed') }}</span>
+                                    <button type="button" @click="deleteAssignment(a.id)"
+                                            class="text-[var(--error-color)] hover:opacity-80 transition-opacity text-xs uppercase tracking-[0.1em]">
+                                        {{ t('classes.remove') }}
+                                    </button>
+                                </template>
+                                <template v-else>
+                                    <span :class="a.completed ? 'text-[var(--caret-color)]' : 'text-[var(--sub-color)]'" class="text-xs uppercase tracking-[0.1em]">
+                                        {{ a.completed ? t('classes.completed') : t('classes.not_completed') }}
+                                    </span>
+                                    <Link v-if="!a.completed" :href="a.start_url"
+                                          class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity underline underline-offset-4 text-xs">
+                                        {{ t('classes.start') }}
+                                    </Link>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- Teacher: join link -->
                 <section v-if="isOwner" class="mb-10">
