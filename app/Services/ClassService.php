@@ -83,6 +83,56 @@ class ClassService
         ];
     }
 
+    /**
+     * When a student joined a class, as an ISO 8601 string.
+     */
+    public function joinedAtFor(ClassGroup $class, User $student): ?string
+    {
+        $member = $class->members()->where('user_id', $student->id)->first();
+
+        return $member ? Carbon::parse($member->pivot->joined_at)->toIso8601String() : null;
+    }
+
+    /**
+     * A fuller stats breakdown for a single student's detail page.
+     *
+     * @return array<string, mixed>
+     */
+    public function detailedProgressFor(User $student): array
+    {
+        $tests = $student->tests();
+
+        return [
+            'tests_count' => (int) $tests->clone()->count(),
+            'best_wpm' => (int) $tests->clone()->max('wpm'),
+            'avg_wpm' => (int) round((float) $tests->clone()->avg('wpm')),
+            'avg_accuracy' => round((float) $tests->clone()->avg('accuracy'), 1),
+            'total_chars' => (int) $tests->clone()->sum('char_count'),
+            'total_errors' => (int) $tests->clone()->sum('total_errors'),
+            'first_test_at' => ($firstTestAt = $tests->clone()->min('created_at'))
+                ? Carbon::parse($firstTestAt)->toIso8601String()
+                : null,
+            'last_practiced_on' => $student->last_practiced_on,
+            'streak' => $this->streaks->forInertia($student),
+            'hifz' => $this->hifz->stats($student),
+            'recent_tests' => $student->tests()
+                ->with('quranText:id,surah_number')
+                ->latest()
+                ->take(10)
+                ->get(['id', 'quran_text_id', 'wpm', 'accuracy', 'char_count', 'total_errors', 'mode', 'hifz_level', 'start_ayah', 'end_ayah', 'created_at'])
+                ->map(fn ($t): array => [
+                    'id' => $t->id,
+                    'wpm' => (int) $t->wpm,
+                    'accuracy' => (float) $t->accuracy,
+                    'char_count' => (int) $t->char_count,
+                    'total_errors' => (int) $t->total_errors,
+                    'mode' => $t->hifz_level ? 'hifz' : $t->mode,
+                    'range' => $t->quranText ? $t->quranText->surah_number.':'.$t->start_ayah.'–'.$t->end_ayah : null,
+                    'created_at' => $t->created_at->toIso8601String(),
+                ]),
+        ];
+    }
+
     private function uniqueCode(): string
     {
         do {

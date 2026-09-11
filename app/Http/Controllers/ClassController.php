@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassGroup;
+use App\Models\User;
 use App\Services\ClassService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -76,6 +77,28 @@ class ClassController extends Controller
             'isOwner' => $isOwner,
             'roster' => $isOwner ? $this->classes->rosterFor($class) : [],
             'myProgress' => $isOwner ? null : $this->classes->progressFor($user),
+        ]);
+    }
+
+    /**
+     * A teacher's detailed view of one student's progress in the class.
+     */
+    public function student(Request $request, ClassGroup $class, User $student): Response
+    {
+        abort_unless($class->owner_user_id === $request->user()->id, 403);
+        abort_unless($class->members()->where('user_id', $student->id)->exists(), 404);
+
+        return Inertia::render('Classes/Student', [
+            'group' => [
+                'id' => $class->id,
+                'name' => $class->name,
+            ],
+            'student' => [
+                'id' => $student->id,
+                'name' => $student->name,
+                'joined_at' => $this->classes->joinedAtFor($class, $student),
+            ],
+            'progress' => $this->classes->detailedProgressFor($student),
         ]);
     }
 

@@ -81,23 +81,32 @@ const num = (v) => (v ?? 0).toLocaleString();
                             <thead>
                                 <tr class="border-b border-[var(--border-color)] text-[var(--sub-color)] uppercase tracking-[0.1em]">
                                     <th class="px-4 py-3 text-left">{{ t('classes.student') }}</th>
+                                    <th class="px-4 py-3 text-right">{{ t('classes.joined_on') }}</th>
                                     <th class="px-4 py-3 text-right">{{ t('classes.tests') }}</th>
                                     <th class="px-4 py-3 text-right">{{ t('classes.avg_wpm') }}</th>
                                     <th class="px-4 py-3 text-right">{{ t('classes.avg_accuracy') }}</th>
                                     <th class="px-4 py-3 text-right">{{ t('classes.streak') }}</th>
                                     <th class="px-4 py-3 text-right">{{ t('classes.hifz_due') }}</th>
                                     <th class="px-4 py-3 text-right">{{ t('classes.last_practiced') }}</th>
+                                    <th class="px-4 py-3 text-right"></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[var(--border-color)]">
                                 <tr v-for="s in roster" :key="s.id">
                                     <td class="px-4 py-3 text-[var(--main-color)]">{{ s.name }}</td>
+                                    <td class="px-4 py-3 text-right text-[var(--sub-color)]">{{ fmtDay(s.joined_at) }}</td>
                                     <td class="px-4 py-3 text-right tabular-nums text-[var(--sub-color)]">{{ num(s.tests_count) }}</td>
                                     <td class="px-4 py-3 text-right tabular-nums text-[var(--sub-color)]">{{ num(s.avg_wpm) }}</td>
                                     <td class="px-4 py-3 text-right tabular-nums text-[var(--sub-color)]">{{ s.avg_accuracy }}%</td>
                                     <td class="px-4 py-3 text-right tabular-nums text-[var(--sub-color)]">{{ num(s.streak) }}</td>
                                     <td class="px-4 py-3 text-right tabular-nums text-[var(--sub-color)]">{{ num(s.hifz_due) }}</td>
                                     <td class="px-4 py-3 text-right text-[var(--sub-color)]">{{ fmtDay(s.last_practiced_on) }}</td>
+                                    <td class="px-4 py-3 text-right">
+                                        <Link :href="`/classes/${group.id}/students/${s.id}`"
+                                              class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity underline underline-offset-4">
+                                            {{ t('classes.details') }}
+                                        </Link>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

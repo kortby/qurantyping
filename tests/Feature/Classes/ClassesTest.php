@@ -89,6 +89,56 @@ it('shows the owner a roster with per-student stats', function () {
         );
 });
 
+it('shows the owner a detailed page for one student in the class', function () {
+    $qt = seedClassAyah();
+    $teacher = User::factory()->create();
+    $class = ClassGroup::factory()->for($teacher, 'owner')->create();
+    $student = User::factory()->create();
+    $class->members()->attach($student->id, ['joined_at' => now()]);
+
+    Test::factory()->for($student)->create(['quran_text_id' => $qt->id, 'wpm' => 40, 'accuracy' => 90]);
+    Test::factory()->for($student)->create(['quran_text_id' => $qt->id, 'wpm' => 80, 'accuracy' => 96]);
+
+    actingAs($teacher)->get("/classes/{$class->id}/students/{$student->id}")
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('student.id', $student->id)
+            ->where('progress.tests_count', 2)
+            ->where('progress.best_wpm', 80)
+            ->where('progress.first_test_at', fn ($v) => $v !== null)
+            ->has('progress.recent_tests', 2)
+        );
+});
+
+it('leaves first_test_at null for a student who has not typed anything', function () {
+    $teacher = User::factory()->create();
+    $class = ClassGroup::factory()->for($teacher, 'owner')->create();
+    $student = User::factory()->create();
+    $class->members()->attach($student->id, ['joined_at' => now()]);
+
+    actingAs($teacher)->get("/classes/{$class->id}/students/{$student->id}")
+        ->assertInertia(fn ($page) => $page
+            ->where('progress.tests_count', 0)
+            ->where('progress.first_test_at', null)
+        );
+});
+
+it('forbids a non-owner from viewing a student detail page', function () {
+    $class = ClassGroup::factory()->create();
+    $student = User::factory()->create();
+    $class->members()->attach($student->id, ['joined_at' => now()]);
+
+    actingAs(User::factory()->create())->get("/classes/{$class->id}/students/{$student->id}")->assertForbidden();
+});
+
+it('404s when the requested student is not a member of the class', function () {
+    $teacher = User::factory()->create();
+    $class = ClassGroup::factory()->for($teacher, 'owner')->create();
+    $outsider = User::factory()->create();
+
+    actingAs($teacher)->get("/classes/{$class->id}/students/{$outsider->id}")->assertNotFound();
+});
+
 it('shows a student their own progress, not the full roster', function () {
     $class = ClassGroup::factory()->create();
     $student = User::factory()->create();
