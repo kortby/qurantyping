@@ -241,11 +241,18 @@ const updateCaret = () => {
                 top: rect.bottom - containerRect.top - 2, // 2px offset for the underline
                 left: rect.left - containerRect.left,
                 width: rect.width,
-                height: 5, 
+                height: 5,
                 opacity: 1
             };
+
+            // Long passages overflow the viewport — follow the caret so the
+            // user never has to scroll manually, in either typing direction.
+            const edgeMargin = 140;
+            if (rect.top < edgeMargin || rect.bottom > window.innerHeight - edgeMargin) {
+                activeSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
-    }, 32); 
+    }, 32);
 };
 
 watch([userInput, isFocused], updateCaret);
