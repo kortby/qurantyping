@@ -2,13 +2,17 @@
 
 namespace Database\Seeders;
 
+use App\Models\QuranText;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use App\Models\QuranText;
-use Illuminate\Http\Client\RequestException;
 use Throwable;
 
+/**
+ * After a fresh run of this seeder, also run `php artisan quran:fix-tanzil-spelling`
+ * — the source API has six spelling variants (vs. the Tanzil Quran text
+ * project) that this seeder would otherwise reintroduce.
+ */
 class QuranTextSeeder extends Seeder
 {
     private const API_BASE_URL = 'https://quranapi.pages.dev/api';
@@ -19,10 +23,11 @@ class QuranTextSeeder extends Seeder
             $this->command->info('Step 1/2: Fetching list of all Surahs...');
 
             // Retry fetching the surah list if the network is flaky
-            $response = Http::retry(3, 1000)->get(self::API_BASE_URL . '/surah.json');
+            $response = Http::retry(3, 1000)->get(self::API_BASE_URL.'/surah.json');
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 $this->command->error('Failed to fetch surah list from API.');
+
                 return;
             }
 
@@ -34,6 +39,7 @@ class QuranTextSeeder extends Seeder
             // If we already have everything, stop.
             if ($existingCount >= $totalAyahsInApi) {
                 $this->command->info("Database already contains all {$totalAyahsInApi} Ayahs. Skipping.");
+
                 return;
             }
 
@@ -41,7 +47,7 @@ class QuranTextSeeder extends Seeder
             if ($existingCount > 0) {
                 $this->command->info("Current database has {$existingCount} Ayahs. Resuming from where we stopped...");
             } else {
-                $this->command->info("Starting fresh seeding. This will take several minutes...");
+                $this->command->info('Starting fresh seeding. This will take several minutes...');
             }
 
             $progressBar = $this->command->getOutput()->createProgressBar($totalAyahsInApi);
@@ -65,12 +71,12 @@ class QuranTextSeeder extends Seeder
                     // ROBUST FETCHING: Retry up to 5 times with a 10s timeout per try
                     $ayahResponse = Http::timeout(15)
                         ->retry(5, 2000)
-                        ->get(self::API_BASE_URL . "/{$surahNumber}/{$ayahNum}.json");
+                        ->get(self::API_BASE_URL."/{$surahNumber}/{$ayahNum}.json");
 
                     if ($ayahResponse->successful()) {
                         $ayahData = $ayahResponse->json();
 
-                        if (isset($ayahData['arabic2']) && !empty($ayahData['arabic2'])) {
+                        if (isset($ayahData['arabic2']) && ! empty($ayahData['arabic2'])) {
                             $batchToInsert[] = [
                                 'surah_number' => $surahNumber,
                                 'ayah_number' => $ayahNum,
@@ -98,7 +104,7 @@ class QuranTextSeeder extends Seeder
                 }
 
                 // Insert remaining for the current Surah
-                if (!empty($batchToInsert)) {
+                if (! empty($batchToInsert)) {
                     QuranText::insert($batchToInsert);
                 }
             }
@@ -107,7 +113,7 @@ class QuranTextSeeder extends Seeder
             $this->command->info("\n✅ Database seeding successfully completed!");
 
         } catch (Throwable $e) {
-            $this->command->error("\nAn error occurred: " . $e->getMessage());
+            $this->command->error("\nAn error occurred: ".$e->getMessage());
             $this->command->info("DON'T WORRY: You can run 'php artisan db:seed' again to RESUME from where it failed.");
         }
     }

@@ -325,7 +325,7 @@ export const translations = {
             landing_h1: "Quran Typing Practice",
             landing_intro: "Type the Qur'an in Arabic with live accuracy feedback, full harakat, an on-screen keyboard, and a spaced-repetition Hifz mode. Free."
         },
-        text_source_note: "Qur'an text is presented in standard Uthmani mushaf script. Spot an error? Let us know and we'll fix it.",
+        text_source_note: "Qur'an text is cross-checked against the Tanzil Quran text project. Spot an error? Let us know and we'll fix it.",
         arabic_typing_test_page: {
             h1: "Free Arabic Typing Test",
             intro: "Measure your Arabic typing speed and accuracy on real Qur'anic text — words per minute, live error highlighting, full harakat, and a built-in on-screen Arabic keyboard. No account needed.",
@@ -879,7 +879,7 @@ export const translations = {
             landing_h1: "Entraînement à la saisie du Coran",
             landing_intro: "Tapez le Coran en arabe avec un retour de précision en temps réel, les harakat complets, un clavier à l'écran et un mode Hifz à répétition espacée. Gratuit."
         },
-        text_source_note: "Le texte coranique est présenté selon l'écriture othmanie standard du mushaf. Vous relevez une erreur ? Signalez-la, nous la corrigerons.",
+        text_source_note: "Le texte coranique est vérifié par recoupement avec le projet Tanzil. Vous relevez une erreur ? Signalez-la, nous la corrigerons.",
         arabic_typing_test_page: {
             h1: "Test de Frappe en Arabe Gratuit",
             intro: "Mesurez votre vitesse et votre précision de frappe en arabe sur de vrais versets coraniques : mots par minute, mise en évidence des erreurs en temps réel, harakat complets et clavier arabe virtuel intégré. Aucun compte requis.",
@@ -1433,7 +1433,7 @@ export const translations = {
             landing_h1: "تدريب على كتابة القرآن",
             landing_intro: "اكتب القرآن بالعربية مع تصحيح فوري للدقة، وحركات كاملة، ولوحة مفاتيح على الشاشة، ووضع حفظ بالمراجعة المتباعدة. مجانًا."
         },
-        text_source_note: "يُعرض نص القرآن الكريم بالرسم العثماني المعتمد في المصحف. هل لاحظت خطأً؟ أخبرنا لنصححه.",
+        text_source_note: "تمت مطابقة نص القرآن الكريم مع مشروع تنزيل (Tanzil). هل لاحظت خطأً؟ أخبرنا لنصححه.",
         arabic_typing_test_page: {
             h1: "اختبار مجاني لسرعة الكتابة بالعربية",
             intro: "قِس سرعتك ودقتك في الكتابة بالعربية على نص قرآني حقيقي: عدد الكلمات في الدقيقة، وتمييز الأخطاء لحظيًا، وحركات كاملة، ولوحة مفاتيح عربية مدمجة على الشاشة. دون الحاجة لحساب.",
