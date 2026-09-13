@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Admin\RaceController as AdminRaceController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\ArabicTypingTestPageController;
@@ -184,6 +185,8 @@ Route::middleware([
     Route::delete('users/{user}/sessions', [AdminUserController::class, 'revokeSessions'])->name('users.sessions.revoke');
     Route::delete('users/{user}/tokens/{token}', [AdminUserController::class, 'destroyToken'])->name('users.tokens.destroy');
     Route::post('users/{user}/impersonate', [ImpersonationController::class, 'start'])->name('users.impersonate');
+
+    Route::get('races', [AdminRaceController::class, 'index'])->name('races.index');
 
     Route::get('feedback', [AdminFeedbackController::class, 'index'])->name('feedback.index');
     Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])->name('feedback.show');
