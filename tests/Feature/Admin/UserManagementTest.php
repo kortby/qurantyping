@@ -146,6 +146,17 @@ it('shows the friend requests a user sent and received', function () {
         );
 });
 
+it('shows an empty state when a user has no friend requests', function () {
+    $target = User::factory()->create();
+
+    $this->actingAs($this->admin)->get("/admin/users/{$target->id}")
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Admin/Users/Show')
+            ->has('friendRequests', 0)
+        );
+});
+
 it('updates a user name and email', function () {
     $target = User::factory()->create();
 

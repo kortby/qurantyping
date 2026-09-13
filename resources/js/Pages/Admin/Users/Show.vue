@@ -273,9 +273,9 @@ const CARD = 'border border-[var(--border-color)] bg-[var(--panel-color)] p-6';
                 </div>
 
                 <!-- Friend requests -->
-                <div v-if="friendRequests.length" :class="CARD">
+                <div :class="CARD">
                     <h2 :class="H2">Friend requests</h2>
-                    <ul class="mt-4 space-y-2 font-mono text-xs">
+                    <ul v-if="friendRequests.length" class="mt-4 space-y-2 font-mono text-xs">
                         <li v-for="f in friendRequests" :key="f.id" class="flex items-center justify-between gap-4 border-b border-[var(--border-color)] pb-2 last:border-0">
                             <span class="text-[var(--main-color)] truncate">
                                 <span class="text-[var(--sub-color)] uppercase text-[10px] tracking-[0.15em]">{{ f.direction === 'sent' ? 'To' : 'From' }}</span>
@@ -290,6 +290,7 @@ const CARD = 'border border-[var(--border-color)] bg-[var(--panel-color)] p-6';
                             </span>
                         </li>
                     </ul>
+                    <p v-else class="font-mono text-xs text-[var(--sub-color)] mt-4">No friend requests.</p>
                 </div>
 
                 <!-- Edit -->
