@@ -14,6 +14,11 @@ const DECORATIVE_MARKS = /[ؐ-ؚـۖ-ۭ۝]/g;
 const AYAH_SEPARATOR = / ?۝([٠-٩]+) ?/g;
 const NUM_OPEN = '␞';
 const NUM_CLOSE = '␟';
+// Rasm annotations (maddah/hamza above or below a carrier letter, e.g. the ٓ in
+// "إِنِّىٓ" at 71:9) have no key on any Arabic layout — drop them from the typed
+// sequence entirely rather than merely normalizing them, since normalizing alone
+// would still force the typist to press *some* key to fill that array slot.
+const UNKEYABLE_MARKS = /[ٕٓٔ]/g;
 
 export function normalize(text, keepHarakat = false) {
     if (!text) return '';
@@ -38,6 +43,7 @@ export function normalize(text, keepHarakat = false) {
 export function logicTokens(displayText) {
     const marked = (displayText || '')
         .normalize('NFC')
+        .replace(UNKEYABLE_MARKS, '')
         .replace(AYAH_SEPARATOR, (_m, digits) => `${NUM_OPEN}${digits}${NUM_CLOSE}`)
         .replace(/[ \t\n]+/g, ' ')
         .replace(/^[\s␞]+|\s+$/g, '');

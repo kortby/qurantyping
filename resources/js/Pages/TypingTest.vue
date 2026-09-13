@@ -307,19 +307,25 @@ const currentDisplayText = computed(() => {
 
 const logicCharacterCount = computed(() => visualMapping.value.logicText.length);
 
-// Map visual characters to logic ones (ignoring the ۝ decorative separator)
+// Uthmani rasm annotations (maddah/hamza above or below a carrier letter, e.g.
+// the ٓ in "إِنِّىٓ" at 71:9) have no key on any Arabic keyboard layout — they
+// must stay visible in currentDisplayText but never require a keystroke.
+const UNKEYABLE_MARK = /[ٕٓٔ]/;
+
+// Map visual characters to logic ones (ignoring the ۝ decorative separator
+// and unkeyable rasm annotations)
 const visualMapping = computed(() => {
     const visual = currentDisplayText.value || '';
     let logicText = '';
     const vToL = new Array(visual.length).fill(-1);
     const lToVStart = [];
-    
+
     let i = 0;
     while (i < visual.length) {
         // Match the pattern: [optional space]۝[arabic digits][optional space]
         // Which we treat as a single logic space
         const match = visual.substring(i).match(/^ ?۝[٠-٩]+ ?/);
-        
+
         if (match) {
             const matchLen = match[0].length;
             lToVStart.push(i);
@@ -330,6 +336,11 @@ const visualMapping = computed(() => {
                 vToL[i + j] = -1;
             }
             i += matchLen;
+        } else if (UNKEYABLE_MARK.test(visual[i])) {
+            // Stays in the rendered text, but the typist never presses a key for it.
+            // vToL[i] is left at its -1 default, and lToVStart gets no entry since
+            // this position adds nothing to logicText.
+            i++;
         } else {
             lToVStart.push(i);
             logicText += visual[i];
