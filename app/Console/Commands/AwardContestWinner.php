@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Models\Badge;
 use App\Models\Test;
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 class AwardContestWinner extends Command
 {
@@ -39,8 +41,9 @@ class AwardContestWinner extends Command
             ->orderBy('created_at')
             ->first();
 
-        if (!$winningTest) {
+        if (! $winningTest) {
             $this->error("No valid contest entries found for {$year}.");
+
             return;
         }
 
@@ -57,10 +60,20 @@ class AwardContestWinner extends Command
             ]
         );
 
-        if (!$user->badges()->where('badge_id', $badge->id)->exists()) {
-            $user->badges()->attach($badge->id);
+        try {
+            DB::table('user_badges')->insert([
+                'user_id' => $user->id,
+                'badge_id' => $badge->id,
+                'awarded_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $this->info("Successfully awarded '{$badge->name}' badge to {$user->name}.");
-        } else {
+        } catch (QueryException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) !== 1062) {
+                throw $e;
+            }
+
             $this->warn("User {$user->name} already has the '{$badge->name}' badge.");
         }
     }

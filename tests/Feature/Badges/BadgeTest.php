@@ -61,6 +61,21 @@ it('is idempotent — no duplicate pivot rows', function () {
     expect($this->user->badges()->where('slug', 'first-test')->count())->toBe(1);
 });
 
+it('tolerates a concurrent process already having awarded the same badge', function () {
+    // BadgeService::award() does a plain insert (no read-then-write), so a
+    // second insert for the same user+badge hits the composite primary key
+    // exactly as it would if two overlapping evaluate() calls raced — that
+    // must be swallowed rather than bubbling up as an unhandled QueryException.
+    $badge = Badge::whereNotNull('slug')->first();
+
+    $award = new ReflectionMethod(BadgeService::class, 'award');
+    $service = app(BadgeService::class);
+
+    expect($award->invoke($service, $this->user, $badge))->toBeTrue()
+        ->and($award->invoke($service, $this->user, $badge))->toBeFalse()
+        ->and($this->user->badges()->where('badge_id', $badge->id)->count())->toBe(1);
+});
+
 it('awards wpm, streak, race and certificate badges from their sources', function () {
     Test::factory()->for($this->user)->create(['wpm' => 65]);
     $this->user->forceFill(['longest_streak' => 8])->save();   // not mass-assignable

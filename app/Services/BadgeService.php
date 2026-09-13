@@ -8,6 +8,7 @@ use App\Models\RaceParticipant;
 use App\Models\Test;
 use App\Models\User;
 use App\Models\UserAyahProgress;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -107,13 +108,38 @@ class BadgeService
                 continue;
             }
 
-            if ($rule($user)) {
-                $user->badges()->syncWithoutDetaching([$bySlug[$slug]->id => ['awarded_at' => now()]]);
+            if ($rule($user) && $this->award($user, $bySlug[$slug])) {
                 $awarded->push($bySlug[$slug]);
             }
         }
 
         return $awarded;
+    }
+
+    /**
+     * Insert the user_badges row, tolerating a concurrent evaluation that
+     * already awarded the same badge (duplicate entry on the composite
+     * user_id/badge_id primary key).
+     */
+    private function award(User $user, Badge $badge): bool
+    {
+        try {
+            DB::table('user_badges')->insert([
+                'user_id' => $user->id,
+                'badge_id' => $badge->id,
+                'awarded_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return true;
+        } catch (QueryException $e) {
+            if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
+                return false;
+            }
+
+            throw $e;
+        }
     }
 
     /**
