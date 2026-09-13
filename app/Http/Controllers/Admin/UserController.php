@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\Feedback;
+use App\Models\Friendship;
 use App\Models\RaceParticipant;
 use App\Models\User;
 use App\Models\UserLetterStat;
@@ -195,7 +196,36 @@ class UserController extends Controller
                 ]),
             'sessions' => fn (): array => $this->sessionsFor($request, $user),
             'tokens' => fn () => $user->tokens()->latest()->get(['id', 'name', 'last_used_at', 'created_at']),
+            'friendRequests' => fn () => $this->friendRequestsFor($user),
         ]);
+    }
+
+    /**
+     * Every friend request this user sent or received, newest first.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function friendRequestsFor(User $user): array
+    {
+        return Friendship::query()
+            ->where('user_id', $user->id)
+            ->orWhere('friend_id', $user->id)
+            ->with(['requester:id,name', 'recipient:id,name'])
+            ->latest()
+            ->latest('id')
+            ->take(20)
+            ->get()
+            ->map(fn (Friendship $f): array => [
+                'id' => $f->id,
+                'direction' => $f->user_id === $user->id ? 'sent' : 'received',
+                'other_user' => $f->user_id === $user->id
+                    ? ['id' => $f->recipient->id, 'name' => $f->recipient->name]
+                    : ['id' => $f->requester->id, 'name' => $f->requester->name],
+                'status' => $f->status,
+                'created_at' => $f->created_at->toIso8601String(),
+                'accepted_at' => $f->accepted_at?->toIso8601String(),
+            ])
+            ->all();
     }
 
     /**

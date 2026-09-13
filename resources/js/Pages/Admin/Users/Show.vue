@@ -26,6 +26,7 @@ const props = defineProps({
     recentTests: Array,
     sessions: Array,
     tokens: Array,
+    friendRequests: Array,
 });
 
 const page = usePage();
@@ -266,6 +267,26 @@ const CARD = 'border border-[var(--border-color)] bg-[var(--panel-color)] p-6';
                             <span class="whitespace-nowrap text-[var(--sub-color)]">
                                 <span v-if="f.handled" class="text-[var(--caret-color)]">handled</span>
                                 <span v-else>open</span> · {{ fmtDay(f.created_at) }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Friend requests -->
+                <div v-if="friendRequests.length" :class="CARD">
+                    <h2 :class="H2">Friend requests</h2>
+                    <ul class="mt-4 space-y-2 font-mono text-xs">
+                        <li v-for="f in friendRequests" :key="f.id" class="flex items-center justify-between gap-4 border-b border-[var(--border-color)] pb-2 last:border-0">
+                            <span class="text-[var(--main-color)] truncate">
+                                <span class="text-[var(--sub-color)] uppercase text-[10px] tracking-[0.15em]">{{ f.direction === 'sent' ? 'To' : 'From' }}</span>
+                                {{ f.other_user.name }}
+                            </span>
+                            <span class="whitespace-nowrap text-[var(--sub-color)]">
+                                <span :class="{
+                                    'text-[var(--caret-color)]': f.status === 'accepted',
+                                    'text-[var(--error-color)]': f.status === 'pending' && f.direction === 'sent',
+                                }">{{ f.status }}</span>
+                                · {{ fmtDay(f.created_at) }}
                             </span>
                         </li>
                     </ul>

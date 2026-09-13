@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Certificate;
+use App\Models\Friendship;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Config;
@@ -120,6 +121,28 @@ it('shows a user detail page with practice progress', function () {
             ->has('activity')
             ->has('feedback')
             ->has('badgeTotal')
+        );
+});
+
+it('shows the friend requests a user sent and received', function () {
+    $target = User::factory()->create(['name' => 'Target User']);
+    $sentTo = User::factory()->create(['name' => 'Sent To Her']);
+    $receivedFrom = User::factory()->create(['name' => 'Received From Him']);
+
+    Friendship::factory()->create(['user_id' => $target->id, 'friend_id' => $sentTo->id]);
+    Friendship::factory()->accepted()->create(['user_id' => $receivedFrom->id, 'friend_id' => $target->id]);
+
+    $this->actingAs($this->admin)->get("/admin/users/{$target->id}")
+        ->assertOk()
+        ->assertSee('Sent To Her')
+        ->assertSee('Received From Him')
+        ->assertInertia(fn ($page) => $page
+            ->component('Admin/Users/Show')
+            ->has('friendRequests', 2)
+            ->where('friendRequests.0.direction', 'received')
+            ->where('friendRequests.0.status', 'accepted')
+            ->where('friendRequests.1.direction', 'sent')
+            ->where('friendRequests.1.status', 'pending')
         );
 });
 
