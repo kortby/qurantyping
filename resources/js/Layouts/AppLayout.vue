@@ -109,7 +109,7 @@ if (typeof window !== 'undefined') {
                     </Link>
 
                     <!-- Nav Links Desktop -->
-                    <nav class="hidden lg:flex items-center gap-x-5 xl:gap-x-7 text-sm text-[var(--sub-color)] [&>a]:whitespace-nowrap">
+                    <nav class="hidden lg:flex flex-wrap items-center gap-x-5 gap-y-1.5 xl:gap-x-7 text-sm text-[var(--sub-color)] [&>a]:whitespace-nowrap">
                         <Link href="/" class="hover:text-[var(--main-color)] transition-colors">{{ t('navigation.home') }}</Link>
                         <Link href="/leaderboard" class="hover:text-[var(--main-color)] transition-colors">{{ t('leaderboard') }}</Link>
                         <template v-if="$page.props.auth.user">
@@ -147,7 +147,6 @@ if (typeof window !== 'undefined') {
                                 </transition>
                             </div>
 
-                            <Link v-if="$page.props.auth.user.is_super_admin" href="/admin/users" class="text-[var(--lapis-color)] hover:opacity-80 transition-opacity">{{ t('navigation.admin') }}</Link>
                         </template>
                     </nav>
                 </div>
