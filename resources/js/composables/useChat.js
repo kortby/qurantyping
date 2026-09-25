@@ -21,7 +21,8 @@ const state = reactive({
     windows: [],
     typing: {},
     initialUnread: 0,
-    bottomOffset: 0,
+    keyboard: null,
+    focusMode: false,
 });
 
 let heartbeatTimer = null;
@@ -168,7 +169,7 @@ function onIncoming({ message }) {
         loadConversations();
     }
 
-    if (!state.windows.some((w) => w.id === friendId) && window.matchMedia('(min-width: 768px)').matches) {
+    if (!state.focusMode && !state.windows.some((w) => w.id === friendId) && window.matchMedia('(min-width: 768px)').matches) {
         openChat(friendId, { minimized: true });
     }
 }
@@ -320,10 +321,20 @@ export function notifyTyping(friendId) {
 }
 
 /**
- * Lift the dock above a page's own bottom-docked UI (e.g. the typing test's virtual keyboard).
+ * Let a page put its virtual-keyboard toggle into the floating dock, next to Chats.
+ * `height` lifts open chat windows above the keyboard while it is shown. Pass null to remove it.
+ *
+ * @param {{ visible: boolean, height: number, toggle: () => void } | null} control
  */
-export function setChatBottomOffset(px) {
-    state.bottomOffset = Math.max(0, Math.round(px));
+export function setDockKeyboard(control) {
+    state.keyboard = control;
+}
+
+/**
+ * Quiet the dock while a typing test is running: icon-only controls and no pop-up windows.
+ */
+export function setChatFocusMode(focused) {
+    state.focusMode = !!focused;
 }
 
 export function useChat() {

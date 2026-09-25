@@ -12,7 +12,7 @@ import LunarCountdown from '@/Components/LunarCountdown.vue';
 import BadgeSeal from '@/Components/BadgeSeal.vue';
 import ShareCard from '@/Components/ShareCard.vue';
 import { useSettings } from '../useSettings';
-import { setChatBottomOffset } from '@/composables/useChat';
+import { setDockKeyboard, setChatFocusMode } from '@/composables/useChat';
 
 const activeKey = ref(null);
 const activeCode = ref(null);
@@ -1018,20 +1018,29 @@ onMounted(async () => {
     }
 });
 
-// Sit the chat dock just above the keyboard's show/hide toggle (lg+ only, like the dock).
+// The keyboard's show/hide toggle lives in the floating dock beside Chats (lg+ only, like the keyboard).
 const isLargeScreen = ref(typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches);
 const onScreenResize = () => { isLargeScreen.value = window.matchMedia('(min-width: 1024px)').matches; };
 if (typeof window !== 'undefined') window.addEventListener('resize', onScreenResize);
 
 watch(
-    () => isLargeScreen.value && !!currentDisplayText.value && !showResults.value,
-    (docked) => setChatBottomOffset(docked ? 48 : 0),
+    () => [isLargeScreen.value && !!currentDisplayText.value && !showResults.value, showVirtualKeyboard.value, keyboardDockHeight.value],
+    ([docked, visible, height]) => setDockKeyboard(docked
+        ? { visible, height, toggle: () => setShowVirtualKeyboard(!showVirtualKeyboard.value) }
+        : null),
+    { immediate: true },
+);
+
+watch(
+    () => !!intervalId.value && !testFinished.value && !showResults.value,
+    (running) => setChatFocusMode(running),
     { immediate: true },
 );
 
 onUnmounted(() => {
     window.removeEventListener('resize', onScreenResize);
-    setChatBottomOffset(0);
+    setDockKeyboard(null);
+    setChatFocusMode(false);
     window.removeEventListener('keydown', handleGlobalKeydown);
     window.removeEventListener('keyup', handleGlobalKeyup);
     stopGhost();
@@ -1363,10 +1372,6 @@ defineOptions({ layout: AppLayout });
                                 :next-key="sourceCharacters[userInput.length]" />
             </div>
 
-            <button type="button" @click="setShowVirtualKeyboard(!showVirtualKeyboard)"
-                    class="pointer-events-auto absolute bottom-3 right-6 sm:right-9 px-3 py-1.5 bg-[var(--panel-color)] border border-[var(--border-color)] text-[10px] font-mono uppercase tracking-[0.15em] text-[var(--sub-color)] hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors">
-                {{ showVirtualKeyboard ? t('hide_keyboard') : t('show_keyboard') }}
-            </button>
         </div>
 
         <!-- Results — an ijāza-style record -->
