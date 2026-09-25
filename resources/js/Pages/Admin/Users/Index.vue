@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePoll } from '@inertiajs/vue3';
 
 const props = defineProps({
     users: Object,
@@ -9,6 +9,8 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search ?? '');
+
+usePoll(30000, { only: ['users'] });
 
 const reload = (params) => {
     router.get('/admin/users', {
@@ -112,6 +114,9 @@ const timeAgo = (value) => {
                                 <tr v-for="user in users.data" :key="user.id" class="hover:bg-[var(--caret-color)]/[0.03] transition-colors">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full shrink-0"
+                                                  :class="user.online ? 'bg-emerald-500' : 'bg-[var(--border-color)]'"
+                                                  :title="user.online ? 'Online now' : 'Offline'"></span>
                                             <Link :href="`/admin/users/${user.id}`" class="font-cinzel text-[var(--main-color)] hover:text-[var(--caret-color)] transition-colors">
                                                 {{ user.name }}
                                             </Link>

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Models\ChatMessage;
 use App\Models\Feedback;
 use App\Models\Friendship;
 use App\Models\RaceParticipant;
 use App\Models\User;
 use App\Models\UserLetterStat;
 use App\Services\CertificateService;
+use App\Services\ChatService;
 use App\Services\HifzService;
 use App\Services\QuranMapService;
 use App\Services\StreakService;
@@ -33,7 +35,7 @@ class UserController extends Controller
         'current_streak', 'hifz_ayahs', 'certificates_count',
     ];
 
-    public function index(Request $request): Response
+    public function index(Request $request, ChatService $chat): Response
     {
         $search = trim((string) $request->query('search', ''));
 
@@ -46,27 +48,31 @@ class UserController extends Controller
 
         return Inertia::render('Admin/Users/Index', [
             'filters' => ['search' => $search ?: null, 'sort' => $sort, 'direction' => $direction],
-            'users' => fn () => User::query()
-                ->when($search !== '', function ($query) use ($search): void {
-                    $query->where(function ($query) use ($search): void {
-                        $query->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
-                    });
-                })
-                ->withCount([
-                    'tests',
-                    'hifzProgress as hifz_ayahs',
-                    'hifzProgress as hifz_due' => fn ($q) => $q->whereDate('due_on', '<=', $today),
-                    'certificates as certificates_count',
-                ])
-                ->orderBy($sort, $direction)
-                ->orderBy('id', 'desc')
-                ->paginate(20)
-                ->withQueryString()
-                ->through(fn (User $user): array => [
+            'users' => function () use ($chat, $search, $sort, $direction, $today) {
+                $users = User::query()
+                    ->when($search !== '', function ($query) use ($search): void {
+                        $query->where(function ($query) use ($search): void {
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                    })
+                    ->withCount([
+                        'tests',
+                        'hifzProgress as hifz_ayahs',
+                        'hifzProgress as hifz_due' => fn ($q) => $q->whereDate('due_on', '<=', $today),
+                        'certificates as certificates_count',
+                    ])
+                    ->orderBy($sort, $direction)
+                    ->orderBy('id', 'desc')
+                    ->paginate(20)
+                    ->withQueryString();
+                $onlineIds = $chat->onlineIds($users->getCollection()->pluck('id')->all());
+
+                return $users->through(fn (User $user): array => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'online' => in_array($user->id, $onlineIds, true),
                     'email_verified_at' => $user->email_verified_at,
                     'tests_count' => $user->tests_count,
                     'current_streak' => (int) $user->current_streak,
@@ -77,7 +83,8 @@ class UserController extends Controller
                     'created_at' => $user->created_at,
                     'last_login_at' => $user->last_login_at,
                     'is_super_admin' => $user->isSuperAdmin(),
-                ]),
+                ]);
+            },
         ]);
     }
 
@@ -103,6 +110,7 @@ class UserController extends Controller
                 'last_practiced_on' => $user->last_practiced_on?->toDateString(),
                 'last_login_at' => $user->last_login_at?->toIso8601String(),
             ],
+            'online' => fn (): bool => app(ChatService::class)->onlineIds([$user->id]) !== [],
             'account' => [
                 'two_factor' => ! is_null($user->two_factor_confirmed_at),
                 'reciter' => $user->reciter ?? config('reciters.default'),
@@ -197,7 +205,31 @@ class UserController extends Controller
             'sessions' => fn (): array => $this->sessionsFor($request, $user),
             'tokens' => fn () => $user->tokens()->latest()->get(['id', 'name', 'last_used_at', 'created_at']),
             'friendRequests' => fn () => $this->friendRequestsFor($user),
+            'chats' => fn (): array => $this->chatsFor($user),
         ]);
+    }
+
+    /**
+     * The user's most recent chat conversations and how many they have in total.
+     *
+     * @return array{total: int, recent: array<int, array{other_user: array{id: int, name: string}, messages_count: int, last_at: ?string}>}
+     */
+    protected function chatsFor(User $user): array
+    {
+        $chat = app(ChatService::class);
+        $pairs = $chat->conversationPairs($user->id)->limit(5)->get();
+        $otherIds = $pairs->map(fn ($row): int => (int) $row->user_a === $user->id ? (int) $row->user_b : (int) $row->user_a);
+        $names = User::query()->whereIn('id', $otherIds)->pluck('name', 'id');
+        $lastAt = ChatMessage::query()->whereIn('id', $pairs->pluck('last_id'))->pluck('created_at', 'id');
+
+        return [
+            'total' => $chat->conversationPairs($user->id)->get()->count(),
+            'recent' => $pairs->values()->map(fn ($row, int $i): array => [
+                'other_user' => ['id' => $otherIds[$i], 'name' => $names[$otherIds[$i]] ?? 'Deleted user'],
+                'messages_count' => (int) $row->messages_count,
+                'last_at' => $lastAt[$row->last_id]?->toIso8601String(),
+            ])->all(),
+        ];
     }
 
     /**

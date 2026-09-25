@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\RaceController as AdminRaceController;
@@ -194,6 +195,9 @@ Route::middleware([
     Route::post('users/{user}/impersonate', [ImpersonationController::class, 'start'])->name('users.impersonate');
 
     Route::get('races', [AdminRaceController::class, 'index'])->name('races.index');
+
+    Route::get('chats', [AdminChatController::class, 'index'])->name('chats.index');
+    Route::get('chats/{user}/{other}', [AdminChatController::class, 'show'])->name('chats.show');
 
     Route::get('feedback', [AdminFeedbackController::class, 'index'])->name('feedback.index');
     Route::get('feedback/{feedback}', [AdminFeedbackController::class, 'show'])->name('feedback.show');

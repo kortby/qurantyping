@@ -6,6 +6,7 @@ use App\Events\ChatMessageSent;
 use App\Events\ChatMessagesRead;
 use App\Models\ChatMessage;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
 class ChatService
@@ -91,6 +92,26 @@ class ChatService
                 ->all(),
             'has_more' => $rows->count() > self::PAGE_SIZE,
         ];
+    }
+
+    /**
+     * Every pair of users who have exchanged messages, as `user_a` < `user_b`, with
+     * message count and latest message id, newest conversation first. Optionally
+     * limited to the conversations one user took part in.
+     *
+     * @return Builder<ChatMessage>
+     */
+    public function conversationPairs(?int $userId = null): Builder
+    {
+        return ChatMessage::query()
+            ->selectRaw('LEAST(sender_id, recipient_id) as user_a, GREATEST(sender_id, recipient_id) as user_b, COUNT(*) as messages_count, MAX(id) as last_id')
+            ->when($userId, function (Builder $query) use ($userId): void {
+                $query->where(function (Builder $query) use ($userId): void {
+                    $query->where('sender_id', $userId)->orWhere('recipient_id', $userId);
+                });
+            })
+            ->groupByRaw('LEAST(sender_id, recipient_id), GREATEST(sender_id, recipient_id)')
+            ->orderByDesc('last_id');
     }
 
     /**

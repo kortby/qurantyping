@@ -3,6 +3,7 @@
 use App\Models\Certificate;
 use App\Models\Friendship;
 use App\Models\User;
+use App\Services\ChatService;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -257,4 +258,20 @@ it('revokes a single API token for a user', function () {
         ->assertRedirect();
 
     expect($target->tokens()->count())->toBe(0);
+});
+
+it('shows which users are online in the admin', function () {
+    $online = User::factory()->create();
+    $offline = User::factory()->create();
+    app(ChatService::class)->markOnline($online);
+
+    $this->actingAs($this->admin)->get('/admin/users')
+        ->assertInertia(fn ($page) => $page
+            ->where('users.data', fn ($users) => collect($users)->firstWhere('id', $online->id)['online'] === true
+                && collect($users)->firstWhere('id', $offline->id)['online'] === false));
+
+    $this->actingAs($this->admin)->get("/admin/users/{$online->id}")
+        ->assertInertia(fn ($page) => $page->where('online', true));
+    $this->actingAs($this->admin)->get("/admin/users/{$offline->id}")
+        ->assertInertia(fn ($page) => $page->where('online', false));
 });

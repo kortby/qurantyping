@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage, usePoll } from '@inertiajs/vue3';
 import ConfirmationModal from '@/Components/ConfirmationModal.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -27,9 +27,13 @@ const props = defineProps({
     sessions: Array,
     tokens: Array,
     friendRequests: Array,
+    chats: Object,
+    online: Boolean,
 });
 
 const page = usePage();
+
+usePoll(30000, { only: ['online'] });
 
 const form = useForm({
     name: props.user.name,
@@ -80,6 +84,10 @@ const CARD = 'border border-[var(--border-color)] bg-[var(--panel-color)] p-6';
                         </div>
                         <p class="font-mono text-sm text-[var(--sub-color)] mt-1 truncate">{{ user.email }} · #{{ user.id }}</p>
                         <p class="font-mono text-[10px] uppercase tracking-widest text-[var(--sub-color)] mt-2 flex flex-wrap gap-x-2 gap-y-0.5">
+                            <span class="inline-flex items-center gap-1.5" :class="online ? 'text-emerald-500' : ''">
+                                <span class="w-2 h-2 rounded-full" :class="online ? 'bg-emerald-500' : 'bg-[var(--border-color)]'"></span>{{ online ? 'Online now' : 'Offline' }}
+                            </span>
+                            <span>·</span>
                             <span :class="user.email_verified_at ? 'text-[var(--caret-color)]' : 'text-[var(--error-color)]'">{{ user.email_verified_at ? 'Verified' : 'Unverified' }}</span>
                             <span>· Joined {{ fmtDay(user.created_at) }}</span>
                             <span>· Last login {{ user.last_login_at ? fmt(user.last_login_at) : 'never' }}</span>
@@ -291,6 +299,26 @@ const CARD = 'border border-[var(--border-color)] bg-[var(--panel-color)] p-6';
                         </li>
                     </ul>
                     <p v-else class="font-mono text-xs text-[var(--sub-color)] mt-4">No friend requests.</p>
+                </div>
+
+                <!-- Chats -->
+                <div :class="CARD">
+                    <div class="flex items-center justify-between gap-4">
+                        <h2 :class="H2">Chats</h2>
+                        <Link v-if="chats.total" :href="`/admin/chats?user=${user.id}`" class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--lapis-color)] hover:opacity-70">
+                            All {{ chats.total }} →
+                        </Link>
+                    </div>
+                    <ul v-if="chats.recent.length" class="mt-4 space-y-2 font-mono text-xs">
+                        <li v-for="c in chats.recent" :key="c.other_user.id" class="flex items-center justify-between gap-4 border-b border-[var(--border-color)] pb-2 last:border-0">
+                            <Link :href="`/admin/chats/${user.id}/${c.other_user.id}`" class="text-[var(--main-color)] truncate hover:text-[var(--caret-color)] transition-colors">
+                                <span class="text-[var(--sub-color)] uppercase text-[10px] tracking-[0.15em]">With</span>
+                                {{ c.other_user.name }}
+                            </Link>
+                            <span class="whitespace-nowrap text-[var(--sub-color)]">{{ c.messages_count }} msgs · {{ fmtDay(c.last_at) }}</span>
+                        </li>
+                    </ul>
+                    <p v-else class="font-mono text-xs text-[var(--sub-color)] mt-4">No chats.</p>
                 </div>
 
                 <!-- Edit -->
