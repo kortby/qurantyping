@@ -2,7 +2,7 @@
 
 Date d'entrée en vigueur : 15 novembre 2025
 
-Dernière mise à jour : 29 janvier 2026
+Dernière mise à jour : 25 septembre 2026
 
 Merci de faire confiance à QuranTyping ('QuranTyping', 'nous', 'notre') avec vos informations personnelles ! Nous prenons notre responsabilité envers vous très au sérieux, c'est pourquoi cette Politique de Confidentialité décrit comment nous traitons vos données.
 
@@ -16,6 +16,7 @@ En vertu de cette Politique de Confidentialité, nous sommes le responsable du t
 *   Comment collectons-nous vos données ?
 *   Comment utiliserons-nous vos données ?
 *   Comment stockons-nous vos données ?
+*   Messages privés
 *   Quels sont vos droits en matière de protection des données ?
 *   Analytique
 *   Publicités
@@ -37,6 +38,8 @@ QuranTyping collecte les données suivantes :
 *   Vos paramètres actuellement actifs
 *   Combien de tests de frappe vous avez commencés et terminés
 *   Combien de temps vous avez tapé sur le site Web
+*   Les messages que vous envoyez à vos amis
+*   Le fait que vous soyez actuellement en ligne
 
 QuranTyping ne collecte PAS :
 
@@ -51,6 +54,7 @@ Vous fournissez directement la plupart des données que nous collectons. Nous co
 *   Créez un compte
 *   Complétez un test de frappe
 *   Modifiez les paramètres sur le site Web
+*   Envoyez un message à un ami
 
 ## Comment utiliserons-nous vos données ?
 
@@ -66,6 +70,16 @@ Si vous êtes trouvé en train de tricher ou d'exploiter le site Web, nous pouvo
 ## Comment stockons-nous vos données ?
 
 QuranTyping stocke vos données en toute sécurité en utilisant MySQL.
+
+## Messages privés
+
+QuranTyping vous permet de discuter avec les utilisateurs que vous avez acceptés comme amis. Lorsque vous envoyez un message, nous enregistrons son texte, l'heure d'envoi et l'heure à laquelle votre ami l'a lu. Les messages ne sont pas chiffrés de bout en bout.
+
+**Accès des administrateurs.** Les administrateurs de QuranTyping peuvent lire les messages échangés entre utilisateurs. Nous le faisons uniquement pour assurer la sécurité de la communauté : examiner les signalements de harcèlement, d'abus ou de spam, faire respecter nos Conditions d'Utilisation et respecter nos obligations légales. Nous n'utilisons pas vos messages à des fins publicitaires et nous ne les vendons ni ne les partageons avec des tiers, sauf si la loi l'exige. La lecture d'une conversation par un administrateur ne la marque pas comme lue pour vous. Au sens de la réglementation sur la protection des données, ce traitement repose sur notre intérêt légitime à garantir la sécurité des utilisateurs de QuranTyping.
+
+**Statut en ligne.** Lorsque vous êtes connecté et que QuranTyping est ouvert, vos amis peuvent voir que vous êtes en ligne. Ce statut est conservé environ une minute et demie après votre départ. Il n'est pas enregistré de façon permanente.
+
+**Durée de conservation des messages.** Les messages restent dans votre conversation jusqu'à ce que vous ou votre interlocuteur supprimiez votre compte. Retirer quelqu'un de vos amis ne supprime pas vos anciens messages. Ne partagez pas de mots de passe, de données de paiement ou d'autres informations sensibles dans la discussion.
 
 ## Quels sont vos droits en matière de protection des données ?
 

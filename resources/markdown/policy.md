@@ -2,7 +2,7 @@
 
 Effective date: November 15, 2025
 
-Last updated: January 29, 2026
+Last updated: September 25, 2026
 
 Thanks for trusting QuranTyping ('QuranTyping', 'we', 'us', 'our') with your personal information! We take our responsibility to you very seriously, and so this Privacy Statement describes how we handle your data.
 
@@ -16,6 +16,7 @@ Under this Privacy Statement, we are the data controller responsible for process
 *   How do we collect your data?
 *   How will we use your data?
 *   How do we store your data?
+*   Private messages
 *   What are your data protection rights?
 *   Analytics
 *   Advertisements
@@ -37,6 +38,8 @@ QuranTyping collects the following data:
 *   Your currently active settings
 *   How many typing tests you've started and completed
 *   How long you've been typing on the website
+*   Messages you send to your friends
+*   Whether you are currently online
 
 QuranTyping does NOT collect:
 
@@ -51,6 +54,7 @@ You directly provide most of the data we collect. We collect data and process da
 *   Create an account
 *   Complete a typing test
 *   Change settings on the website
+*   Send a message to a friend
 
 ## How will we use your data?
 
@@ -66,6 +70,16 @@ If you are found to be cheating or exploiting the website, we may store hashed v
 ## How do we store your data?
 
 QuranTyping securely stores your data using MySQL.
+
+## Private messages
+
+QuranTyping lets you chat with users you have accepted as friends. When you send a message, we store its text, the time it was sent and the time your friend read it. Messages are not end-to-end encrypted.
+
+**Administrator access.** QuranTyping administrators can read the messages exchanged between users. We do this only to keep the community safe: to look into reports of harassment, abuse or spam, to enforce our Terms of Service, and to meet our legal obligations. We do not use your messages for advertising and we do not sell or share them with third parties, unless the law requires it. Reading a conversation as an administrator does not mark it as read for you. Under data protection law, the basis for this processing is our legitimate interest in keeping QuranTyping safe for its users.
+
+**Online status.** While you are signed in with QuranTyping open, your friends can see that you are online. This status is kept for about a minute and a half after you leave. It is not stored permanently.
+
+**How long we keep messages.** Messages stay in your conversation until you or the person you talked with deletes their account. Removing someone as a friend does not delete your past messages. Please do not share passwords, payment details or other sensitive information in chat.
 
 ## What are your data protection rights?
 
