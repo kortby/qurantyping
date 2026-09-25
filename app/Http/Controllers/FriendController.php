@@ -6,6 +6,7 @@ use App\Models\Friendship;
 use App\Models\Test;
 use App\Models\User;
 use App\Notifications\FriendRequestAccepted;
+use App\Services\ChatService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -15,12 +16,13 @@ use Inertia\Response;
 class FriendController extends Controller
 {
     /**
-     * The friends list, pending requests both ways, and an optional name search.
+     * The friends list with online status, pending requests both ways, and an optional name search.
      */
-    public function index(Request $request): Response
+    public function index(Request $request, ChatService $chat): Response
     {
         $user = $request->user();
         $friendIds = $user->friendIds();
+        $onlineIds = $chat->onlineIds($friendIds->all());
 
         $friendshipIdByUser = Friendship::query()
             ->where('status', 'accepted')
@@ -56,6 +58,7 @@ class FriendController extends Controller
                 'name' => $friend->name,
                 'profile_photo_url' => $friend->profile_photo_url,
                 'best_wpm' => (int) ($bestWpm[$friend->id] ?? 0),
+                'online' => in_array($friend->id, $onlineIds, true),
                 'last_active' => $friend->last_login_at?->toIso8601String(),
                 'ghost_test_id' => $ghostTestIds[$friend->id] ?? null,
             ])->all(),

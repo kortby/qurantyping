@@ -4,6 +4,7 @@ use App\Models\Friendship;
 use App\Models\QuranText;
 use App\Models\Test;
 use App\Models\User;
+use App\Services\ChatService;
 
 use function Pest\Laravel\actingAs;
 
@@ -206,4 +207,21 @@ it('falls back to the global leaderboard for a guest asking for the friends scop
     $this->get('/leaderboard?scope=friends')
         ->assertOk()
         ->assertInertia(fn ($page) => $page->where('scope', 'global'));
+});
+
+it('shows which friends are online on the friends page', function () {
+    $me = User::factory()->create();
+    $online = User::factory()->create(['name' => 'Aisha']);
+    $offline = User::factory()->create(['name' => 'Bilal']);
+    Friendship::factory()->accepted()->create(['user_id' => $me->id, 'friend_id' => $online->id]);
+    Friendship::factory()->accepted()->create(['user_id' => $offline->id, 'friend_id' => $me->id]);
+
+    app(ChatService::class)->markOnline($online);
+
+    actingAs($me)->get('/friends')
+        ->assertInertia(fn ($page) => $page
+            ->where('friends.0.name', 'Aisha')
+            ->where('friends.0.online', true)
+            ->where('friends.1.name', 'Bilal')
+            ->where('friends.1.online', false));
 });

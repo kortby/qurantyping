@@ -1,9 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useSettings } from '../../useSettings';
-import { openChat } from '@/composables/useChat';
+import { openChat, useChat } from '@/composables/useChat';
 
 const props = defineProps({
     friends: { type: Array, default: () => [] },
@@ -15,6 +15,12 @@ const props = defineProps({
 });
 
 const { t } = useSettings();
+const chat = useChat();
+
+/** Friends with live presence from the chat heartbeat, online ones first. */
+const friendsWithPresence = computed(() => props.friends
+    .map((friend) => ({ ...friend, online: chat.conversation(friend.id)?.online ?? friend.online }))
+    .sort((a, b) => Number(b.online) - Number(a.online)));
 
 const search = ref(props.query || '');
 const busy = ref(false);
@@ -160,10 +166,18 @@ const remove = (friendshipId) => act('delete', `/friends/${friendshipId}`);
                 <section>
                     <h2 class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--sub-color)] mb-3">{{ t('friends.your_friends') }}</h2>
                     <div v-if="friends.length" class="border border-[var(--border-color)] divide-y divide-[var(--border-color)] font-mono text-sm">
-                        <div v-for="friend in friends" :key="friend.id" class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <div v-for="friend in friendsWithPresence" :key="friend.id" class="flex flex-col items-start gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                             <span class="flex items-center gap-3 min-w-0 max-w-full">
-                                <img v-if="friend.profile_photo_url" :src="friend.profile_photo_url" alt="" class="w-7 h-7 rounded-full object-cover shrink-0" />
-                                <span class="text-[var(--main-color)] truncate">{{ friend.name }}</span>
+                                <span class="relative shrink-0">
+                                    <img v-if="friend.profile_photo_url" :src="friend.profile_photo_url" alt="" class="w-7 h-7 rounded-full object-cover" />
+                                    <span v-if="friend.online" class="absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--bg-color)]"></span>
+                                </span>
+                                <span class="flex flex-col min-w-0">
+                                    <span class="text-[var(--main-color)] truncate">{{ friend.name }}</span>
+                                    <span class="text-[10px] uppercase tracking-[0.15em]" :class="friend.online ? 'text-emerald-500' : 'text-[var(--sub-color)] opacity-70'">
+                                        {{ friend.online ? t('chat.online') : t('chat.offline') }}
+                                    </span>
+                                </span>
                                 <span v-if="friend.best_wpm" class="text-[var(--sub-color)] tabular-nums shrink-0">{{ friend.best_wpm }} wpm</span>
                             </span>
                             <span class="flex items-center gap-4 text-[10px] uppercase tracking-[0.2em] shrink-0">
