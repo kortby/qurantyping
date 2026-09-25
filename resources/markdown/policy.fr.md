@@ -69,7 +69,7 @@ Si vous êtes trouvé en train de tricher ou d'exploiter le site Web, nous pouvo
 
 ## Comment stockons-nous vos données ?
 
-QuranTyping stocke vos données en toute sécurité en utilisant MySQL.
+QuranTyping stocke vos données en toute sécurité sur ses serveurs.
 
 ## Messages privés
 

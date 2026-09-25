@@ -69,7 +69,7 @@ If you are found to be cheating or exploiting the website, we may store hashed v
 
 ## How do we store your data?
 
-QuranTyping securely stores your data using MySQL.
+QuranTyping stores your data securely on its servers.
 
 ## Private messages
 
