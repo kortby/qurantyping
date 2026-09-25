@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useSettings } from '../../useSettings';
+import { openChat } from '@/composables/useChat';
 
 const props = defineProps({
     friends: { type: Array, default: () => [] },
@@ -166,6 +167,10 @@ const remove = (friendshipId) => act('delete', `/friends/${friendshipId}`);
                                 <span v-if="friend.best_wpm" class="text-[var(--sub-color)] tabular-nums shrink-0">{{ friend.best_wpm }} wpm</span>
                             </span>
                             <span class="flex items-center gap-4 text-[10px] uppercase tracking-[0.2em] shrink-0">
+                                <button type="button" @click="openChat(friend.id)"
+                                        class="text-[var(--lapis-color)] hover:opacity-70 transition-opacity">
+                                    {{ t('chat.message') }}
+                                </button>
                                 <Link v-if="friend.ghost_test_id" :href="`/?ghost=${friend.ghost_test_id}`"
                                       class="text-[var(--caret-color)] hover:opacity-70 transition-opacity">
                                     {{ t('friends.race_ghost') }}

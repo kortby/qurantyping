@@ -9,8 +9,11 @@ use App\Models\User;
 use App\Observers\TestObserver;
 use App\Services\ClassService;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewPulse', fn (User $user): bool => $user->isSuperAdmin());
 
         Test::observe(TestObserver::class);
+
+        RateLimiter::for('chat', fn (Request $request): Limit => Limit::perMinute(40)->by($request->user()?->id ?: $request->ip()));
 
         View::composer('app', function ($view): void {
             $view->with('structuredDataJson', $this->structuredData((array) View::shared('faq', [])));

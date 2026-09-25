@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\DailyChallengeRun;
+use App\Services\ChatService;
 use App\Services\HifzService;
 use App\Services\QuranNavigator;
 use App\Services\StreakService;
@@ -76,6 +77,9 @@ class HandleInertiaRequests extends Middleware
                     : [],
                 'unread_count' => fn () => $request->user()
                     ? $request->user()->unreadNotifications()->count()
+                    : 0,
+                'chat_unread' => fn () => $request->user()
+                    ? app(ChatService::class)->unreadCount($request->user())
                     : 0,
                 'daily_done' => fn () => $request->user()
                     ? DailyChallengeRun::where('user_id', $request->user()->id)

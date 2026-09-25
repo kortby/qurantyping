@@ -5,6 +5,8 @@ use App\Models\QuranText;
 use App\Models\Result;
 use App\Models\Test;
 use App\Models\User;
+use App\Notifications\FriendRequestReceived;
+use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\actingAs;
 
@@ -153,4 +155,24 @@ it('shares the unread count and recent notifications with the frontend', functio
             ->where('auth.unread_count', 1)
             ->where('auth.notifications.0.type', 'friend_request')
         );
+});
+
+it('broadcasts friend notifications instantly on the recipient\'s private channel', function () {
+    Notification::fake();
+    $me = User::factory()->create();
+    $them = User::factory()->create();
+
+    actingAs($me)->post('/friends', ['friend_id' => $them->id]);
+
+    Notification::assertSentTo(
+        $them,
+        FriendRequestReceived::class,
+        function ($notification, array $channels) use ($them): bool {
+            $message = $notification->toBroadcast($them);
+
+            return in_array('broadcast', $channels, true)
+                && $message->connection === 'sync'
+                && $message->data['type'] === 'friend_request';
+        },
+    );
 });

@@ -12,6 +12,7 @@ import LunarCountdown from '@/Components/LunarCountdown.vue';
 import BadgeSeal from '@/Components/BadgeSeal.vue';
 import ShareCard from '@/Components/ShareCard.vue';
 import { useSettings } from '../useSettings';
+import { setChatBottomOffset } from '@/composables/useChat';
 
 const activeKey = ref(null);
 const activeCode = ref(null);
@@ -1017,7 +1018,20 @@ onMounted(async () => {
     }
 });
 
+// Sit the chat dock just above the keyboard's show/hide toggle (lg+ only, like the dock).
+const isLargeScreen = ref(typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches);
+const onScreenResize = () => { isLargeScreen.value = window.matchMedia('(min-width: 1024px)').matches; };
+if (typeof window !== 'undefined') window.addEventListener('resize', onScreenResize);
+
+watch(
+    () => isLargeScreen.value && !!currentDisplayText.value && !showResults.value,
+    (docked) => setChatBottomOffset(docked ? 48 : 0),
+    { immediate: true },
+);
+
 onUnmounted(() => {
+    window.removeEventListener('resize', onScreenResize);
+    setChatBottomOffset(0);
     window.removeEventListener('keydown', handleGlobalKeydown);
     window.removeEventListener('keyup', handleGlobalKeyup);
     stopGhost();

@@ -9,6 +9,7 @@ import Banner from '../Components/Banner.vue';
 import SocialButtons from '@/Components/SocialButtons.vue';
 import StreakBadge from '@/Components/StreakBadge.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
+import ChatDock from '@/Components/Chat/ChatDock.vue';
 
 const { currentLang, currentTheme, setLang, setTheme, t } = useSettings();
 const mobileMenuOpen = ref(false);
@@ -409,6 +410,7 @@ if (typeof window !== 'undefined') {
 
         <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
         <AuthWarningModal :show="showAuthWarningModal" @close="showAuthWarningModal = false" />
+        <ChatDock />
     </div>
 </template>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useSettings } from '../useSettings';
@@ -12,6 +12,10 @@ const localRead = ref(false);
 
 const items = computed(() => page.props.auth?.notifications ?? []);
 const unread = computed(() => (localRead.value ? 0 : page.props.auth?.unread_count ?? 0));
+
+watch(() => page.props.auth?.unread_count, (count, previous) => {
+    if (count > (previous ?? 0)) localRead.value = false;
+});
 
 const LABELS = {
     friend_request: 'notifications.friend_request',

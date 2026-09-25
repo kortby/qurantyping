@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
 class FriendRequestAccepted extends Notification
@@ -14,7 +15,7 @@ class FriendRequestAccepted extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -28,5 +29,13 @@ class FriendRequestAccepted extends Notification
             'actor_name' => $this->actor->name,
             'url' => '/friends',
         ];
+    }
+
+    /**
+     * Push to the user's open tabs straight away, without waiting on a queue worker.
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return (new BroadcastMessage($this->toArray($notifiable)))->onConnection('sync');
     }
 }

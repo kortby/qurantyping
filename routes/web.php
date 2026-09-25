@@ -9,6 +9,7 @@ use App\Http\Controllers\ArabicTypingTestPageController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\BadgeController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ContestController;
 use App\Http\Controllers\DailyChallengeController;
@@ -142,6 +143,12 @@ Route::middleware([
     Route::get('/test/drill', [TestController::class, 'drillText'])->name('test.drill');
 
     Route::post('/notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/heartbeat', [ChatController::class, 'heartbeat'])->name('chat.heartbeat');
+    Route::get('/chat/{user}', [ChatController::class, 'show'])->whereNumber('user')->name('chat.show');
+    Route::post('/chat/{user}', [ChatController::class, 'store'])->whereNumber('user')->middleware('throttle:chat')->name('chat.store');
+    Route::post('/chat/{user}/read', [ChatController::class, 'read'])->whereNumber('user')->name('chat.read');
 
     Route::get('/today', [DailyChallengeController::class, 'index'])->name('daily.index');
 
