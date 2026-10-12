@@ -22,6 +22,7 @@ const { t, currentLang, usePunctuation, setPunctuation, showVirtualKeyboard, set
 const page = usePage();
 
 const showTashkilFeature = computed(() => page.props.features?.tashkil ?? false);
+const isSuperAdmin = computed(() => page.props.auth?.user?.is_super_admin ?? false);
 
 const props = defineProps({
     personalBestWpm: Number,
@@ -884,6 +885,23 @@ const focusInput = () => {
     document.getElementById('hidden-input')?.focus();
 };
 
+/**
+ * Admin-only: fill the input with the exact expected sequence and drive it
+ * through the real input handler, so a passage can be completed without typing
+ * it by hand. Because it feeds sourceCharacters (the same computed the engine
+ * compares against) into the genuine NFC + per-keystroke path, a clean finish
+ * proves the comparison pipeline matches; a regression leaves it stuck at the
+ * erroring character instead of completing.
+ */
+const autoTypePassage = () => {
+    if (!isSuperAdmin.value) return;
+    const el = document.getElementById('hidden-input');
+    if (!el || sourceCharacters.value.length === 0) return;
+    resetTest();
+    el.value = sourceCharacters.value.join('');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+};
+
 const handleFocus = () => isFocused.value = true;
 const handleBlur = () => isFocused.value = false;
 
@@ -1148,6 +1166,14 @@ defineOptions({ layout: AppLayout });
             <span v-if="isDrill" class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--lapis-color)] border border-[var(--border-color)] px-2 py-1">
                 {{ t('navigation.drills') }}
             </span>
+
+            <button
+                v-if="isSuperAdmin"
+                type="button"
+                @click="autoTypePassage"
+                title="Admin: fill the input with the expected text and run the completion path"
+                class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--sub-color)] border border-dashed border-[var(--border-color)] px-2 py-1 hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors"
+            >Auto-type</button>
 
             <QuranAudioPlayer
                 v-if="!hifzMode && quranText.surah_number"
