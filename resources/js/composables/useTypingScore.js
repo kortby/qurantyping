@@ -43,6 +43,15 @@ export function normalize(text, keepHarakat = false) {
 export function logicTokens(displayText) {
     const marked = (displayText || '')
         .normalize('NFC')
+        // Drop the tatweel (aesthetic stretch), then re-normalize. The tatweel is a
+        // zero-combining-class base that can separate two marks (e.g. the sukun on
+        // the lam and the fatha on the kashida in "ٱلْـَٔاخِرَةِ", 13:26). Removing it
+        // merges those marks onto one base, so we re-NFC to restore canonical order —
+        // otherwise the tatweel survives as its own token (which normalizes to the
+        // empty string and can never be typed) and the marks stay in an order the
+        // racer's own NFC'd keystrokes can never reproduce.
+        .replace(/ـ/g, '')
+        .normalize('NFC')
         .replace(UNKEYABLE_MARKS, '')
         .replace(AYAH_SEPARATOR, (_m, digits) => `${NUM_OPEN}${digits}${NUM_CLOSE}`)
         .replace(/[ \t\n]+/g, ' ')

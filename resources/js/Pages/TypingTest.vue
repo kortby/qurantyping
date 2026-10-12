@@ -13,6 +13,7 @@ import BadgeSeal from '@/Components/BadgeSeal.vue';
 import ShareCard from '@/Components/ShareCard.vue';
 import { useSettings } from '../useSettings';
 import { setDockKeyboard, setChatFocusMode } from '@/composables/useChat';
+import { normalizeDisplayText, buildVisualMapping, normalizeForComparison as normalizeChar } from '@/lib/arabicText';
 
 const activeKey = ref(null);
 const activeCode = ref(null);
@@ -280,77 +281,19 @@ window.addEventListener('resize', updateCaret);
 // spaces, ayah numerals and the ۝ separator.
 const DRILLABLE_CHAR = /[\u0621-\u064A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/;
 
-const normalizeForComparison = (text) => {
-    if (!text) return '';
-    let result = text.normalize('NFC')
-        .replace(/[أإآٱ\u0670]/g, 'ا') // ٱ wasla + ٰ dagger alif → plain alif (no key on standard layouts)
-        .replace(/[ۀة]/g, 'ه')
-        .replace(/[ىي]/g, 'ي');
-    
-    // If Tashkeel mode is ON, we only strip decorative/stop signs, but KEEP vowels (\u064B-\u065F)
-    if (usePunctuation.value) {
-        // Only strip Tatweel, stop signs, and the End of Ayah symbol
-        result = result.replace(/[\u0610-\u061A\u0640\u06D6-\u06ED\u06DD]/g, '');
-    } else {
-        // Strip everything if Tashkeel is off
-        result = result.replace(/[\u0610-\u061A\u0640\u064B-\u065F\u0670\u06D6-\u06ED\u06DD]/g, '');
-    }
-    
-    return result.trim();
-};
+const normalizeForComparison = (text) => normalizeChar(text, usePunctuation.value);
 
 // --- Computed Properties for Stats & Rendering ---
 const currentDisplayText = computed(() => {
     const raw = usePunctuation.value ? (quranText.value.text_punctuated || quranText.value.text) : quranText.value.text_simple;
-    // Normalize to NFC and strip Tatweel (aesthetic stretch)
-    return raw?.normalize('NFC').replace(/\u0640/g, '').trim() || '';
+    return normalizeDisplayText(raw);
 });
 
 const logicCharacterCount = computed(() => visualMapping.value.logicText.length);
 
-// Uthmani rasm annotations (maddah/hamza above or below a carrier letter, e.g.
-// the ٓ in "إِنِّىٓ" at 71:9) have no key on any Arabic keyboard layout — they
-// must stay visible in currentDisplayText but never require a keystroke.
-const UNKEYABLE_MARK = /[ٕٓٔ]/;
-
 // Map visual characters to logic ones (ignoring the ۝ decorative separator
-// and unkeyable rasm annotations)
-const visualMapping = computed(() => {
-    const visual = currentDisplayText.value || '';
-    let logicText = '';
-    const vToL = new Array(visual.length).fill(-1);
-    const lToVStart = [];
-
-    let i = 0;
-    while (i < visual.length) {
-        // Match the pattern: [optional space]۝[arabic digits][optional space]
-        // Which we treat as a single logic space
-        const match = visual.substring(i).match(/^ ?۝[٠-٩]+ ?/);
-
-        if (match) {
-            const matchLen = match[0].length;
-            lToVStart.push(i);
-            logicText += ' ';
-            vToL[i] = logicText.length - 1;
-            // Mark the rest of the ornament characters as mapping to nothing
-            for (let j = 1; j < matchLen; j++) {
-                vToL[i + j] = -1;
-            }
-            i += matchLen;
-        } else if (UNKEYABLE_MARK.test(visual[i])) {
-            // Stays in the rendered text, but the typist never presses a key for it.
-            // vToL[i] is left at its -1 default, and lToVStart gets no entry since
-            // this position adds nothing to logicText.
-            i++;
-        } else {
-            lToVStart.push(i);
-            logicText += visual[i];
-            vToL[i] = logicText.length - 1;
-            i++;
-        }
-    }
-    return { logicText, vToL, lToVStart };
-});
+// and unkeyable rasm annotations).
+const visualMapping = computed(() => buildVisualMapping(currentDisplayText.value));
 
 const sourceClusters = computed(() => {
     const text = currentDisplayText.value || '';
