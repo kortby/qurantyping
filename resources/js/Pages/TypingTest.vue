@@ -363,6 +363,12 @@ const firstErrorIndex = computed(() => {
     return -1;
 });
 
+// How many characters the typist has entered past their first mistake — i.e.
+// the exact number of backspaces needed to get back to it. Zero when correct.
+const errorsBehind = computed(() =>
+    firstErrorIndex.value === -1 ? 0 : userInput.value.length - firstErrorIndex.value,
+);
+
 const currentMaxAyahs = computed(() => {
     if (!surahs.value.length) return 0;
     const surah = surahs.value.find(s => s.surah_number == selectedSurah.value);
@@ -886,6 +892,24 @@ const focusInput = () => {
 };
 
 /**
+ * Delete everything typed after the first mistake, landing the caret exactly on
+ * it. Lets a blind typist recover in one keystroke instead of guessing how many
+ * times to backspace. Mirrors manual backspacing, so no error stats change.
+ */
+const rewindToFirstError = () => {
+    const idx = firstErrorIndex.value;
+    if (idx === -1) {
+        return;
+    }
+    userInput.value = userInput.value.slice(0, idx);
+    const el = document.getElementById('hidden-input');
+    if (el) {
+        el.value = userInput.value;
+    }
+    focusInput();
+};
+
+/**
  * Admin-only: fill the input with the exact expected sequence and drive it
  * through the real input handler, so a passage can be completed without typing
  * it by hand. Because it feeds sourceCharacters (the same computed the engine
@@ -917,7 +941,13 @@ const handleGlobalKeydown = (e) => {
 
     if (e.key === 'Escape') {
         e.preventDefault();
-        resetTest();
+        // First Escape rewinds to the first mistake; a second Escape (nothing
+        // left to fix) resets the whole test, preserving the old behaviour.
+        if (firstErrorIndex.value !== -1) {
+            rewindToFirstError();
+        } else {
+            resetTest();
+        }
     }
 };
 
@@ -1174,6 +1204,15 @@ defineOptions({ layout: AppLayout });
                 title="Admin: fill the input with the expected text and run the completion path"
                 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--sub-color)] border border-dashed border-[var(--border-color)] px-2 py-1 hover:text-[var(--main-color)] hover:border-[var(--caret-color)] transition-colors"
             >Auto-type</button>
+
+            <button
+                v-if="errorsBehind > 0"
+                type="button"
+                @click="rewindToFirstError"
+                class="font-mono text-[11px] tracking-[0.1em] text-[var(--error-color)] border border-[var(--error-color)] px-2.5 py-1 hover:bg-[var(--error-color)]/10 transition-colors animate-fade-in"
+            >
+                <span class="tabular-nums font-semibold">{{ errorsBehind }}</span> {{ t('rewind_hint') }}
+            </button>
 
             <QuranAudioPlayer
                 v-if="!hifzMode && quranText.surah_number"
