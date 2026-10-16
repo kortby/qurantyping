@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -37,15 +36,15 @@ class SocialiteController extends Controller
 
         $email = $socialUser->getEmail();
 
-        if (!$email) {
-            return redirect()->route('login')->with('error', 'We could not get your email from ' . ucfirst($provider) . '. Please ensure your email is public in your account settings.');
+        if (! $email) {
+            return redirect()->route('login')->with('error', 'We could not get your email from '.ucfirst($provider).'. Please ensure your email is public in your account settings.');
         }
 
         $user = User::where('oauth_provider', $provider)
             ->where('oauth_id', $socialUser->getId())
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             // Check if user already exists with this email
             $user = User::where('email', $email)->first();
 
@@ -68,7 +67,7 @@ class SocialiteController extends Controller
             }
         }
 
-        Auth::login($user);
+        Auth::login($user, remember: true);
 
         return redirect()->intended(route('dashboard'));
     }
